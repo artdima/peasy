@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct SettingsView: View {
     var body: some View {
         VStack(spacing: 8) {
             Text("Peasy")
@@ -8,10 +8,10 @@ struct ContentView: View {
             Text("Little tasks, big growth.")
                 .foregroundStyle(.secondary)
         }
-        .padding()
+        .frame(width: 360, height: 200)
     }
 }
 
 #Preview {
-    ContentView()
+    SettingsView()
 }
