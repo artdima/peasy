@@ -5,6 +5,7 @@ import SwiftUI
 final class NotchPanelController {
     private let panel = NotchPanel()
     private let model: NotchViewModel
+    private let hoverTracker = HoverTracker()
     private var screenObserver: NSObjectProtocol?
 
     init(model: NotchViewModel) {
@@ -12,7 +13,6 @@ final class NotchPanelController {
         let hostingView = NSHostingView(rootView: NotchRootView(model: model))
         hostingView.sizingOptions = []
         panel.contentView = hostingView
-        panel.ignoresMouseEvents = true
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil,
@@ -22,14 +22,29 @@ final class NotchPanelController {
                 self?.updateGeometry()
             }
         }
+        hoverTracker.zone = { [weak self] in self?.model.hoverZone }
+        hoverTracker.onChange = { [weak self] inside in self?.setExpanded(inside) }
         updateGeometry()
         panel.orderFrontRegardless()
+        hoverTracker.start()
     }
 
     private func updateGeometry() {
         guard let screen = NotchGeometry.preferredScreen() else { return }
-        let geometry = NotchGeometry(screen: screen)
-        model.geometry = geometry
-        panel.setFrame(geometry.notchRect, display: true)
+        model.geometry = NotchGeometry(screen: screen)
+        applyFrame()
+    }
+
+    private func setExpanded(_ expanded: Bool) {
+        guard expanded != model.isExpanded else { return }
+        model.state = expanded ? .expanded : .collapsed
+        applyFrame()
+    }
+
+    private func applyFrame() {
+        guard let geometry = model.geometry else { return }
+        let frame = model.isExpanded ? (model.expandedFrame ?? geometry.notchRect) : geometry.notchRect
+        panel.setFrame(frame, display: true)
+        panel.ignoresMouseEvents = !model.isExpanded
     }
 }
