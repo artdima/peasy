@@ -13,6 +13,7 @@ final class NotchPanelController {
         let hostingView = NSHostingView(rootView: NotchRootView(model: model))
         hostingView.sizingOptions = []
         panel.contentView = hostingView
+        panel.ignoresMouseEvents = true
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil,
@@ -29,22 +30,43 @@ final class NotchPanelController {
         hoverTracker.start()
     }
 
+    private var animation: Animation {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+            ? .easeInOut(duration: 0.15)
+            : .spring(response: 0.38, dampingFraction: 0.8)
+    }
+
     private func updateGeometry() {
         guard let screen = NotchGeometry.preferredScreen() else { return }
         model.geometry = NotchGeometry(screen: screen)
-        applyFrame()
+        panel.setFrame(currentFrame, display: true)
+    }
+
+    private var currentFrame: CGRect {
+        let notch = model.geometry?.notchRect ?? .zero
+        return model.isExpanded ? (model.expandedFrame ?? notch) : notch
     }
 
     private func setExpanded(_ expanded: Bool) {
-        guard expanded != model.isExpanded else { return }
-        model.state = expanded ? .expanded : .collapsed
-        applyFrame()
+        guard expanded != model.isExpanded, let frame = model.expandedFrame else { return }
+        if expanded {
+            panel.setFrame(frame, display: true)
+            panel.ignoresMouseEvents = false
+            withAnimation(animation) {
+                model.state = .expanded
+            }
+        } else {
+            panel.ignoresMouseEvents = true
+            withAnimation(animation, completionCriteria: .logicallyComplete) {
+                model.state = .collapsed
+            } completion: { [weak self] in
+                self?.finishCollapse()
+            }
+        }
     }
 
-    private func applyFrame() {
-        guard let geometry = model.geometry else { return }
-        let frame = model.isExpanded ? (model.expandedFrame ?? geometry.notchRect) : geometry.notchRect
-        panel.setFrame(frame, display: true)
-        panel.ignoresMouseEvents = !model.isExpanded
+    private func finishCollapse() {
+        guard !model.isExpanded else { return }
+        panel.setFrame(currentFrame, display: true)
     }
 }

@@ -9,22 +9,36 @@ final class NotchViewModel {
         case expanded
     }
 
+    static let earRadius: CGFloat = 12
+    static let collapsedCornerRadius: CGFloat = 10
+    static let expandedCornerRadius: CGFloat = 22
+
     var geometry: NotchGeometry?
     var state: State = .collapsed
-    var contentSize = CGSize(width: 360, height: 140)
+    var contentSize = CGSize(width: 360, height: 120)
 
     var isExpanded: Bool { state == .expanded }
 
+    var collapsedSize: CGSize {
+        geometry?.notchRect.size ?? .zero
+    }
+
+    var expandedSize: CGSize {
+        let notch = collapsedSize
+        return CGSize(
+            width: max(contentSize.width, notch.width) + 2 * Self.earRadius,
+            height: notch.height + contentSize.height
+        )
+    }
+
     var expandedFrame: CGRect? {
         guard let geometry else { return nil }
-        let notch = geometry.notchRect
-        let width = max(contentSize.width, notch.width)
-        let height = notch.height + contentSize.height
+        let size = expandedSize
         return CGRect(
-            x: notch.midX - width / 2,
-            y: geometry.screenFrame.maxY - height,
-            width: width,
-            height: height
+            x: geometry.notchRect.midX - size.width / 2,
+            y: geometry.screenFrame.maxY - size.height,
+            width: size.width,
+            height: size.height
         )
     }
 
