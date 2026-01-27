@@ -6,28 +6,36 @@ final class NotchPanelController {
     private let panel = NotchPanel()
     private let model: NotchViewModel
     private let hoverTracker = HoverTracker()
-    private var screenObserver: NSObjectProtocol?
+    private var observers: [NSObjectProtocol] = []
+    private var isMenuOpen = false
 
-    init(model: NotchViewModel) {
+    init(model: NotchViewModel, actions: NotchActions) {
         self.model = model
-        let hostingView = NSHostingView(rootView: NotchRootView(model: model))
+        let hostingView = NSHostingView(rootView: NotchRootView(model: model, actions: actions))
         hostingView.sizingOptions = []
         panel.contentView = hostingView
         panel.ignoresMouseEvents = true
-        screenObserver = NotificationCenter.default.addObserver(
-            forName: NSApplication.didChangeScreenParametersNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.updateGeometry()
-            }
+        observe(NSApplication.didChangeScreenParametersNotification) { $0.updateGeometry() }
+        observe(NSMenu.didBeginTrackingNotification) { $0.isMenuOpen = true }
+        observe(NSMenu.didEndTrackingNotification) {
+            $0.isMenuOpen = false
+            $0.hoverTracker.update(force: true)
         }
         hoverTracker.zone = { [weak self] in self?.model.hoverZone }
         hoverTracker.onChange = { [weak self] inside in self?.setExpanded(inside) }
+        hoverTracker.holdOpen = { [weak self] in self?.isMenuOpen ?? false }
         updateGeometry()
         panel.orderFrontRegardless()
         hoverTracker.start()
+    }
+
+    private func observe(_ name: Notification.Name, perform action: @escaping (NotchPanelController) -> Void) {
+        let token = NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                if let self { action(self) }
+            }
+        }
+        observers.append(token)
     }
 
     private var animation: Animation {

@@ -4,6 +4,7 @@ import AppKit
 final class HoverTracker {
     var zone: () -> CGRect? = { nil }
     var onChange: (Bool) -> Void = { _ in }
+    var holdOpen: () -> Bool = { false }
 
     private let openDelay: Duration
     private let closeDelay: Duration
@@ -39,9 +40,9 @@ final class HoverTracker {
         pending?.cancel()
     }
 
-    func update() {
+    func update(force: Bool = false) {
         let inside = zone()?.contains(NSEvent.mouseLocation) ?? false
-        guard inside != isInside else { return }
+        guard force || inside != isInside else { return }
         isInside = inside
         setPolling(inside)
         schedule(inside)
@@ -52,8 +53,9 @@ final class HoverTracker {
         let delay = inside ? openDelay : closeDelay
         pending = Task { [weak self] in
             try? await Task.sleep(for: delay)
-            guard !Task.isCancelled else { return }
-            self?.onChange(inside)
+            guard !Task.isCancelled, let self else { return }
+            if !inside, holdOpen() { return }
+            onChange(inside)
         }
     }
 

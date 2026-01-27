@@ -2,6 +2,7 @@ import SwiftUI
 
 struct NotchRootView: View {
     let model: NotchViewModel
+    let actions: NotchActions
 
     var body: some View {
         let expanded = model.isExpanded
@@ -21,6 +22,12 @@ struct NotchRootView: View {
             }
         }
         .frame(width: size.width, height: size.height)
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button("Settings…", action: actions.openSettings)
+            Divider()
+            Button("Quit Peasy", action: actions.quit)
+        }
         .opacity(isVisible ? 1 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .environment(\.colorScheme, .dark)
