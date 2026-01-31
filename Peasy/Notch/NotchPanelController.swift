@@ -1,4 +1,5 @@
 import AppKit
+import SwiftData
 import SwiftUI
 
 @MainActor
@@ -9,9 +10,11 @@ final class NotchPanelController {
     private var observers: [NSObjectProtocol] = []
     private var isMenuOpen = false
 
-    init(model: NotchViewModel, actions: NotchActions) {
+    init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
-        let hostingView = NSHostingView(rootView: NotchRootView(model: model, actions: actions))
+        let rootView = NotchRootView(model: model, actions: actions)
+            .modelContainer(modelContainer)
+        let hostingView = NSHostingView(rootView: rootView)
         hostingView.sizingOptions = []
         panel.contentView = hostingView
         panel.ignoresMouseEvents = true
