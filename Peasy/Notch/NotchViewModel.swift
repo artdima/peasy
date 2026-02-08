@@ -9,13 +9,16 @@ final class NotchViewModel {
         case expanded
     }
 
+    static let contentWidth: CGFloat = 380
     static let earRadius: CGFloat = 12
     static let collapsedCornerRadius: CGFloat = 10
     static let expandedCornerRadius: CGFloat = 22
 
     var geometry: NotchGeometry?
     var state: State = .collapsed
-    var contentSize = CGSize(width: 360, height: 120)
+    private(set) var contentSize = CGSize(width: NotchViewModel.contentWidth, height: 120)
+
+    @ObservationIgnored var onLayoutChange: () -> Void = {}
 
     var isExpanded: Bool { state == .expanded }
 
@@ -48,5 +51,12 @@ final class NotchViewModel {
         }
         guard let notch = geometry?.notchRect else { return nil }
         return CGRect(x: notch.minX - 6, y: notch.minY, width: notch.width + 12, height: notch.height + 2)
+    }
+
+    func setContentHeight(_ height: CGFloat) {
+        let height = height.rounded(.up)
+        guard height > 0, height != contentSize.height else { return }
+        contentSize.height = height
+        onLayoutChange()
     }
 }

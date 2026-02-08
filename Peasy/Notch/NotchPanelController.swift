@@ -9,6 +9,7 @@ final class NotchPanelController {
     private let hoverTracker = HoverTracker()
     private var observers: [NSObjectProtocol] = []
     private var isMenuOpen = false
+    private var shrinkTask: Task<Void, Never>?
 
     init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
@@ -27,6 +28,7 @@ final class NotchPanelController {
         hoverTracker.zone = { [weak self] in self?.model.hoverZone }
         hoverTracker.onChange = { [weak self] inside in self?.setExpanded(inside) }
         hoverTracker.holdOpen = { [weak self] in self?.isMenuOpen ?? false }
+        model.onLayoutChange = { [weak self] in self?.layoutDidChange() }
         updateGeometry()
         panel.orderFrontRegardless()
         hoverTracker.start()
@@ -73,6 +75,20 @@ final class NotchPanelController {
             } completion: { [weak self] in
                 self?.finishCollapse()
             }
+        }
+    }
+
+    private func layoutDidChange() {
+        guard model.isExpanded, let frame = model.expandedFrame else { return }
+        shrinkTask?.cancel()
+        if frame.height >= panel.frame.height {
+            panel.setFrame(frame, display: true)
+            return
+        }
+        shrinkTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled, let self, model.isExpanded, let frame = model.expandedFrame else { return }
+            panel.setFrame(frame, display: true)
         }
     }
 

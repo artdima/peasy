@@ -15,13 +15,15 @@ struct NotchRootView: View {
             .fill(.black)
 
             if expanded {
-                NotchContentView()
-                    .frame(width: model.contentSize.width, height: model.contentSize.height)
+                NotchContentView(model: model)
+                    .frame(width: model.contentSize.width, height: model.contentSize.height, alignment: .top)
                     .padding(.top, model.collapsedSize.height)
                     .transition(.opacity.animation(.easeOut(duration: 0.18).delay(0.08)))
             }
         }
-        .frame(width: size.width, height: size.height)
+        .frame(width: size.width, height: size.height, alignment: .top)
+        .clipped()
+        .animation(.smooth(duration: 0.25), value: model.contentSize.height)
         .contentShape(Rectangle())
         .contextMenu {
             Button("Settings…", action: actions.openSettings)
@@ -36,18 +38,5 @@ struct NotchRootView: View {
 
     private var isVisible: Bool {
         model.isExpanded || model.geometry?.hasNotch == false
-    }
-}
-
-struct NotchContentView: View {
-    var body: some View {
-        VStack(spacing: 4) {
-            Text("Peasy")
-                .font(.headline)
-            Text("Little tasks, big growth.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
