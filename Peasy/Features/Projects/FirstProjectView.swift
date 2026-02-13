@@ -4,6 +4,7 @@ struct FirstProjectView: View {
     let onCreate: (String) -> Void
 
     @State private var name = ""
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -14,6 +15,7 @@ struct FirstProjectView: View {
                 .foregroundStyle(.secondary)
             TextField("Project name", text: $name)
                 .textFieldStyle(.plain)
+                .focused($isFocused)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
                 .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
@@ -21,6 +23,9 @@ struct FirstProjectView: View {
                     onCreate(name)
                     name = ""
                 }
+        }
+        .onAppear {
+            isFocused = true
         }
     }
 }

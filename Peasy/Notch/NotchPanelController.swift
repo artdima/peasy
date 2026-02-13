@@ -13,6 +13,8 @@ final class NotchPanelController {
 
     init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
+        var actions = actions
+        actions.collapse = { [weak self] in self?.setExpanded(false) }
         let rootView = NotchRootView(model: model, actions: actions)
             .modelContainer(modelContainer)
         let hostingView = NSHostingView(rootView: rootView)
@@ -27,7 +29,11 @@ final class NotchPanelController {
         }
         hoverTracker.zone = { [weak self] in self?.model.hoverZone }
         hoverTracker.onChange = { [weak self] inside in self?.setExpanded(inside) }
-        hoverTracker.holdOpen = { [weak self] in self?.isMenuOpen ?? false }
+        observe(NSWindow.didResignKeyNotification) {
+            guard $0.model.isExpanded else { return }
+            $0.hoverTracker.update(force: true)
+        }
+        hoverTracker.holdOpen = { [weak self] in self?.shouldHoldOpen ?? false }
         model.onLayoutChange = { [weak self] in self?.layoutDidChange() }
         updateGeometry()
         panel.orderFrontRegardless()
@@ -41,6 +47,10 @@ final class NotchPanelController {
             }
         }
         observers.append(token)
+    }
+
+    private var shouldHoldOpen: Bool {
+        isMenuOpen || (model.holdsOpen && panel.isKeyWindow)
     }
 
     private var animation: Animation {
@@ -65,6 +75,7 @@ final class NotchPanelController {
         if expanded {
             panel.setFrame(frame, display: true)
             panel.ignoresMouseEvents = false
+            panel.makeKey()
             withAnimation(animation) {
                 model.state = .expanded
             }
@@ -94,6 +105,10 @@ final class NotchPanelController {
 
     private func finishCollapse() {
         guard !model.isExpanded else { return }
+        if panel.isKeyWindow {
+            panel.orderOut(nil)
+            panel.orderFrontRegardless()
+        }
         panel.setFrame(currentFrame, display: true)
     }
 }

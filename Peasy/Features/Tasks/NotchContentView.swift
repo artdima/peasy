@@ -3,6 +3,7 @@ import SwiftUI
 
 struct NotchContentView: View {
     let model: NotchViewModel
+    let actions: NotchActions
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Project.order), SortDescriptor(\Project.createdAt)])
@@ -15,6 +16,11 @@ struct NotchContentView: View {
             if let project = selectedProject {
                 Text(project.name)
                     .font(.headline)
+                NewTaskField(model: model) { title in
+                    withAnimation(.snappy) {
+                        _ = store.addTask(title, to: project)
+                    }
+                }
                 TaskListView(project: project, store: store)
             } else {
                 FirstProjectView { name in
@@ -27,6 +33,7 @@ struct NotchContentView: View {
         .padding(EdgeInsets(top: 6, leading: 16, bottom: 14, trailing: 16))
         .frame(width: NotchViewModel.contentWidth, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
+        .onExitCommand(perform: actions.collapse)
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.height
         } action: { height in

@@ -15,7 +15,7 @@ struct NotchRootView: View {
             .fill(.black)
 
             if expanded {
-                NotchContentView(model: model)
+                NotchContentView(model: model, actions: actions)
                     .frame(width: model.contentSize.width, height: model.contentSize.height, alignment: .top)
                     .padding(.top, model.collapsedSize.height)
                     .transition(.opacity.animation(.easeOut(duration: 0.18).delay(0.08)))

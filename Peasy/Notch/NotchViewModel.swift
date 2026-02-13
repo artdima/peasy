@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Observation
 
 @MainActor
@@ -16,11 +17,16 @@ final class NotchViewModel {
 
     var geometry: NotchGeometry?
     var state: State = .collapsed
+    var draft = ""
     private(set) var contentSize = CGSize(width: NotchViewModel.contentWidth, height: 120)
 
     @ObservationIgnored var onLayoutChange: () -> Void = {}
 
     var isExpanded: Bool { state == .expanded }
+
+    var holdsOpen: Bool {
+        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var collapsedSize: CGSize {
         geometry?.notchRect.size ?? .zero
