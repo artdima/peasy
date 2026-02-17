@@ -18,6 +18,8 @@ final class NotchViewModel {
     var geometry: NotchGeometry?
     var state: State = .collapsed
     var draft = ""
+    var selectedTaskID: UUID?
+    var editingTaskID: UUID?
     private(set) var contentSize = CGSize(width: NotchViewModel.contentWidth, height: 120)
 
     @ObservationIgnored var onLayoutChange: () -> Void = {}
@@ -25,7 +27,7 @@ final class NotchViewModel {
     var isExpanded: Bool { state == .expanded }
 
     var holdsOpen: Bool {
-        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        editingTaskID != nil || !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var collapsedSize: CGSize {

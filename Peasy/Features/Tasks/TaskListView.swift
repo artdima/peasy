@@ -5,6 +5,7 @@ struct TaskListView: View {
 
     let project: Project
     let store: TaskStore
+    let model: NotchViewModel
 
     @State private var showsCompleted = false
     @State private var contentHeight: CGFloat = 0
@@ -21,13 +22,13 @@ struct TaskListView: View {
                         .padding(.vertical, 6)
                 }
                 ForEach(openTasks) { task in
-                    TaskRow(task: task, store: store)
+                    TaskRow(task: task, store: store, model: model)
                 }
                 if !completedTasks.isEmpty {
                     CompletedHeader(count: completedTasks.count, isExpanded: $showsCompleted)
                     if showsCompleted {
                         ForEach(completedTasks) { task in
-                            TaskRow(task: task, store: store)
+                            TaskRow(task: task, store: store, model: model)
                         }
                     }
                 }

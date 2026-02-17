@@ -15,6 +15,7 @@ final class NotchPanelController {
         self.model = model
         var actions = actions
         actions.collapse = { [weak self] in self?.setExpanded(false) }
+        modelContainer.mainContext.undoManager = panel.undoManager
         let rootView = NotchRootView(model: model, actions: actions)
             .modelContainer(modelContainer)
         let hostingView = NSHostingView(rootView: rootView)
@@ -105,6 +106,8 @@ final class NotchPanelController {
 
     private func finishCollapse() {
         guard !model.isExpanded else { return }
+        model.selectedTaskID = nil
+        model.editingTaskID = nil
         if panel.isKeyWindow {
             panel.orderOut(nil)
             panel.orderFrontRegardless()

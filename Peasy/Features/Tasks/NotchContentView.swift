@@ -21,7 +21,17 @@ struct NotchContentView: View {
                         _ = store.addTask(title, to: project)
                     }
                 }
-                TaskListView(project: project, store: store)
+                TaskListView(project: project, store: store, model: model)
+                    .background {
+                        Button("Delete Task") {
+                            deleteSelectedTask(in: project, store: store)
+                        }
+                        .keyboardShortcut(.delete, modifiers: .command)
+                        .disabled(model.selectedTaskID == nil || model.editingTaskID != nil)
+                        .opacity(0)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                    }
             } else {
                 FirstProjectView { name in
                     if let project = store.createProject(named: name) {
@@ -34,10 +44,21 @@ struct NotchContentView: View {
         .frame(width: NotchViewModel.contentWidth, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
         .onExitCommand(perform: actions.collapse)
+        .onChange(of: model.draft) {
+            model.selectedTaskID = nil
+        }
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.height
         } action: { height in
             model.setContentHeight(height)
+        }
+    }
+
+    private func deleteSelectedTask(in project: Project, store: TaskStore) {
+        guard let id = model.selectedTaskID, let task = project.tasks?.first(where: { $0.id == id }) else { return }
+        model.selectedTaskID = nil
+        withAnimation(.snappy) {
+            store.delete(task)
         }
     }
 
