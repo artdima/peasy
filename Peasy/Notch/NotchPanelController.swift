@@ -108,6 +108,8 @@ final class NotchPanelController {
         guard !model.isExpanded else { return }
         model.selectedTaskID = nil
         model.editingTaskID = nil
+        model.projectEditor = nil
+        model.projectPendingDeletion = nil
         if panel.isKeyWindow {
             panel.orderOut(nil)
             panel.orderFrontRegardless()

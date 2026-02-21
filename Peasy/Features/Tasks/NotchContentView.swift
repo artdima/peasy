@@ -14,8 +14,23 @@ struct NotchContentView: View {
         let store = TaskStore(context: modelContext)
         VStack(alignment: .leading, spacing: 10) {
             if let project = selectedProject {
-                Text(project.name)
-                    .font(.headline)
+                ProjectSwitcher(
+                    projects: projects,
+                    selectedID: project.id,
+                    store: store,
+                    model: model,
+                    onSelect: select,
+                    onDelete: { delete($0, store: store) }
+                )
+                if let pendingID = model.projectPendingDeletion,
+                   let pending = projects.first(where: { $0.id == pendingID }) {
+                    DeleteProjectConfirmation(project: pending) {
+                        model.projectPendingDeletion = nil
+                    } onConfirm: {
+                        model.projectPendingDeletion = nil
+                        delete(pending, store: store)
+                    }
+                }
                 NewTaskField(model: model) { title in
                     withAnimation(.snappy) {
                         _ = store.addTask(title, to: project)
@@ -35,7 +50,7 @@ struct NotchContentView: View {
             } else {
                 FirstProjectView { name in
                     if let project = store.createProject(named: name) {
-                        selectedProjectID = project.id.uuidString
+                        select(project)
                     }
                 }
             }
@@ -51,6 +66,21 @@ struct NotchContentView: View {
             proxy.size.height
         } action: { height in
             model.setContentHeight(height)
+        }
+    }
+
+    private func select(_ project: Project) {
+        selectedProjectID = project.id.uuidString
+        model.selectedTaskID = nil
+        model.editingTaskID = nil
+    }
+
+    private func delete(_ project: Project, store: TaskStore) {
+        if project.id.uuidString == selectedProjectID {
+            selectedProjectID = ""
+        }
+        withAnimation(.snappy) {
+            store.delete(project)
         }
     }
 

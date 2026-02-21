@@ -10,6 +10,11 @@ final class NotchViewModel {
         case expanded
     }
 
+    enum ProjectEditor: Equatable {
+        case adding
+        case renaming(UUID)
+    }
+
     static let contentWidth: CGFloat = 380
     static let earRadius: CGFloat = 12
     static let collapsedCornerRadius: CGFloat = 10
@@ -20,6 +25,8 @@ final class NotchViewModel {
     var draft = ""
     var selectedTaskID: UUID?
     var editingTaskID: UUID?
+    var projectEditor: ProjectEditor?
+    var projectPendingDeletion: UUID?
     private(set) var contentSize = CGSize(width: NotchViewModel.contentWidth, height: 120)
 
     @ObservationIgnored var onLayoutChange: () -> Void = {}
@@ -27,7 +34,8 @@ final class NotchViewModel {
     var isExpanded: Bool { state == .expanded }
 
     var holdsOpen: Bool {
-        editingTaskID != nil || !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        editingTaskID != nil || projectEditor != nil || projectPendingDeletion != nil
+            || !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var collapsedSize: CGSize {
