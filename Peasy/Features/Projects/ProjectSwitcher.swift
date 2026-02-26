@@ -8,6 +8,8 @@ struct ProjectSwitcher: View {
     let onSelect: (Project) -> Void
     let onDelete: (Project) -> Void
 
+    @State private var dropTargetID: UUID?
+
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 4) {
@@ -22,6 +24,21 @@ struct ProjectSwitcher: View {
                     } else {
                         ProjectChip(name: project.name, isSelected: project.id == selectedID) {
                             onSelect(project)
+                        }
+                        .draggable(project.id.uuidString)
+                        .dropDestination(for: String.self) { items, _ in
+                            moveProject(withID: items.first, before: project)
+                        } isTargeted: { targeted in
+                            if targeted {
+                                dropTargetID = project.id
+                            } else if dropTargetID == project.id {
+                                dropTargetID = nil
+                            }
+                        }
+                        .overlay(alignment: .leading) {
+                            if dropTargetID == project.id {
+                                DropIndicator(axis: .vertical)
+                            }
                         }
                         .contextMenu {
                             Button("Rename") {
@@ -53,12 +70,25 @@ struct ProjectSwitcher: View {
                             .contentShape(Circle())
                     }
                     .buttonStyle(.plain)
+                    .dropDestination(for: String.self) { items, _ in
+                        moveProject(withID: items.first, before: nil)
+                    }
                     .help("New project")
                     .accessibilityLabel("New project")
                 }
             }
         }
         .scrollIndicators(.hidden)
+    }
+
+    private func moveProject(withID id: String?, before target: Project?) -> Bool {
+        guard let id, let source = projects.firstIndex(where: { $0.id.uuidString == id }) else { return false }
+        let destination = target.flatMap { target in projects.firstIndex { $0.id == target.id } } ?? projects.count
+        guard destination != source, destination != source + 1 else { return true }
+        withAnimation(.snappy) {
+            store.moveProjects(from: IndexSet(integer: source), to: destination)
+        }
+        return true
     }
 
     private func requestDeletion(of project: Project) {
