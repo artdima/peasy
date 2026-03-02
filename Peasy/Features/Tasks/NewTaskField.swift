@@ -26,5 +26,8 @@ struct NewTaskField: View {
         .onAppear {
             isFocused = true
         }
+        .onChange(of: model.newTaskFocusRequest) {
+            isFocused = true
+        }
     }
 }

@@ -62,10 +62,48 @@ struct NotchContentView: View {
         .onChange(of: model.draft) {
             model.selectedTaskID = nil
         }
+        .onChange(of: model.lastCommand) { _, event in
+            if let event {
+                perform(event.command, store: store)
+            }
+        }
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.height
         } action: { height in
             model.setContentHeight(height)
+        }
+    }
+
+    private func perform(_ command: NotchViewModel.Command, store: TaskStore) {
+        switch command {
+        case .selectProject(let index):
+            if projects.indices.contains(index) {
+                select(projects[index])
+            }
+        case .focusNewTask:
+            model.selectedTaskID = nil
+            model.focusNewTask()
+        case .moveSelection(let delta):
+            guard let project = selectedProject else { return }
+            let tasks = store.openTasks(in: project)
+            guard !tasks.isEmpty else { return }
+            if let current = tasks.firstIndex(where: { $0.id == model.selectedTaskID }) {
+                let next = min(max(current + delta, 0), tasks.count - 1)
+                model.selectedTaskID = tasks[next].id
+            } else {
+                model.selectedTaskID = delta > 0 ? tasks.first?.id : tasks.last?.id
+            }
+        case .toggleSelected:
+            guard let project = selectedProject else { return }
+            let tasks = store.openTasks(in: project)
+            guard let index = tasks.firstIndex(where: { $0.id == model.selectedTaskID }) else { return }
+            withAnimation(.snappy) {
+                store.toggle(tasks[index])
+            }
+            let remaining = store.openTasks(in: project)
+            model.selectedTaskID = remaining.isEmpty ? nil : remaining[min(index, remaining.count - 1)].id
+        case .editSelected:
+            model.editingTaskID = model.selectedTaskID
         }
     }
 

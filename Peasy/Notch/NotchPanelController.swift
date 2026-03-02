@@ -10,6 +10,7 @@ final class NotchPanelController {
     private var observers: [NSObjectProtocol] = []
     private var isMenuOpen = false
     private var shrinkTask: Task<Void, Never>?
+    private var keyMonitor: Any?
 
     init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
@@ -35,6 +36,10 @@ final class NotchPanelController {
             $0.hoverTracker.update(force: true)
         }
         hoverTracker.holdOpen = { [weak self] in self?.shouldHoldOpen ?? false }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let handled = MainActor.assumeIsolated { self?.handleKey(event) ?? false }
+            return handled ? nil : event
+        }
         model.onLayoutChange = { [weak self] in self?.layoutDidChange() }
         updateGeometry()
         panel.orderFrontRegardless()
@@ -48,6 +53,42 @@ final class NotchPanelController {
             }
         }
         observers.append(token)
+    }
+
+    private func handleKey(_ event: NSEvent) -> Bool {
+        guard panel.isKeyWindow, model.isExpanded, model.acceptsNavigationKeys else { return false }
+        let modifiers = event.modifierFlags
+            .intersection(.deviceIndependentFlagsMask)
+            .subtracting([.numericPad, .function, .capsLock])
+        let characters = event.charactersIgnoringModifiers ?? ""
+
+        if modifiers == .command {
+            if characters == "n" {
+                model.send(.focusNewTask)
+                return true
+            }
+            if let digit = Int(characters), (1...9).contains(digit) {
+                model.send(.selectProject(digit - 1))
+                return true
+            }
+            return false
+        }
+        guard modifiers.isEmpty else { return false }
+
+        let canActOnSelection = model.draft.isEmpty && model.selectedTaskID != nil
+        switch event.keyCode {
+        case KeyCode.down:
+            model.send(.moveSelection(1))
+        case KeyCode.up:
+            model.send(.moveSelection(-1))
+        case KeyCode.space where canActOnSelection:
+            model.send(.toggleSelected)
+        case KeyCode.returnKey where canActOnSelection, KeyCode.enter where canActOnSelection:
+            model.send(.editSelected)
+        default:
+            return false
+        }
+        return true
     }
 
     private var shouldHoldOpen: Bool {

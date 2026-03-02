@@ -15,62 +15,70 @@ struct TaskListView: View {
     var body: some View {
         let openTasks = store.openTasks(in: project)
         let completedTasks = store.completedTasks(in: project)
-        ScrollView {
-            VStack(alignment: .leading, spacing: 2) {
-                if openTasks.isEmpty {
-                    Text(completedTasks.isEmpty ? "No tasks yet" : "All done")
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                }
-                ForEach(openTasks) { task in
-                    TaskRow(task: task, store: store, model: model)
-                        .draggable(task.id.uuidString)
-                        .dropDestination(for: String.self) { items, _ in
-                            moveTask(withID: items.first, before: task, in: openTasks)
-                        } isTargeted: { targeted in
-                            if targeted {
-                                dropTargetID = task.id
-                            } else if dropTargetID == task.id {
-                                dropTargetID = nil
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 2) {
+                    if openTasks.isEmpty {
+                        Text(completedTasks.isEmpty ? "No tasks yet" : "All done")
+                            .foregroundStyle(.tertiary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                    }
+                    ForEach(openTasks) { task in
+                        TaskRow(task: task, store: store, model: model)
+                            .draggable(task.id.uuidString)
+                            .dropDestination(for: String.self) { items, _ in
+                                moveTask(withID: items.first, before: task, in: openTasks)
+                            } isTargeted: { targeted in
+                                if targeted {
+                                    dropTargetID = task.id
+                                } else if dropTargetID == task.id {
+                                    dropTargetID = nil
+                                }
                             }
-                        }
-                        .overlay(alignment: .top) {
-                            if dropTargetID == task.id {
-                                DropIndicator(axis: .horizontal)
+                            .overlay(alignment: .top) {
+                                if dropTargetID == task.id {
+                                    DropIndicator(axis: .horizontal)
+                                }
                             }
-                        }
-                }
-                if !openTasks.isEmpty {
-                    Color.clear
-                        .frame(height: 8)
-                        .dropDestination(for: String.self) { items, _ in
-                            moveTask(withID: items.first, before: nil, in: openTasks)
-                        } isTargeted: { targeted in
-                            isEndTargeted = targeted
-                        }
-                        .overlay(alignment: .top) {
-                            if isEndTargeted {
-                                DropIndicator(axis: .horizontal)
+                    }
+                    if !openTasks.isEmpty {
+                        Color.clear
+                            .frame(height: 8)
+                            .dropDestination(for: String.self) { items, _ in
+                                moveTask(withID: items.first, before: nil, in: openTasks)
+                            } isTargeted: { targeted in
+                                isEndTargeted = targeted
                             }
-                        }
-                }
-                if !completedTasks.isEmpty {
-                    CompletedHeader(count: completedTasks.count, isExpanded: $showsCompleted)
-                    if showsCompleted {
-                        ForEach(completedTasks) { task in
-                            TaskRow(task: task, store: store, model: model)
+                            .overlay(alignment: .top) {
+                                if isEndTargeted {
+                                    DropIndicator(axis: .horizontal)
+                                }
+                            }
+                    }
+                    if !completedTasks.isEmpty {
+                        CompletedHeader(count: completedTasks.count, isExpanded: $showsCompleted)
+                        if showsCompleted {
+                            ForEach(completedTasks) { task in
+                                TaskRow(task: task, store: store, model: model)
+                            }
                         }
                     }
                 }
+                .onGeometryChange(for: CGFloat.self) { geometry in
+                    geometry.size.height
+                } action: { height in
+                    contentHeight = height
+                }
             }
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.height
-            } action: { height in
-                contentHeight = height
+            .frame(height: min(contentHeight, Self.maxHeight))
+            .onChange(of: model.selectedTaskID) { _, id in
+                guard let id else { return }
+                withAnimation(.snappy) {
+                    proxy.scrollTo(id)
+                }
             }
         }
-        .frame(height: min(contentHeight, Self.maxHeight))
     }
 
     private func moveTask(withID id: String?, before target: TaskItem?, in tasks: [TaskItem]) -> Bool {

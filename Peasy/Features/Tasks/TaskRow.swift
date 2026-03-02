@@ -78,10 +78,12 @@ struct TaskRow: View {
         guard isEditing else { return }
         store.rename(task, to: editedTitle)
         model.editingTaskID = nil
+        model.focusNewTask()
     }
 
     private func cancelEdit() {
         model.editingTaskID = nil
+        model.focusNewTask()
     }
 
     private func delete() {

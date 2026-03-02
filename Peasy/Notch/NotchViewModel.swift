@@ -15,6 +15,19 @@ final class NotchViewModel {
         case renaming(UUID)
     }
 
+    enum Command: Equatable {
+        case moveSelection(Int)
+        case toggleSelected
+        case editSelected
+        case selectProject(Int)
+        case focusNewTask
+    }
+
+    struct CommandEvent: Equatable {
+        let id: Int
+        let command: Command
+    }
+
     static let contentWidth: CGFloat = 380
     static let earRadius: CGFloat = 12
     static let collapsedCornerRadius: CGFloat = 10
@@ -27,6 +40,8 @@ final class NotchViewModel {
     var editingTaskID: UUID?
     var projectEditor: ProjectEditor?
     var projectPendingDeletion: UUID?
+    private(set) var lastCommand: CommandEvent?
+    private(set) var newTaskFocusRequest = 0
     private(set) var contentSize = CGSize(width: NotchViewModel.contentWidth, height: 120)
 
     @ObservationIgnored var onLayoutChange: () -> Void = {}
@@ -67,6 +82,18 @@ final class NotchViewModel {
         }
         guard let notch = geometry?.notchRect else { return nil }
         return CGRect(x: notch.minX - 6, y: notch.minY, width: notch.width + 12, height: notch.height + 2)
+    }
+
+    var acceptsNavigationKeys: Bool {
+        editingTaskID == nil && projectEditor == nil && projectPendingDeletion == nil
+    }
+
+    func send(_ command: Command) {
+        lastCommand = CommandEvent(id: (lastCommand?.id ?? 0) + 1, command: command)
+    }
+
+    func focusNewTask() {
+        newTaskFocusRequest += 1
     }
 
     func setContentHeight(_ height: CGFloat) {
