@@ -105,6 +105,8 @@ struct ProjectChip: View {
     let isSelected: Bool
     let action: () -> Void
 
+    @State private var isHovered = false
+
     var body: some View {
         Button(action: action) {
             Text(name)
@@ -113,10 +115,11 @@ struct ProjectChip: View {
                 .foregroundStyle(isSelected ? .primary : .secondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(.white.opacity(isSelected ? 0.16 : 0), in: Capsule())
+                .background(.white.opacity(isSelected ? 0.16 : isHovered ? 0.08 : 0), in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

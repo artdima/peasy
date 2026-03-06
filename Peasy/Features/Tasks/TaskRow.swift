@@ -18,6 +18,7 @@ struct TaskRow: View {
                 Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 15))
                     .foregroundStyle(task.isDone ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+                    .contentTransition(.symbolEffect(.replace))
             }
             .buttonStyle(.plain)
             .accessibilityLabel(task.isDone ? "Mark as not done" : "Mark as done")
@@ -55,6 +56,8 @@ struct TaskRow: View {
         .contentShape(Rectangle())
         .simultaneousGesture(TapGesture().onEnded { model.selectedTaskID = task.id })
         .onHover { isHovered = $0 }
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .contextMenu {
             Button(task.isDone ? "Mark as Not Done" : "Mark as Done", action: toggle)
             Button("Edit", action: startEditing)

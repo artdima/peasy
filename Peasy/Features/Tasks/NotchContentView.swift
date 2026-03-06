@@ -55,7 +55,7 @@ struct NotchContentView: View {
                 }
             }
         }
-        .padding(EdgeInsets(top: 6, leading: 16, bottom: 14, trailing: 16))
+        .padding(EdgeInsets(top: 8, leading: 14, bottom: 14, trailing: 14))
         .frame(width: NotchViewModel.contentWidth, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
         .onExitCommand(perform: actions.collapse)
