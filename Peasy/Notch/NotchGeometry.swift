@@ -50,8 +50,4 @@ extension NotchGeometry {
             menuBarHeight: screen.frame.maxY - screen.visibleFrame.maxY
         )
     }
-
-    static func preferredScreen(among screens: [NSScreen] = NSScreen.screens) -> NSScreen? {
-        screens.first { $0.safeAreaInsets.top > 0 } ?? screens.first
-    }
 }

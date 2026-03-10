@@ -11,6 +11,7 @@ final class NotchPanelController {
     private var isMenuOpen = false
     private var shrinkTask: Task<Void, Never>?
     private var keyMonitor: Any?
+    private var displayPreference = DisplayPreference.current
 
     init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
@@ -24,6 +25,12 @@ final class NotchPanelController {
         panel.contentView = hostingView
         panel.ignoresMouseEvents = true
         observe(NSApplication.didChangeScreenParametersNotification) { $0.updateGeometry() }
+        observe(UserDefaults.didChangeNotification) { controller in
+            let preference = DisplayPreference.current
+            guard preference != controller.displayPreference else { return }
+            controller.displayPreference = preference
+            controller.updateGeometry()
+        }
         observe(NSMenu.didBeginTrackingNotification) { $0.isMenuOpen = true }
         observe(NSMenu.didEndTrackingNotification) {
             $0.isMenuOpen = false
@@ -36,6 +43,7 @@ final class NotchPanelController {
             $0.hoverTracker.update(force: true)
         }
         hoverTracker.holdOpen = { [weak self] in self?.shouldHoldOpen ?? false }
+        hoverTracker.onMove = { [weak self] location in self?.followPointer(to: location) }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             let handled = MainActor.assumeIsolated { self?.handleKey(event) ?? false }
             return handled ? nil : event
@@ -102,9 +110,18 @@ final class NotchPanelController {
     }
 
     private func updateGeometry() {
-        guard let screen = NotchGeometry.preferredScreen() else { return }
-        model.geometry = NotchGeometry(screen: screen)
+        guard let screen = displayPreference.pick(from: NSScreen.screens, pointer: NSEvent.mouseLocation) else { return }
+        let geometry = NotchGeometry(screen: screen)
+        guard geometry != model.geometry else { return }
+        model.geometry = geometry
         panel.setFrame(currentFrame, display: true)
+    }
+
+    private func followPointer(to location: CGPoint) {
+        guard displayPreference == .pointer, !model.isExpanded,
+              let screenFrame = model.geometry?.screenFrame, !screenFrame.contains(location)
+        else { return }
+        updateGeometry()
     }
 
     private var currentFrame: CGRect {

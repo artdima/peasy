@@ -5,6 +5,7 @@ final class HoverTracker {
     var zone: () -> CGRect? = { nil }
     var onChange: (Bool) -> Void = { _ in }
     var holdOpen: () -> Bool = { false }
+    var onMove: (CGPoint) -> Void = { _ in }
 
     private let openDelay: Duration
     private let closeDelay: Duration
@@ -41,7 +42,9 @@ final class HoverTracker {
     }
 
     func update(force: Bool = false) {
-        let inside = zone()?.contains(NSEvent.mouseLocation) ?? false
+        let location = NSEvent.mouseLocation
+        onMove(location)
+        let inside = zone()?.contains(location) ?? false
         guard force || inside != isInside else { return }
         isInside = inside
         setPolling(inside)
