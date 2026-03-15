@@ -26,6 +26,7 @@ final class NotchPanelController {
         panel.ignoresMouseEvents = true
         observe(NSApplication.didChangeScreenParametersNotification) { $0.updateGeometry() }
         observe(UserDefaults.didChangeNotification) { controller in
+            controller.hoverTracker.openDelay = OpenDelay.current.duration
             let preference = DisplayPreference.current
             guard preference != controller.displayPreference else { return }
             controller.displayPreference = preference
@@ -36,6 +37,7 @@ final class NotchPanelController {
             $0.isMenuOpen = false
             $0.hoverTracker.update(force: true)
         }
+        hoverTracker.openDelay = OpenDelay.current.duration
         hoverTracker.zone = { [weak self] in self?.model.hoverZone }
         hoverTracker.onChange = { [weak self] inside in self?.setExpanded(inside) }
         observe(NSWindow.didResignKeyNotification) {

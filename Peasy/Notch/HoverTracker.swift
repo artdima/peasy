@@ -7,7 +7,7 @@ final class HoverTracker {
     var holdOpen: () -> Bool = { false }
     var onMove: (CGPoint) -> Void = { _ in }
 
-    private let openDelay: Duration
+    var openDelay: Duration
     private let closeDelay: Duration
     private var monitors: [Any] = []
     private var pollTimer: Timer?
