@@ -26,6 +26,7 @@ struct NotchRootView: View {
         .animation(.smooth(duration: 0.25), value: model.contentSize.height)
         .contentShape(Rectangle())
         .contextMenu {
+            Button("About Peasy", action: actions.showAbout)
             Button("Settings…", action: actions.openSettings)
             Divider()
             Button("Quit Peasy", action: actions.quit)

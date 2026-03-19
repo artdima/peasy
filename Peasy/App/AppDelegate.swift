@@ -15,9 +15,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             fatalError("Failed to open the task store: \(error)")
         }
         let actions = NotchActions(
+            showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
             quit: { NSApp.terminate(nil) }
         )
         notchController = NotchPanelController(model: notchModel, actions: actions, modelContainer: container)
+    }
+
+    private static func showAbout() {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        let credits = NSAttributedString(
+            string: String(localized: "Little tasks, big growth."),
+            attributes: [
+                .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+                .foregroundColor: NSColor.secondaryLabelColor,
+                .paragraphStyle: paragraph,
+            ]
+        )
+        NSApp.activate()
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
     }
 }
