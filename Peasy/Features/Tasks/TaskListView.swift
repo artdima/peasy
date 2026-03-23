@@ -20,7 +20,7 @@ struct TaskListView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
                     if openTasks.isEmpty {
-                        Text(completedTasks.isEmpty ? "No tasks yet" : "All done")
+                        Text(completedTasks.isEmpty ? LocalizedStringKey("No tasks yet") : "All done")
                             .foregroundStyle(.tertiary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 6)

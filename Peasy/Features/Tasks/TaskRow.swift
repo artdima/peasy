@@ -21,7 +21,7 @@ struct TaskRow: View {
                     .contentTransition(.symbolEffect(.replace))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(task.isDone ? "Mark as not done" : "Mark as done")
+            .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
 
             if isEditing {
                 TextField("Task", text: $editedTitle)
@@ -59,7 +59,7 @@ struct TaskRow: View {
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .contextMenu {
-            Button(task.isDone ? "Mark as Not Done" : "Mark as Done", action: toggle)
+            Button(task.isDone ? LocalizedStringKey("Mark as Not Done") : "Mark as Done", action: toggle)
             Button("Edit", action: startEditing)
             Divider()
             Button("Delete", role: .destructive, action: delete)
