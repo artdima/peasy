@@ -32,6 +32,7 @@ final class NotchViewModel {
     static let earRadius: CGFloat = 12
     static let collapsedCornerRadius: CGFloat = 10
     static let expandedCornerRadius: CGFloat = 22
+    static let maxContentHeight: CGFloat = 520
 
     var geometry: NotchGeometry?
     var state: State = .collapsed
@@ -44,7 +45,6 @@ final class NotchViewModel {
     private(set) var newTaskFocusRequest = 0
     private(set) var contentSize = CGSize(width: NotchViewModel.contentWidth, height: 120)
 
-    @ObservationIgnored var onLayoutChange: () -> Void = {}
 
     var isExpanded: Bool { state == .expanded }
 
@@ -76,6 +76,18 @@ final class NotchViewModel {
         )
     }
 
+    var canvasFrame: CGRect? {
+        guard let geometry else { return nil }
+        let width = expandedSize.width
+        let height = collapsedSize.height + Self.maxContentHeight
+        return CGRect(
+            x: geometry.notchRect.midX - width / 2,
+            y: geometry.screenFrame.maxY - height,
+            width: width,
+            height: height
+        )
+    }
+
     var hoverZone: CGRect? {
         if isExpanded {
             return expandedFrame
@@ -100,6 +112,5 @@ final class NotchViewModel {
         let height = height.rounded(.up)
         guard height > 0, height != contentSize.height else { return }
         contentSize.height = height
-        onLayoutChange()
     }
 }

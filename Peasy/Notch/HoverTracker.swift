@@ -6,6 +6,7 @@ final class HoverTracker {
     var onChange: (Bool) -> Void = { _ in }
     var holdOpen: () -> Bool = { false }
     var onMove: (CGPoint) -> Void = { _ in }
+    var onInsideChange: (Bool) -> Void = { _ in }
 
     var openDelay: Duration
     private let closeDelay: Duration
@@ -47,6 +48,7 @@ final class HoverTracker {
         let inside = zone()?.contains(location) ?? false
         guard force || inside != isInside else { return }
         isInside = inside
+        onInsideChange(inside)
         setPolling(inside)
         schedule(inside)
     }

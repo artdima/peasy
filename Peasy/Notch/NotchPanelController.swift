@@ -9,7 +9,6 @@ final class NotchPanelController {
     private let hoverTracker = HoverTracker()
     private var observers: [NSObjectProtocol] = []
     private var isMenuOpen = false
-    private var shrinkTask: Task<Void, Never>?
     private var keyMonitor: Any?
     private var displayPreference = DisplayPreference.current
 
@@ -20,9 +19,13 @@ final class NotchPanelController {
         modelContainer.mainContext.undoManager = panel.undoManager
         let rootView = NotchRootView(model: model, actions: actions)
             .modelContainer(modelContainer)
-        let hostingView = NSHostingView(rootView: rootView)
+        let hostingView = PanelHostingView(rootView: rootView)
         hostingView.sizingOptions = []
-        panel.contentView = hostingView
+        hostingView.autoresizingMask = [.width, .height]
+        let container = NSView()
+        container.addSubview(hostingView)
+        panel.contentView = container
+        hostingView.frame = container.bounds
         panel.ignoresMouseEvents = true
         observe(NSApplication.didChangeScreenParametersNotification) { $0.updateGeometry() }
         observe(UserDefaults.didChangeNotification) { controller in
@@ -46,11 +49,11 @@ final class NotchPanelController {
         }
         hoverTracker.holdOpen = { [weak self] in self?.shouldHoldOpen ?? false }
         hoverTracker.onMove = { [weak self] location in self?.followPointer(to: location) }
+        hoverTracker.onInsideChange = { [weak self] inside in self?.updateMouseHandling(pointerInside: inside) }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             let handled = MainActor.assumeIsolated { self?.handleKey(event) ?? false }
             return handled ? nil : event
         }
-        model.onLayoutChange = { [weak self] in self?.layoutDidChange() }
         updateGeometry()
         panel.orderFrontRegardless()
         hoverTracker.start()
@@ -116,7 +119,13 @@ final class NotchPanelController {
         let geometry = NotchGeometry(screen: screen)
         guard geometry != model.geometry else { return }
         model.geometry = geometry
-        panel.setFrame(currentFrame, display: true)
+        if let frame = model.canvasFrame {
+            panel.setFrame(frame, display: true)
+        }
+    }
+
+    private func updateMouseHandling(pointerInside: Bool) {
+        panel.ignoresMouseEvents = !(model.isExpanded && pointerInside)
     }
 
     private func followPointer(to location: CGPoint) {
@@ -126,15 +135,9 @@ final class NotchPanelController {
         updateGeometry()
     }
 
-    private var currentFrame: CGRect {
-        let notch = model.geometry?.notchRect ?? .zero
-        return model.isExpanded ? (model.expandedFrame ?? notch) : notch
-    }
-
-    private func setExpanded(_ expanded: Bool) {
-        guard expanded != model.isExpanded, let frame = model.expandedFrame else { return }
+    func setExpanded(_ expanded: Bool) {
+        guard expanded != model.isExpanded, model.geometry != nil else { return }
         if expanded {
-            panel.setFrame(frame, display: true)
             panel.ignoresMouseEvents = false
             panel.makeKey()
             withAnimation(animation) {
@@ -150,20 +153,6 @@ final class NotchPanelController {
         }
     }
 
-    private func layoutDidChange() {
-        guard model.isExpanded, let frame = model.expandedFrame else { return }
-        shrinkTask?.cancel()
-        if frame.height >= panel.frame.height {
-            panel.setFrame(frame, display: true)
-            return
-        }
-        shrinkTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(350))
-            guard !Task.isCancelled, let self, model.isExpanded, let frame = model.expandedFrame else { return }
-            panel.setFrame(frame, display: true)
-        }
-    }
-
     private func finishCollapse() {
         guard !model.isExpanded else { return }
         model.selectedTaskID = nil
@@ -174,6 +163,5 @@ final class NotchPanelController {
             panel.orderOut(nil)
             panel.orderFrontRegardless()
         }
-        panel.setFrame(currentFrame, display: true)
     }
 }
