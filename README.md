@@ -55,7 +55,7 @@ AppKit owns the window and the mouse, SwiftUI draws everything inside the panel.
 
 - **A non-activating `NSPanel` above the menu bar.** It becomes the key window without activating Peasy, so typing goes to the panel while the previous app stays active. On collapse the panel resigns key and input returns.
 - **Global mouse monitor, not a tracking area.** The collapsed panel ignores mouse events so clicks still reach the menu bar. Watching `mouseMoved` globally needs no Accessibility permission. While the pointer is inside, a short timer catches exits that the monitors miss.
-- **The window follows the panel's size.** Transparent margins would swallow clicks, so the window grows before the unfold animation and shrinks after the fold.
+- **A fixed-size window with click-through.** Resizing the window during SwiftUI layout made `NSHostingView` loop on constraint updates and crash. The panel now lives on a canvas sized for the largest panel, the hosting view sits inside a plain container with no safe area, and the window ignores mouse events whenever the pointer is outside the visible panel.
 - **Models are CloudKit-ready from day one.** Every property has a default or is optional, relationships are optional with inverses, nothing is unique. Turning on sync is a configuration change, not a migration.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
 - **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so the first project is the user's.
