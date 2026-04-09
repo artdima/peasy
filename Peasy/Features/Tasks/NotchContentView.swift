@@ -55,9 +55,14 @@ struct NotchContentView: View {
                 }
             }
         }
-        .padding(EdgeInsets(top: 8, leading: 14, bottom: 14, trailing: 14))
-        .frame(width: NotchViewModel.contentWidth, alignment: .leading)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button("About Peasy", action: actions.showAbout)
+            Button("Settings…", action: actions.openSettings)
+            Divider()
+            Button("Quit Peasy", action: actions.quit)
+        }
         .onExitCommand(perform: actions.collapse)
         .onChange(of: model.draft) {
             model.selectedTaskID = nil
@@ -66,11 +71,6 @@ struct NotchContentView: View {
             if let event {
                 perform(event.command, store: store)
             }
-        }
-        .onGeometryChange(for: CGFloat.self) { proxy in
-            proxy.size.height
-        } action: { height in
-            model.setContentHeight(height)
         }
     }
 

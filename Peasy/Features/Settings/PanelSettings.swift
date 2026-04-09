@@ -13,8 +13,8 @@ enum OpenDelay: Int, CaseIterable, Identifiable {
 
     var id: Int { rawValue }
 
-    var duration: Duration {
-        .milliseconds(rawValue)
+    var seconds: TimeInterval {
+        TimeInterval(rawValue) / 1000
     }
 
     var title: LocalizedStringKey {

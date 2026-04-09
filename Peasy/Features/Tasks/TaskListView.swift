@@ -1,15 +1,12 @@
 import SwiftUI
 
 struct TaskListView: View {
-    static let maxHeight: CGFloat = 320
-
     let project: Project
     let store: TaskStore
     let model: NotchViewModel
 
     @AppStorage(PanelSettings.showsCompletedKey) private var showsCompletedSection = true
     @State private var showsCompleted = false
-    @State private var contentHeight: CGFloat = 0
     @State private var dropTargetID: UUID?
     @State private var isEndTargeted = false
 
@@ -66,13 +63,8 @@ struct TaskListView: View {
                         }
                     }
                 }
-                .onGeometryChange(for: CGFloat.self) { geometry in
-                    geometry.size.height
-                } action: { height in
-                    contentHeight = height
-                }
             }
-            .frame(height: min(contentHeight, Self.maxHeight))
+            .frame(maxHeight: .infinity)
             .onChange(of: model.selectedTaskID) { _, id in
                 guard let id else { return }
                 withAnimation(.snappy) {

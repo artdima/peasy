@@ -11,16 +11,16 @@
   <img src="https://img.shields.io/badge/Swift-6.2-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 6.2">
   <img src="https://img.shields.io/badge/UI-SwiftUI-1575F9?style=flat-square" alt="SwiftUI">
   <img src="https://img.shields.io/badge/data-SwiftData-5E5CE6?style=flat-square" alt="SwiftData">
-  <img src="https://img.shields.io/badge/dependencies-none-2EA043?style=flat-square" alt="No dependencies">
+  <img src="https://img.shields.io/badge/notch-NotchKit-2EA043?style=flat-square" alt="NotchKit">
 </p>
 
 ## What's inside
 
 | Feature | What it does |
 | --- | --- |
-| **Notch panel** | Hover over the notch and the panel unfolds from it; move away or press Esc to fold it back. |
+| **Notch panel** | Hover over the notch and the panel unfolds from it; move away to fold it back. Click into the panel to type: from then on it stays open until you click elsewhere or press Esc. |
 | **Projects** | Tasks live in projects. Switch with the chips in the header or ⌘1…⌘9, rename and delete from the context menu. |
-| **Quick input** | Type a task and press Return. The panel takes the keyboard without activating Peasy, so the app you were in stays in front. |
+| **Quick input** | Click the notch or the panel, type a task and press Return. The panel takes the keyboard without activating Peasy, so the app you were in stays in front. |
 | **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps back to input. |
 | **Reorder** | Drag tasks inside a project and projects inside the header. |
 | **Any display** | Built-in display, main display or the one with the pointer. Macs without a notch get a small black island instead. |
@@ -39,7 +39,7 @@ xcodebuild -project Peasy.xcodeproj -scheme Peasy -destination 'platform=macOS' 
 ```
 Peasy/
 ├── App/            entry point, AppDelegate wiring, test detection
-├── Notch/          NSPanel, notch geometry, hover tracking, shape, view model, key handling
+├── Notch/          NotchKit presenter setup, view model, key handling, display choice
 ├── Features/
 │   ├── Tasks/      panel content, task list, rows, quick input
 │   ├── Projects/   project switcher, first-project screen
@@ -49,13 +49,13 @@ Peasy/
 PeasyTests/         Swift Testing suites
 ```
 
-AppKit owns the window and the mouse, SwiftUI draws everything inside the panel. Views read data through `@Query` and relationships, and change it only through `TaskStore`. The panel controller talks to SwiftUI through `NotchViewModel`: state, layout size and keyboard commands.
+[NotchKit](https://github.com/duongductrong/NotchKit) owns the window, the morphing shape and the hover policy. `NotchController` configures it, routes the keyboard and keeps the panel on the chosen display. Views read data through `@Query` and relationships, and change it only through `TaskStore`. The controller talks to SwiftUI through `NotchViewModel`: selection, editing state and keyboard commands.
 
 ## Decisions worth explaining
 
-- **A non-activating `NSPanel` above the menu bar.** It becomes the key window without activating Peasy, so typing goes to the panel while the previous app stays active. On collapse the panel resigns key and input returns.
-- **Global mouse monitor, not a tracking area.** The collapsed panel ignores mouse events so clicks still reach the menu bar. Watching `mouseMoved` globally needs no Accessibility permission. While the pointer is inside, a short timer catches exits that the monitors miss.
-- **A fixed-size window with click-through.** Resizing the window during SwiftUI layout made `NSHostingView` loop on constraint updates and crash. The panel now lives on a canvas sized for the largest panel, the hosting view sits inside a plain container with no safe area, and the window ignores mouse events whenever the pointer is outside the visible panel.
+- **NotchKit for the window and the shape.** A hand-rolled panel crashed in a constraint-update loop when SwiftUI resized its window, and lost hover at the top pixel row of the screen. NotchKit keeps one fixed-size window, morphs a single shape inside it and hit-tests the visible ink only.
+- **Keyboard only after a click.** A hover-opened panel does not take the keyboard, so drifting to the top of the screen never steals keystrokes. The first click inside makes the panel key and pins it open until a click elsewhere or Esc.
+- **Own outside-click handling.** NotchKit can replay the dismissing click to the app underneath; Peasy turns that off and collapses from a passive global monitor instead, so a click outside is delivered exactly once.
 - **Models are CloudKit-ready from day one.** Every property has a default or is optional, relationships are optional with inverses, nothing is unique. Turning on sync is a configuration change, not a migration.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
 - **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so the first project is the user's.
@@ -68,6 +68,6 @@ AppKit owns the window and the mouse, SwiftUI draws everything inside the panel.
 ## Known limitations
 
 - iCloud sync is not switched on yet: it needs a development team and the CloudKit container.
-- The panel takes the keyboard as soon as it unfolds, even if you were typing elsewhere.
+- The panel has a fixed size; a long list scrolls inside it.
 - In full-screen apps the panel still appears at the top of the screen.
 - Open at login is reliable only for a signed build in `/Applications`.

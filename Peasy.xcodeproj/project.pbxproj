@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8F3A1C402EA9000100D4E001 /* NotchKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8F3A1C412EA9000100D4E001 /* NotchKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		8F3A1C362EA9000100D4E001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -39,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F3A1C402EA9000100D4E001 /* NotchKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +95,7 @@
 			);
 			name = Peasy;
 			packageProductDependencies = (
+				8F3A1C412EA9000100D4E001 /* NotchKit */,
 			);
 			productName = Peasy;
 			productReference = 8F3A1C182EA9000100D4E001 /* Peasy.app */;
@@ -147,6 +153,9 @@
 			);
 			mainGroup = 8F3A1C0F2EA9000100D4E001;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8F3A1C422EA9000100D4E001 /* XCRemoteSwiftPackageReference "NotchKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8F3A1C192EA9000100D4E001 /* Products */;
 			projectDirPath = "";
@@ -450,6 +459,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8F3A1C422EA9000100D4E001 /* XCRemoteSwiftPackageReference "NotchKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/duongductrong/NotchKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8F3A1C412EA9000100D4E001 /* NotchKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8F3A1C422EA9000100D4E001 /* XCRemoteSwiftPackageReference "NotchKit" */;
+			productName = NotchKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8F3A1C102EA9000100D4E001 /* Project object */;
 }

@@ -4,7 +4,7 @@ import SwiftData
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let notchModel = NotchViewModel()
     private let settingsWindow = SettingsWindowController()
-    private var notchController: NotchPanelController?
+    private var notchController: NotchController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.processInfo.isRunningTests else { return }
@@ -19,7 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             openSettings: { [weak self] in self?.settingsWindow.show() },
             quit: { NSApp.terminate(nil) }
         )
-        notchController = NotchPanelController(model: notchModel, actions: actions, modelContainer: container)
+        notchController = NotchController(model: notchModel, actions: actions, modelContainer: container)
     }
 
     private static func showAbout() {
