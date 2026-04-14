@@ -8,54 +8,58 @@ struct NotchContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Project.order), SortDescriptor(\Project.createdAt)])
     private var projects: [Project]
-    @AppStorage("selectedProjectID") private var selectedProjectID = ""
+    @Query private var tasks: [TaskItem]
+    @AppStorage(TaskList.storageKey) private var selectedListValue = TaskList.today.storageValue
 
     var body: some View {
         let store = TaskStore(context: modelContext)
-        VStack(alignment: .leading, spacing: 10) {
-            if let project = selectedProject {
-                ProjectSwitcher(
+        let list = selectedList
+        let openTasks = TaskQueries.openTasks(in: list, from: tasks)
+        VStack(spacing: 0) {
+            PanelHeader(model: model)
+                .frame(height: model.headerHeight)
+
+            HStack(alignment: .top, spacing: 12) {
+                ProjectSidebar(
                     projects: projects,
-                    selectedID: project.id,
+                    tasks: tasks,
+                    selection: list,
                     store: store,
                     model: model,
                     onSelect: select,
                     onDelete: { delete($0, store: store) }
                 )
-                if let pendingID = model.projectPendingDeletion,
-                   let pending = projects.first(where: { $0.id == pendingID }) {
-                    DeleteProjectConfirmation(project: pending) {
-                        model.projectPendingDeletion = nil
-                    } onConfirm: {
-                        model.projectPendingDeletion = nil
-                        delete(pending, store: store)
+                .frame(width: 172)
+
+                Rectangle()
+                    .fill(PanelStyle.separator)
+                    .frame(width: 1)
+
+                TaskSection(
+                    list: list,
+                    title: title(for: list),
+                    openTasks: openTasks,
+                    completedTasks: TaskQueries.completedTasks(in: list, from: tasks),
+                    projects: projects,
+                    store: store,
+                    model: model,
+                    onDeleteProject: { delete($0, store: store) }
+                )
+                .background {
+                    Button("Delete Task") {
+                        deleteSelectedTask(store: store)
                     }
-                }
-                NewTaskField(model: model) { title in
-                    withAnimation(.snappy) {
-                        _ = store.addTask(title, to: project)
-                    }
-                }
-                TaskListView(project: project, store: store, model: model)
-                    .background {
-                        Button("Delete Task") {
-                            deleteSelectedTask(in: project, store: store)
-                        }
-                        .keyboardShortcut(.delete, modifiers: .command)
-                        .disabled(model.selectedTaskID == nil || model.editingTaskID != nil)
-                        .opacity(0)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                    }
-            } else {
-                FirstProjectView { name in
-                    if let project = store.createProject(named: name) {
-                        select(project)
-                    }
+                    .keyboardShortcut(.delete, modifiers: .command)
+                    .disabled(model.selectedTaskID == nil || model.editingTaskID != nil)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
                 }
             }
+            .padding(EdgeInsets(top: 10, leading: 14, bottom: 14, trailing: 14))
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .foregroundStyle(PanelStyle.primary)
         .contentShape(Rectangle())
         .contextMenu {
             Button("About Peasy", action: actions.showAbout)
@@ -74,63 +78,80 @@ struct NotchContentView: View {
         }
     }
 
+    private var selectedList: TaskList {
+        let list = TaskList(storageValue: selectedListValue)
+        if case .project(let id) = list, !projects.contains(where: { $0.id == id }) {
+            return .today
+        }
+        return list
+    }
+
+    private var lists: [TaskList] {
+        [.today, .inbox] + projects.map { .project($0.id) }
+    }
+
+    private func title(for list: TaskList) -> Text {
+        switch list {
+        case .today:
+            Text("Today")
+        case .inbox:
+            Text("Inbox")
+        case .project(let id):
+            Text(verbatim: projects.first { $0.id == id }?.name ?? "")
+        }
+    }
+
     private func perform(_ command: NotchViewModel.Command, store: TaskStore) {
         switch command {
-        case .selectProject(let index):
-            if projects.indices.contains(index) {
-                select(projects[index])
+        case .selectList(let index):
+            if lists.indices.contains(index) {
+                select(lists[index])
             }
         case .focusNewTask:
             model.selectedTaskID = nil
             model.focusNewTask()
         case .moveSelection(let delta):
-            guard let project = selectedProject else { return }
-            let tasks = store.openTasks(in: project)
-            guard !tasks.isEmpty else { return }
-            if let current = tasks.firstIndex(where: { $0.id == model.selectedTaskID }) {
-                let next = min(max(current + delta, 0), tasks.count - 1)
-                model.selectedTaskID = tasks[next].id
+            let open = TaskQueries.openTasks(in: selectedList, from: tasks)
+            guard !open.isEmpty else { return }
+            if let current = open.firstIndex(where: { $0.id == model.selectedTaskID }) {
+                let next = min(max(current + delta, 0), open.count - 1)
+                model.selectedTaskID = open[next].id
             } else {
-                model.selectedTaskID = delta > 0 ? tasks.first?.id : tasks.last?.id
+                model.selectedTaskID = delta > 0 ? open.first?.id : open.last?.id
             }
         case .toggleSelected:
-            guard let project = selectedProject else { return }
-            let tasks = store.openTasks(in: project)
-            guard let index = tasks.firstIndex(where: { $0.id == model.selectedTaskID }) else { return }
+            let open = TaskQueries.openTasks(in: selectedList, from: tasks)
+            guard let index = open.firstIndex(where: { $0.id == model.selectedTaskID }) else { return }
             withAnimation(.snappy) {
-                store.toggle(tasks[index])
+                store.toggle(open[index])
             }
-            let remaining = store.openTasks(in: project)
+            let remaining = store.openTasks(in: selectedList)
             model.selectedTaskID = remaining.isEmpty ? nil : remaining[min(index, remaining.count - 1)].id
         case .editSelected:
             model.editingTaskID = model.selectedTaskID
         }
     }
 
-    private func select(_ project: Project) {
-        selectedProjectID = project.id.uuidString
+    private func select(_ list: TaskList) {
+        selectedListValue = list.storageValue
         model.selectedTaskID = nil
         model.editingTaskID = nil
     }
 
     private func delete(_ project: Project, store: TaskStore) {
-        if project.id.uuidString == selectedProjectID {
-            selectedProjectID = ""
+        if selectedList == .project(project.id) {
+            selectedListValue = TaskList.today.storageValue
         }
         withAnimation(.snappy) {
             store.delete(project)
         }
     }
 
-    private func deleteSelectedTask(in project: Project, store: TaskStore) {
-        guard let id = model.selectedTaskID, let task = project.tasks?.first(where: { $0.id == id }) else { return }
+    private func deleteSelectedTask(store: TaskStore) {
+        guard let id = model.selectedTaskID, let task = tasks.first(where: { $0.id == id }) else { return }
         model.selectedTaskID = nil
         withAnimation(.snappy) {
             store.delete(task)
         }
-    }
-
-    private var selectedProject: Project? {
-        projects.first { $0.id.uuidString == selectedProjectID } ?? projects.first
     }
 }

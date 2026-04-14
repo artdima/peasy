@@ -6,7 +6,7 @@ import SwiftUI
 
 @MainActor
 final class NotchController {
-    static let panelSize = CGSize(width: 420, height: 320)
+    static let panelSize = CGSize(width: 680, height: 452)
 
     private let presenter: NotchPresenter
     private let model: NotchViewModel
@@ -34,12 +34,14 @@ final class NotchController {
         }
         observe(NSApplication.didChangeScreenParametersNotification) { controller, _ in
             controller.presenter.preferredScreenID = controller.preferredScreenID()
+            controller.model.headerHeight = controller.presenter.geometry.collapsedHeight
         }
         observe(UserDefaults.didChangeNotification) { controller, _ in
             controller.settingsDidChange()
         }
         startMonitors()
         observePhase()
+        observePin()
     }
 
     var isExpanded: Bool {
@@ -66,8 +68,10 @@ final class NotchController {
         NotchConfiguration(
             expandedSize: panelSize,
             collapsedWidth: .wrapCutout(reserve: 0),
-            expandedTopCornerRadius: 14,
-            expandedBottomCornerRadius: 22,
+            expandedTopCornerRadius: 16,
+            expandedBottomCornerRadius: 30,
+            expandedContentInsetsOverride: EdgeInsets(),
+            expandedTopReserve: .none,
             hoverOpenDelay: openDelay.seconds,
             collapsesOnOutsideClick: false
         )
@@ -88,6 +92,7 @@ final class NotchController {
                 .modelContainer(modelContainer)
         }
         modelContainer.mainContext.undoManager = panel?.undoManager
+        model.headerHeight = presenter.geometry.collapsedHeight
     }
 
     private func observe(_ name: Notification.Name, perform action: @escaping (NotchController, Notification) -> Void) {
@@ -108,6 +113,18 @@ final class NotchController {
             Task { @MainActor [weak self] in
                 self?.phaseDidChange()
                 self?.observePhase()
+            }
+        }
+    }
+
+    private func observePin() {
+        withObservationTracking {
+            _ = model.isPinned
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                presenter.configuration.collapsesOnPointerExit = !model.isPinned
+                observePin()
             }
         }
     }
@@ -173,7 +190,7 @@ final class NotchController {
     }
 
     private func handleOutsideClick() {
-        if presenter.phase == .expanded {
+        if presenter.phase == .expanded, !model.isPinned {
             collapse()
         }
     }
@@ -204,7 +221,7 @@ final class NotchController {
                 return true
             }
             if let digit = Int(characters), (1...9).contains(digit) {
-                model.send(.selectProject(digit - 1))
+                model.send(.selectList(digit - 1))
                 return true
             }
             return false

@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct TaskListView: View {
-    let project: Project
+    let list: TaskList
+    let openTasks: [TaskItem]
+    let completedTasks: [TaskItem]
     let store: TaskStore
     let model: NotchViewModel
 
@@ -11,22 +13,14 @@ struct TaskListView: View {
     @State private var isEndTargeted = false
 
     var body: some View {
-        let openTasks = store.openTasks(in: project)
-        let completedTasks = store.completedTasks(in: project)
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 2) {
-                    if openTasks.isEmpty {
-                        Text(completedTasks.isEmpty ? LocalizedStringKey("No tasks yet") : "All done")
-                            .foregroundStyle(.tertiary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                    }
+                VStack(alignment: .leading, spacing: 0) {
                     ForEach(openTasks) { task in
-                        TaskRow(task: task, store: store, model: model)
+                        TaskRow(task: task, list: list, store: store, model: model)
                             .draggable(task.id.uuidString)
                             .dropDestination(for: String.self) { items, _ in
-                                moveTask(withID: items.first, before: task, in: openTasks)
+                                moveTask(withID: items.first, before: task)
                             } isTargeted: { targeted in
                                 if targeted {
                                     dropTargetID = task.id
@@ -40,11 +34,18 @@ struct TaskListView: View {
                                 }
                             }
                     }
-                    if !openTasks.isEmpty {
+
+                    if openTasks.isEmpty {
+                        Text("All done")
+                            .font(.system(size: 13))
+                            .foregroundStyle(PanelStyle.tertiary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                    } else {
                         Color.clear
                             .frame(height: 8)
                             .dropDestination(for: String.self) { items, _ in
-                                moveTask(withID: items.first, before: nil, in: openTasks)
+                                moveTask(withID: items.first, before: nil)
                             } isTargeted: { targeted in
                                 isEndTargeted = targeted
                             }
@@ -54,11 +55,12 @@ struct TaskListView: View {
                                 }
                             }
                     }
+
                     if showsCompletedSection, !completedTasks.isEmpty {
-                        CompletedHeader(count: completedTasks.count, isExpanded: $showsCompleted)
+                        CompletedDisclosure(count: completedTasks.count, isExpanded: $showsCompleted)
                         if showsCompleted {
                             ForEach(completedTasks) { task in
-                                TaskRow(task: task, store: store, model: model)
+                                TaskRow(task: task, list: list, store: store, model: model)
                             }
                         }
                     }
@@ -71,17 +73,51 @@ struct TaskListView: View {
                     proxy.scrollTo(id)
                 }
             }
+            .onChange(of: list) {
+                showsCompleted = false
+            }
         }
     }
 
-    private func moveTask(withID id: String?, before target: TaskItem?, in tasks: [TaskItem]) -> Bool {
-        guard let id, let source = tasks.firstIndex(where: { $0.id.uuidString == id }) else { return false }
-        let destination = target.flatMap { target in tasks.firstIndex { $0.id == target.id } } ?? tasks.count
+    private func moveTask(withID id: String?, before target: TaskItem?) -> Bool {
+        guard let id, let source = openTasks.firstIndex(where: { $0.id.uuidString == id }) else { return false }
+        let destination = target.flatMap { target in openTasks.firstIndex { $0.id == target.id } } ?? openTasks.count
         guard destination != source, destination != source + 1 else { return true }
         withAnimation(.snappy) {
-            store.moveOpenTasks(in: project, from: IndexSet(integer: source), to: destination)
+            store.moveOpenTasks(in: list, from: IndexSet(integer: source), to: destination)
         }
         return true
+    }
+}
+
+struct CompletedDisclosure: View {
+    let count: Int
+    @Binding var isExpanded: Bool
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button {
+            withAnimation(.snappy) {
+                isExpanded.toggle()
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                Text("Completed · \(count)")
+            }
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.tertiary)
+            .padding(.horizontal, 10)
+            .frame(height: 32)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .padding(.top, 6)
+        .accessibilityAddTraits(isExpanded ? .isSelected : [])
     }
 }
 
@@ -95,31 +131,5 @@ struct DropIndicator: View {
             .padding(axis == .horizontal ? .horizontal : .vertical, 6)
             .offset(x: axis == .vertical ? -3 : 0, y: axis == .horizontal ? -1 : 0)
             .allowsHitTesting(false)
-    }
-}
-
-struct CompletedHeader: View {
-    let count: Int
-    @Binding var isExpanded: Bool
-
-    var body: some View {
-        Button {
-            withAnimation(.snappy) {
-                isExpanded.toggle()
-            }
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
-                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
-                Text("Completed · \(count)")
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 }

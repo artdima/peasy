@@ -19,7 +19,7 @@ struct NotchControllerTests {
         let store = TaskStore(context: container.mainContext)
         let project = try #require(store.createProject(named: "Home"))
         for index in 1...12 {
-            store.addTask("Task \(index)", to: project)
+            store.addTask("Task \(index)", to: .project(project.id))
             try await Task.sleep(for: .milliseconds(80))
         }
         try await Task.sleep(for: .milliseconds(400))

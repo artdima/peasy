@@ -13,7 +13,7 @@ final class NotchViewModel {
         case moveSelection(Int)
         case toggleSelected
         case editSelected
-        case selectProject(Int)
+        case selectList(Int)
         case focusNewTask
     }
 
@@ -23,6 +23,8 @@ final class NotchViewModel {
     }
 
     var draft = ""
+    var isPinned = false
+    var headerHeight: CGFloat = 34
     var selectedTaskID: UUID?
     var editingTaskID: UUID?
     var projectEditor: ProjectEditor?
@@ -43,6 +45,7 @@ final class NotchViewModel {
     }
 
     func resetInteraction() {
+        isPinned = false
         selectedTaskID = nil
         editingTaskID = nil
         projectEditor = nil

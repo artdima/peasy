@@ -25,9 +25,10 @@ enum Ordering {
         }
     }
 
-    static func move<Item: Orderable>(_ items: [Item], from source: IndexSet, to destination: Int) {
+    @discardableResult
+    static func move<Item: Orderable>(_ items: [Item], from source: IndexSet, to destination: Int) -> Bool {
         let moved = source.sorted().map { items[$0] }
-        guard !moved.isEmpty else { return }
+        guard !moved.isEmpty else { return false }
         var reordered = items.enumerated().filter { !source.contains($0.offset) }.map(\.element)
         let shift = source.filter { $0 < destination }.count
         let insertIndex = min(max(destination - shift, 0), reordered.count)
@@ -39,12 +40,12 @@ enum Ordering {
         for (item, order) in zip(moved, orders(count: moved.count, between: lower, and: upper)) {
             item.order = order
         }
+        return zip(reordered, reordered.dropFirst()).contains { $1.order - $0.order < minimumGap }
+    }
 
-        let isCrowded = zip(reordered, reordered.dropFirst()).contains { $1.order - $0.order < minimumGap }
-        if isCrowded {
-            for (index, item) in reordered.enumerated() {
-                item.order = Double(index)
-            }
+    static func renumber<Item: Orderable>(_ items: [Item]) {
+        for (index, item) in items.sorted(by: { $0.order < $1.order }).enumerated() {
+            item.order = Double(index)
         }
     }
 }

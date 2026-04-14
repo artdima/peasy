@@ -5,10 +5,6 @@ import SwiftData
 struct TaskStore {
     let context: ModelContext
 
-    init(context: ModelContext) {
-        self.context = context
-    }
-
     func projects() -> [Project] {
         let descriptor = FetchDescriptor<Project>(sortBy: [SortDescriptor(\.order), SortDescriptor(\.createdAt)])
         return (try? context.fetch(descriptor)) ?? []
@@ -18,10 +14,31 @@ struct TaskStore {
         projects().first { $0.id == id }
     }
 
+    func allTasks() -> [TaskItem] {
+        (try? context.fetch(FetchDescriptor<TaskItem>())) ?? []
+    }
+
+    func tasks(in list: TaskList) -> [TaskItem] {
+        TaskQueries.tasks(in: list, from: allTasks())
+    }
+
+    func openTasks(in list: TaskList) -> [TaskItem] {
+        TaskQueries.openTasks(in: list, from: allTasks())
+    }
+
+    func completedTasks(in list: TaskList) -> [TaskItem] {
+        TaskQueries.completedTasks(in: list, from: allTasks())
+    }
+
     @discardableResult
     func createProject(named name: String) -> Project? {
         guard let name = Self.clean(name) else { return nil }
-        let project = Project(name: name, order: (projects().last?.order ?? -1) + 1)
+        let existing = projects()
+        let project = Project(
+            name: name,
+            order: (existing.last?.order ?? -1) + 1,
+            colorHex: ProjectPalette.nextColor(excluding: existing.map(\.colorHex))
+        )
         context.insert(project)
         save()
         return project
@@ -39,25 +56,27 @@ struct TaskStore {
     }
 
     func moveProjects(from source: IndexSet, to destination: Int) {
-        Ordering.move(projects(), from: source, to: destination)
+        let projects = projects()
+        if Ordering.move(projects, from: source, to: destination) {
+            Ordering.renumber(projects)
+        }
         save()
     }
 
-    func openTasks(in project: Project) -> [TaskItem] {
-        sortedTasks(in: project).filter { !$0.isDone }
-    }
-
-    func completedTasks(in project: Project) -> [TaskItem] {
-        sortedTasks(in: project)
-            .filter(\.isDone)
-            .sorted { ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast) }
+    @discardableResult
+    func addTask(_ title: String, to list: TaskList) -> TaskItem? {
+        switch list {
+        case .today: addTask(title, project: nil, isToday: true)
+        case .inbox: addTask(title, project: nil, isToday: false)
+        case .project(let id): addTask(title, project: project(id: id), isToday: false)
+        }
     }
 
     @discardableResult
-    func addTask(_ title: String, to project: Project) -> TaskItem? {
+    func addTask(_ title: String, project: Project?, isToday: Bool) -> TaskItem? {
         guard let title = Self.clean(title) else { return nil }
-        let lastOrder = sortedTasks(in: project).last?.order ?? -1
-        let task = TaskItem(title: title, order: lastOrder + 1)
+        let lastOrder = allTasks().map(\.order).max() ?? -1
+        let task = TaskItem(title: title, order: lastOrder + 1, isToday: isToday)
         context.insert(task)
         task.project = project
         save()
@@ -67,6 +86,12 @@ struct TaskStore {
     func toggle(_ task: TaskItem) {
         task.isDone.toggle()
         task.completedAt = task.isDone ? Date() : nil
+        save()
+    }
+
+    func setToday(_ task: TaskItem, _ isToday: Bool) {
+        guard task.isToday != isToday else { return }
+        task.isToday = isToday
         save()
     }
 
@@ -81,20 +106,18 @@ struct TaskStore {
         save()
     }
 
-    func clearCompleted(in project: Project) {
-        for task in completedTasks(in: project) {
+    func clearCompleted(in list: TaskList) {
+        for task in completedTasks(in: list) {
             context.delete(task)
         }
         save()
     }
 
-    func moveOpenTasks(in project: Project, from source: IndexSet, to destination: Int) {
-        Ordering.move(openTasks(in: project), from: source, to: destination)
+    func moveOpenTasks(in list: TaskList, from source: IndexSet, to destination: Int) {
+        if Ordering.move(openTasks(in: list), from: source, to: destination) {
+            Ordering.renumber(allTasks())
+        }
         save()
-    }
-
-    private func sortedTasks(in project: Project) -> [TaskItem] {
-        (project.tasks ?? []).sorted { ($0.order, $0.createdAt) < ($1.order, $1.createdAt) }
     }
 
     private func save() {

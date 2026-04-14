@@ -2,10 +2,12 @@ import SwiftUI
 
 struct TaskRow: View {
     let task: TaskItem
+    let list: TaskList
     let store: TaskStore
     @Bindable var model: NotchViewModel
 
     @State private var isHovered = false
+    @State private var isChecking = false
     @State private var editedTitle = ""
     @FocusState private var isEditorFocused: Bool
 
@@ -13,19 +15,14 @@ struct TaskRow: View {
     private var isSelected: Bool { model.selectedTaskID == task.id }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Button(action: toggle) {
-                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 15))
-                    .foregroundStyle(task.isDone ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                    .contentTransition(.symbolEffect(.replace))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
+        HStack(spacing: 8) {
+            CheckRing(color: accent, isOn: task.isDone || isChecking, action: toggle)
+                .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
 
             if isEditing {
                 TextField("Task", text: $editedTitle)
                     .textFieldStyle(.plain)
+                    .font(.system(size: 14))
                     .focused($isEditorFocused)
                     .onSubmit(commitEdit)
                     .onExitCommand(perform: cancelEdit)
@@ -40,18 +37,27 @@ struct TaskRow: View {
                     }
             } else {
                 Text(task.title)
-                    .strikethrough(task.isDone)
-                    .foregroundStyle(task.isDone ? .secondary : .primary)
-                    .lineLimit(2)
+                    .font(.system(size: 14))
+                    .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture(count: 2, perform: startEditing)
             }
+
+            if !task.isDone, let meta {
+                meta
+                    .font(.system(size: 12))
+                    .foregroundStyle(PanelStyle.tertiary)
+                    .lineLimit(1)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
+        .padding(.leading, 4)
+        .padding(.trailing, 8)
+        .frame(minHeight: 38)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.white.opacity(isSelected ? 0.12 : isHovered ? 0.07 : 0))
+            .white.opacity(isSelected ? 0.08 : isHovered ? 0.05 : 0),
+            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
         )
         .contentShape(Rectangle())
         .simultaneousGesture(TapGesture().onEnded { model.selectedTaskID = task.id })
@@ -60,15 +66,45 @@ struct TaskRow: View {
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .contextMenu {
             Button(task.isDone ? LocalizedStringKey("Mark as Not Done") : "Mark as Done", action: toggle)
+            Button(task.isToday ? LocalizedStringKey("Remove from Today") : "Add to Today") {
+                withAnimation(.snappy) {
+                    store.setToday(task, !task.isToday)
+                }
+            }
             Button("Edit", action: startEditing)
             Divider()
             Button("Delete", role: .destructive, action: delete)
         }
     }
 
+    private var accent: Color {
+        Color(hex: task.project?.colorHex ?? ProjectPalette.inbox)
+    }
+
+    private var meta: Text? {
+        switch list {
+        case .today:
+            task.project.map { Text(verbatim: $0.name) } ?? Text("Inbox")
+        case .inbox, .project:
+            task.isToday ? Text("Today") : nil
+        }
+    }
+
     private func toggle() {
-        withAnimation(.snappy) {
-            store.toggle(task)
+        if task.isDone {
+            withAnimation(.snappy) {
+                store.toggle(task)
+            }
+            return
+        }
+        guard !isChecking else { return }
+        isChecking = true
+        Task {
+            try? await Task.sleep(for: .milliseconds(520))
+            withAnimation(.snappy) {
+                store.toggle(task)
+            }
+            isChecking = false
         }
     }
 
@@ -96,5 +132,35 @@ struct TaskRow: View {
         withAnimation(.snappy) {
             store.delete(task)
         }
+    }
+}
+
+struct CheckRing: View {
+    let color: Color
+    let isOn: Bool
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(isOn ? 1 : isHovered ? 0.24 : 0))
+                Circle()
+                    .strokeBorder(color, lineWidth: 1.5)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 8, weight: .heavy))
+                    .foregroundStyle(.black)
+                    .opacity(isOn ? 1 : 0)
+                    .scaleEffect(isOn ? 1 : 0.6)
+            }
+            .frame(width: 18, height: 18)
+            .frame(width: 30, height: 30)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.18), value: isOn)
     }
 }

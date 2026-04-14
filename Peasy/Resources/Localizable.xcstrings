@@ -1,12 +1,74 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld tasks" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld task"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tasks"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задача"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задачи"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задач"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задачи"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "About Peasy" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "О Peasy"
+          }
+        }
+      }
+    },
+    "Add to Today" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить в «Сегодня»"
           }
         }
       }
@@ -121,6 +183,16 @@
         }
       }
     },
+    "Inbox" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Входящие"
+          }
+        }
+      }
+    },
     "Little tasks, big growth." : {
       "shouldTranslate" : false
     },
@@ -204,12 +276,12 @@
         }
       }
     },
-    "No tasks yet" : {
+    "New task for today" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Задач пока нет"
+            "value" : "Новая задача на сегодня"
           }
         }
       }
@@ -274,12 +346,12 @@
         }
       }
     },
-    "Project" : {
+    "Pin panel" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Проект"
+            "value" : "Закрепить панель"
           }
         }
       }
@@ -294,22 +366,22 @@
         }
       }
     },
-    "Projects keep related tasks together." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проекты собирают связанные задачи вместе."
-          }
-        }
-      }
-    },
     "Quit Peasy" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Завершить Peasy"
+          }
+        }
+      }
+    },
+    "Remove from Today" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать из «Сегодня»"
           }
         }
       }
@@ -364,22 +436,22 @@
         }
       }
     },
-    "Start with a project" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Начните с проекта"
-          }
-        }
-      }
-    },
     "Task" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Задача"
+          }
+        }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня"
           }
         }
       }

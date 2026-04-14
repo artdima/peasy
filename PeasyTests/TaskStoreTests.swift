@@ -13,82 +13,111 @@ struct TaskStoreTests {
         store = TaskStore(context: container.mainContext)
     }
 
-    @Test func projectsKeepCreationOrder() throws {
+    @Test func projectsKeepCreationOrderAndGetDistinctColors() throws {
         store.createProject(named: "Home")
         store.createProject(named: "  Work  ")
-        #expect(store.projects().map(\.name) == ["Home", "Work"])
+        let projects = store.projects()
+        #expect(projects.map(\.name) == ["Home", "Work"])
+        #expect(projects.map(\.colorHex) == Array(ProjectPalette.colors.prefix(2)))
     }
 
     @Test func emptyNamesAreIgnored() throws {
         #expect(store.createProject(named: "   ") == nil)
-        let project = try #require(store.createProject(named: "Home"))
-        #expect(store.addTask("\n", to: project) == nil)
-        #expect(store.openTasks(in: project).isEmpty)
+        #expect(store.addTask("\n", to: .inbox) == nil)
+        #expect(store.allTasks().isEmpty)
     }
 
     @Test func newTasksGoToTheEnd() throws {
         let project = try #require(store.createProject(named: "Home"))
-        store.addTask("One", to: project)
-        store.addTask("Two", to: project)
-        store.addTask("Three", to: project)
-        #expect(store.openTasks(in: project).map(\.title) == ["One", "Two", "Three"])
+        for title in ["One", "Two", "Three"] {
+            store.addTask(title, to: .project(project.id))
+        }
+        #expect(store.openTasks(in: .project(project.id)).map(\.title) == ["One", "Two", "Three"])
+    }
+
+    @Test func todayCollectsFlaggedTasksFromEveryList() throws {
+        let work = try #require(store.createProject(named: "Work"))
+        let release = try #require(store.addTask("Release", to: .project(work.id)))
+        store.addTask("Backlog", to: .project(work.id))
+        store.addTask("Mail", to: .today)
+        store.setToday(release, true)
+
+        #expect(store.openTasks(in: .today).map(\.title) == ["Release", "Mail"])
+        #expect(store.openTasks(in: .inbox).map(\.title) == ["Mail"])
+        #expect(store.openTasks(in: .project(work.id)).map(\.title) == ["Release", "Backlog"])
+    }
+
+    @Test func todayProgressCountsOnlyTodayTasks() throws {
+        let done = try #require(store.addTask("Done", to: .today))
+        store.addTask("Open", to: .today)
+        store.addTask("Someday", to: .inbox)
+        store.toggle(done)
+
+        let progress = TaskQueries.todayProgress(from: store.allTasks())
+        #expect(progress.done == 1)
+        #expect(progress.total == 2)
     }
 
     @Test func toggleMovesTaskToCompleted() throws {
-        let project = try #require(store.createProject(named: "Home"))
-        let task = try #require(store.addTask("One", to: project))
+        let task = try #require(store.addTask("One", to: .inbox))
         store.toggle(task)
-        #expect(task.isDone)
         #expect(task.completedAt != nil)
-        #expect(store.openTasks(in: project).isEmpty)
-        #expect(store.completedTasks(in: project).map(\.title) == ["One"])
+        #expect(store.openTasks(in: .inbox).isEmpty)
+        #expect(store.completedTasks(in: .inbox).map(\.title) == ["One"])
 
         store.toggle(task)
         #expect(task.completedAt == nil)
     }
 
     @Test func movingTaskChangesOnlyItsOrder() throws {
-        let project = try #require(store.createProject(named: "Home"))
         for title in ["A", "B", "C"] {
-            store.addTask(title, to: project)
+            store.addTask(title, to: .inbox)
         }
-        store.moveOpenTasks(in: project, from: IndexSet(integer: 2), to: 0)
-        #expect(store.openTasks(in: project).map(\.title) == ["C", "A", "B"])
+        store.moveOpenTasks(in: .inbox, from: IndexSet(integer: 2), to: 0)
+        #expect(store.openTasks(in: .inbox).map(\.title) == ["C", "A", "B"])
 
-        store.moveOpenTasks(in: project, from: IndexSet(integer: 0), to: 2)
-        #expect(store.openTasks(in: project).map(\.title) == ["A", "C", "B"])
+        store.moveOpenTasks(in: .inbox, from: IndexSet(integer: 0), to: 2)
+        #expect(store.openTasks(in: .inbox).map(\.title) == ["A", "C", "B"])
     }
 
-    @Test func repeatedMovesStayOrdered() throws {
-        let project = try #require(store.createProject(named: "Home"))
+    @Test func repeatedMovesRenumberWithoutBreakingOtherLists() throws {
+        let work = try #require(store.createProject(named: "Work"))
         for title in ["A", "B", "C"] {
-            store.addTask(title, to: project)
+            store.addTask(title, to: .inbox)
         }
+        store.addTask("W", to: .project(work.id))
         for _ in 0..<80 {
-            store.moveOpenTasks(in: project, from: IndexSet(integer: 2), to: 1)
+            store.moveOpenTasks(in: .inbox, from: IndexSet(integer: 2), to: 1)
         }
-        #expect(store.openTasks(in: project).count == 3)
-        let orders = store.openTasks(in: project).map(\.order)
+        let orders = store.openTasks(in: .inbox).map(\.order)
         #expect(orders == orders.sorted())
-        #expect(Set(orders).count == 3)
+        #expect(Set(store.allTasks().map(\.order)).count == 4)
+        #expect(store.openTasks(in: .project(work.id)).map(\.title) == ["W"])
     }
 
     @Test func clearCompletedKeepsOpenTasks() throws {
-        let project = try #require(store.createProject(named: "Home"))
-        let done = try #require(store.addTask("Done", to: project))
-        store.addTask("Open", to: project)
+        let done = try #require(store.addTask("Done", to: .inbox))
+        store.addTask("Open", to: .inbox)
         store.toggle(done)
-        store.clearCompleted(in: project)
-        #expect(store.openTasks(in: project).map(\.title) == ["Open"])
-        #expect(store.completedTasks(in: project).isEmpty)
+        store.clearCompleted(in: .inbox)
+        #expect(store.openTasks(in: .inbox).map(\.title) == ["Open"])
+        #expect(store.completedTasks(in: .inbox).isEmpty)
     }
 
     @Test func deletingProjectRemovesTasks() throws {
         let project = try #require(store.createProject(named: "Home"))
-        store.addTask("One", to: project)
+        store.addTask("One", to: .project(project.id))
         store.delete(project)
         #expect(store.projects().isEmpty)
         #expect(try store.context.fetchCount(FetchDescriptor<TaskItem>()) == 0)
+    }
+
+    @Test func listsSurviveStorage() {
+        let id = UUID()
+        for list in [TaskList.today, .inbox, .project(id)] {
+            #expect(TaskList(storageValue: list.storageValue) == list)
+        }
+        #expect(TaskList(storageValue: "garbage") == .today)
     }
 
     @Test func orderingFillsGaps() {
