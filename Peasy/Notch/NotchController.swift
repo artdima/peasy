@@ -12,18 +12,24 @@ final class NotchController {
     private let model: NotchViewModel
     private var actions: NotchActions
     private let modelContainer: ModelContainer
+    private let cloud = CloudWindow()
     private var observers: [NSObjectProtocol] = []
     private var monitors: [Any] = []
     private var displayPreference = DisplayPreference.current
-    private var openDelay = OpenDelay.current
     private var focusReturnTask: Task<Void, Never>?
+    private var hoverOpenTask: Task<Void, Never>?
+    private var hoverCancelTask: Task<Void, Never>?
+    private var collapseSoonTask: Task<Void, Never>?
+    private var celebrationTask: Task<Void, Never>?
 
     init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
         self.modelContainer = modelContainer
         self.actions = actions
-        presenter = NotchPresenter(configuration: Self.configuration(openDelay: OpenDelay.current))
+        presenter = NotchPresenter(configuration: Self.configuration(reserve: model.island.reserve, pinned: false))
         self.actions.collapse = { [weak self] in self?.collapse() }
+        model.onFocusStarted = { [weak self] in self?.collapseSoon() }
+        model.onCelebration = { [weak self] in self?.celebrationStarted() }
 
         presenter.preferredScreenID = preferredScreenID()
         installPanel()
@@ -42,6 +48,7 @@ final class NotchController {
         startMonitors()
         observePhase()
         observePin()
+        observeIsland()
     }
 
     var isExpanded: Bool {
@@ -61,18 +68,20 @@ final class NotchController {
         monitors.removeAll()
         observers.forEach(NotificationCenter.default.removeObserver)
         observers.removeAll()
+        cloud.hide()
         presenter.uninstall()
     }
 
-    private static func configuration(openDelay: OpenDelay) -> NotchConfiguration {
+    private static func configuration(reserve: CGFloat, pinned: Bool) -> NotchConfiguration {
         NotchConfiguration(
             expandedSize: panelSize,
-            collapsedWidth: .wrapCutout(reserve: 0),
+            collapsedWidth: .wrapCutout(reserve: reserve),
             expandedTopCornerRadius: 16,
             expandedBottomCornerRadius: 30,
             expandedContentInsetsOverride: EdgeInsets(),
             expandedTopReserve: .none,
-            hoverOpenDelay: openDelay.seconds,
+            expandsOnHover: false,
+            collapsesOnPointerExit: !pinned,
             collapsesOnOutsideClick: false
         )
     }
@@ -85,8 +94,10 @@ final class NotchController {
         let model = model
         let actions = actions
         let modelContainer = modelContainer
+        let presenter = presenter
         presenter.install {
-            EmptyView()
+            IslandView(presenter: presenter, model: model)
+                .modelContainer(modelContainer)
         } expanded: {
             NotchContentView(model: model, actions: actions)
                 .modelContainer(modelContainer)
@@ -129,7 +140,31 @@ final class NotchController {
         }
     }
 
+    private func observeIsland() {
+        withObservationTracking {
+            _ = model.island
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.islandDidChange()
+                self?.observeIsland()
+            }
+        }
+    }
+
+    private func islandDidChange() {
+        if model.island.focusTitle == nil {
+            cloud.hide()
+        }
+        let width = NotchCollapsedWidth.wrapCutout(reserve: model.island.reserve)
+        guard presenter.configuration.collapsedWidth != width else { return }
+        withAnimation(.smooth(duration: 0.46)) {
+            presenter.configuration.collapsedWidth = width
+        }
+    }
+
     private func phaseDidChange() {
+        cloud.hide()
+        cancelHoverOpen(immediately: true)
         guard presenter.phase == .collapsed else { return }
         model.resetInteraction()
         returnKeyboardFocus()
@@ -141,6 +176,29 @@ final class NotchController {
         }
         if model.acceptsNavigationKeys {
             model.focusNewTask()
+        }
+    }
+
+    private func collapseSoon() {
+        guard !model.isPinned else { return }
+        collapseSoonTask?.cancel()
+        collapseSoonTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(280))
+            guard !Task.isCancelled, let self, !model.isPinned else { return }
+            collapse()
+        }
+    }
+
+    private func celebrationStarted() {
+        if presenter.phase == .expanded, !model.isPinned {
+            collapse()
+        }
+        guard let id = model.celebration?.id else { return }
+        celebrationTask?.cancel()
+        celebrationTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3.4))
+            guard !Task.isCancelled else { return }
+            self?.model.endCelebration(id)
         }
     }
 
@@ -162,13 +220,6 @@ final class NotchController {
             displayPreference = preference
             presenter.preferredScreenID = preferredScreenID()
         }
-        let delay = OpenDelay.current
-        if delay != openDelay {
-            openDelay = delay
-            presenter.uninstall()
-            presenter.configuration = Self.configuration(openDelay: delay)
-            installPanel()
-        }
     }
 
     private func preferredScreenID() -> String? {
@@ -184,14 +235,80 @@ final class NotchController {
             MainActor.assumeIsolated { self?.handleOutsideClick() }
         }
         let moves = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
-            MainActor.assumeIsolated { self?.followPointer() }
+            MainActor.assumeIsolated { self?.pointerMoved() }
         }
-        monitors = [keys, outsideClicks, moves].compactMap { $0 }
+        let localMoves = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
+            MainActor.assumeIsolated { self?.pointerMoved() }
+            return event
+        }
+        monitors = [keys, outsideClicks, moves, localMoves].compactMap { $0 }
     }
 
     private func handleOutsideClick() {
         if presenter.phase == .expanded, !model.isPinned {
             collapse()
+        }
+    }
+
+    private func pointerMoved() {
+        followPointer()
+        guard presenter.phase == .collapsed, let panel else {
+            cloud.hide()
+            cancelHoverOpen(immediately: true)
+            return
+        }
+        let location = NSEvent.mouseLocation
+        let pill = presenter.interactiveRect(in: panel.frame)
+        if let title = model.island.focusTitle, let colorHex = model.island.focusColorHex {
+            let buddyZone = CGRect(
+                x: pill.minX,
+                y: pill.minY,
+                width: presenter.collapsedGutterWidth + presenter.configuration.collapsedHitPadding,
+                height: pill.height
+            )
+            if NotchGeometry.contains(buddyZone, location) {
+                cancelHoverOpen(immediately: true)
+                cloud.show(title: title, colorHex: colorHex, below: pill)
+                return
+            }
+        }
+        cloud.hide()
+        if NotchGeometry.contains(pill, location), PanelSettings.flag(PanelSettings.expandsOnHoverKey) {
+            scheduleHoverOpen()
+        } else {
+            cancelHoverOpen(immediately: false)
+        }
+    }
+
+    private func scheduleHoverOpen() {
+        hoverCancelTask?.cancel()
+        hoverCancelTask = nil
+        guard hoverOpenTask == nil else { return }
+        hoverOpenTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(OpenDelay.current.seconds))
+            guard !Task.isCancelled, let self else { return }
+            hoverOpenTask = nil
+            if presenter.phase == .collapsed {
+                presenter.expand(reason: .hover)
+            }
+        }
+    }
+
+    private func cancelHoverOpen(immediately: Bool) {
+        if immediately {
+            hoverOpenTask?.cancel()
+            hoverOpenTask = nil
+            hoverCancelTask?.cancel()
+            hoverCancelTask = nil
+            return
+        }
+        guard hoverOpenTask != nil, hoverCancelTask == nil else { return }
+        hoverCancelTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled, let self else { return }
+            hoverOpenTask?.cancel()
+            hoverOpenTask = nil
+            hoverCancelTask = nil
         }
     }
 

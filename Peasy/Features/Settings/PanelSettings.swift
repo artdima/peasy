@@ -28,4 +28,11 @@ enum OpenDelay: Int, CaseIterable, Identifiable {
 
 enum PanelSettings {
     static let showsCompletedKey = "showsCompletedTasks"
+    static let showsTodayIndicatorKey = "showsTodayIndicator"
+    static let showsBuddyKey = "showsBuddy"
+    static let expandsOnHoverKey = "expandsOnHover"
+
+    static func flag(_ key: String) -> Bool {
+        UserDefaults.standard.object(forKey: key) as? Bool ?? true
+    }
 }

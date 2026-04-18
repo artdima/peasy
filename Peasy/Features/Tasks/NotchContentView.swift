@@ -15,9 +15,19 @@ struct NotchContentView: View {
         let store = TaskStore(context: modelContext)
         let list = selectedList
         let openTasks = TaskQueries.openTasks(in: list, from: tasks)
+        let progress = TaskQueries.todayProgress(from: tasks)
+        let focusTask = tasks.first { $0.id == model.focusedTaskID && !$0.isDone }
         VStack(spacing: 0) {
-            PanelHeader(model: model)
-                .frame(height: model.headerHeight)
+            PanelHeader(
+                model: model,
+                focusTask: focusTask,
+                growth: IslandMode.growth(done: progress.done, total: progress.total)
+            ) {
+                if let focusTask {
+                    goToTask(focusTask)
+                }
+            }
+            .frame(height: model.headerHeight)
 
             HStack(alignment: .top, spacing: 12) {
                 ProjectSidebar(
@@ -125,11 +135,18 @@ struct NotchContentView: View {
             withAnimation(.snappy) {
                 store.toggle(open[index])
             }
+            model.taskCompleted(open[index])
             let remaining = store.openTasks(in: selectedList)
             model.selectedTaskID = remaining.isEmpty ? nil : remaining[min(index, remaining.count - 1)].id
         case .editSelected:
             model.editingTaskID = model.selectedTaskID
         }
+    }
+
+    private func goToTask(_ task: TaskItem) {
+        let list: TaskList = task.isToday ? .today : task.project.map { .project($0.id) } ?? .inbox
+        select(list)
+        model.selectedTaskID = task.id
     }
 
     private func select(_ list: TaskList) {

@@ -22,6 +22,14 @@ final class NotchViewModel {
         let command: Command
     }
 
+    struct Celebration: Equatable {
+        let id = UUID()
+        let title: String
+        let colorHex: String
+    }
+
+    static let focusKey = "focusedTaskID"
+
     var draft = ""
     var isPinned = false
     var headerHeight: CGFloat = 34
@@ -30,6 +38,14 @@ final class NotchViewModel {
     var projectEditor: ProjectEditor?
     var projectPendingDeletion: UUID?
     private(set) var lastCommand: CommandEvent?
+    private(set) var focusedTaskID: UUID? = UserDefaults.standard.string(forKey: NotchViewModel.focusKey)
+        .flatMap(UUID.init(uuidString:))
+    private(set) var celebration: Celebration?
+    var addedConfirmation: String?
+    var island: IslandMode = .plain
+
+    @ObservationIgnored var onFocusStarted: () -> Void = {}
+    @ObservationIgnored var onCelebration: () -> Void = {}
     private(set) var newTaskFocusRequest = 0
 
     var acceptsNavigationKeys: Bool {
@@ -42,6 +58,34 @@ final class NotchViewModel {
 
     func focusNewTask() {
         newTaskFocusRequest += 1
+    }
+
+    func startFocus(on task: TaskItem) {
+        celebration = nil
+        setFocus(task.id)
+        onFocusStarted()
+    }
+
+    func stopFocus() {
+        setFocus(nil)
+    }
+
+    func taskCompleted(_ task: TaskItem) {
+        guard task.isDone, task.id == focusedTaskID else { return }
+        setFocus(nil)
+        celebration = Celebration(title: task.title, colorHex: task.project?.colorHex ?? ProjectPalette.inbox)
+        onCelebration()
+    }
+
+    func endCelebration(_ id: UUID) {
+        if celebration?.id == id {
+            celebration = nil
+        }
+    }
+
+    private func setFocus(_ id: UUID?) {
+        focusedTaskID = id
+        UserDefaults.standard.set(id?.uuidString, forKey: Self.focusKey)
     }
 
     func resetInteraction() {

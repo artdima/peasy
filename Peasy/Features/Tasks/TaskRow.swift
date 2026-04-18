@@ -13,10 +13,11 @@ struct TaskRow: View {
 
     private var isEditing: Bool { model.editingTaskID == task.id }
     private var isSelected: Bool { model.selectedTaskID == task.id }
+    private var isFocused: Bool { model.focusedTaskID == task.id && !task.isDone }
 
     var body: some View {
         HStack(spacing: 8) {
-            CheckRing(color: accent, isOn: task.isDone || isChecking, action: toggle)
+            CheckRing(color: accent, isOn: task.isDone || isChecking, isFocused: isFocused, action: toggle)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
 
             if isEditing {
@@ -45,18 +46,42 @@ struct TaskRow: View {
                     .onTapGesture(count: 2, perform: startEditing)
             }
 
-            if !task.isDone, let meta {
-                meta
+            if !task.isDone {
+                ZStack(alignment: .trailing) {
+                    Group {
+                        if isFocused {
+                            Text("In focus")
+                                .foregroundStyle(PanelStyle.primary)
+                        } else if let meta {
+                            meta
+                                .foregroundStyle(PanelStyle.tertiary)
+                        }
+                    }
                     .font(.system(size: 12))
-                    .foregroundStyle(PanelStyle.tertiary)
                     .lineLimit(1)
+                    .padding(.trailing, 2)
+                    .opacity(isHovered ? 0 : 1)
+
+                    RowActionButton(
+                        systemImage: isFocused ? "stop.fill" : "play.fill",
+                        label: isFocused ? "Stop focus" : "Focus on task"
+                    ) {
+                        if isFocused {
+                            model.stopFocus()
+                        } else {
+                            model.startFocus(on: task)
+                        }
+                    }
+                    .opacity(isHovered ? 1 : 0)
+                }
+                .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
             }
         }
         .padding(.leading, 4)
         .padding(.trailing, 8)
         .frame(minHeight: 38)
         .background(
-            .white.opacity(isSelected ? 0.08 : isHovered ? 0.05 : 0),
+            .white.opacity(isSelected || isFocused ? 0.08 : isHovered ? 0.05 : 0),
             in: RoundedRectangle(cornerRadius: 9, style: .continuous)
         )
         .contentShape(Rectangle())
@@ -104,6 +129,7 @@ struct TaskRow: View {
             withAnimation(.snappy) {
                 store.toggle(task)
             }
+            model.taskCompleted(task)
             isChecking = false
         }
     }
@@ -138,6 +164,7 @@ struct TaskRow: View {
 struct CheckRing: View {
     let color: Color
     let isOn: Bool
+    var isFocused = false
     let action: () -> Void
 
     @State private var isHovered = false
@@ -156,11 +183,39 @@ struct CheckRing: View {
                     .scaleEffect(isOn ? 1 : 0.6)
             }
             .frame(width: 18, height: 18)
+            .background {
+                Circle()
+                    .fill(color.opacity(isFocused ? 0.28 : 0))
+                    .frame(width: 24, height: 24)
+            }
             .frame(width: 30, height: 30)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
         .animation(.easeOut(duration: 0.18), value: isOn)
+    }
+}
+
+struct RowActionButton: View {
+    let systemImage: String
+    let label: LocalizedStringKey
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.secondary)
+                .frame(width: 24, height: 24)
+                .background(.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .help(label)
+        .accessibilityLabel(label)
     }
 }

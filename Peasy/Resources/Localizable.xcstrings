@@ -73,6 +73,16 @@
         }
       }
     },
+    "Added" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавлено"
+          }
+        }
+      }
+    },
     "All done" : {
       "localizations" : {
         "ru" : {
@@ -173,12 +183,42 @@
         }
       }
     },
+    "Done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        }
+      }
+    },
     "Edit" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изменить"
+          }
+        }
+      }
+    },
+    "Focus on task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Взять в фокус"
+          }
+        }
+      }
+    },
+    "In focus" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В фокусе"
           }
         }
       }
@@ -432,6 +472,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показывать на"
+          }
+        }
+      }
+    },
+    "Stop focus" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снять с фокуса"
           }
         }
       }
