@@ -26,6 +26,33 @@ enum OpenDelay: Int, CaseIterable, Identifiable {
     }
 }
 
+enum PanelLayout: String, CaseIterable, Identifiable {
+    case vertical
+    case horizontal
+
+    static let storageKey = "panelLayout"
+
+    static var current: PanelLayout {
+        UserDefaults.standard.string(forKey: storageKey).flatMap(PanelLayout.init(rawValue:)) ?? .vertical
+    }
+
+    var id: String { rawValue }
+
+    var panelSize: CGSize {
+        switch self {
+        case .vertical: CGSize(width: 680, height: 452)
+        case .horizontal: CGSize(width: 560, height: 372)
+        }
+    }
+
+    var bottomCornerRadius: CGFloat {
+        switch self {
+        case .vertical: 30
+        case .horizontal: 28
+        }
+    }
+}
+
 enum PanelSettings {
     static let showsCompletedKey = "showsCompletedTasks"
     static let showsTodayIndicatorKey = "showsTodayIndicator"

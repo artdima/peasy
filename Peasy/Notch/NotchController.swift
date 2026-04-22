@@ -6,8 +6,6 @@ import SwiftUI
 
 @MainActor
 final class NotchController {
-    static let panelSize = CGSize(width: 680, height: 452)
-
     private let presenter: NotchPresenter
     private let model: NotchViewModel
     private var actions: NotchActions
@@ -16,6 +14,7 @@ final class NotchController {
     private var observers: [NSObjectProtocol] = []
     private var monitors: [Any] = []
     private var displayPreference = DisplayPreference.current
+    private var layout = PanelLayout.current
     private var focusReturnTask: Task<Void, Never>?
     private var hoverOpenTask: Task<Void, Never>?
     private var hoverCancelTask: Task<Void, Never>?
@@ -26,7 +25,9 @@ final class NotchController {
         self.model = model
         self.modelContainer = modelContainer
         self.actions = actions
-        presenter = NotchPresenter(configuration: Self.configuration(reserve: model.island.reserve, pinned: false))
+        presenter = NotchPresenter(
+            configuration: Self.configuration(layout: PanelLayout.current, reserve: model.island.reserve, pinned: false)
+        )
         self.actions.collapse = { [weak self] in self?.collapse() }
         model.onFocusStarted = { [weak self] in self?.collapseSoon() }
         model.onCelebration = { [weak self] in self?.celebrationStarted() }
@@ -72,12 +73,12 @@ final class NotchController {
         presenter.uninstall()
     }
 
-    private static func configuration(reserve: CGFloat, pinned: Bool) -> NotchConfiguration {
+    private static func configuration(layout: PanelLayout, reserve: CGFloat, pinned: Bool) -> NotchConfiguration {
         NotchConfiguration(
-            expandedSize: panelSize,
+            expandedSize: layout.panelSize,
             collapsedWidth: .wrapCutout(reserve: reserve),
             expandedTopCornerRadius: 16,
-            expandedBottomCornerRadius: 30,
+            expandedBottomCornerRadius: layout.bottomCornerRadius,
             expandedContentInsetsOverride: EdgeInsets(),
             expandedTopReserve: .none,
             expandsOnHover: false,
@@ -219,6 +220,14 @@ final class NotchController {
         if preference != displayPreference {
             displayPreference = preference
             presenter.preferredScreenID = preferredScreenID()
+        }
+        let layout = PanelLayout.current
+        if layout != self.layout {
+            self.layout = layout
+            collapse()
+            presenter.uninstall()
+            presenter.configuration = Self.configuration(layout: layout, reserve: model.island.reserve, pinned: false)
+            installPanel()
         }
     }
 

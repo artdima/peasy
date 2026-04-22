@@ -10,6 +10,7 @@ struct NotchContentView: View {
     private var projects: [Project]
     @Query private var tasks: [TaskItem]
     @AppStorage(TaskList.storageKey) private var selectedListValue = TaskList.today.storageValue
+    @AppStorage(PanelLayout.storageKey) private var layout = PanelLayout.vertical
 
     var body: some View {
         let store = TaskStore(context: modelContext)
@@ -29,44 +30,12 @@ struct NotchContentView: View {
             }
             .frame(height: model.headerHeight)
 
-            HStack(alignment: .top, spacing: 12) {
-                ProjectSidebar(
-                    projects: projects,
-                    tasks: tasks,
-                    selection: list,
-                    store: store,
-                    model: model,
-                    onSelect: select,
-                    onDelete: { delete($0, store: store) }
-                )
-                .frame(width: 172)
-
-                Rectangle()
-                    .fill(PanelStyle.separator)
-                    .frame(width: 1)
-
-                TaskSection(
-                    list: list,
-                    title: title(for: list),
-                    openTasks: openTasks,
-                    completedTasks: TaskQueries.completedTasks(in: list, from: tasks),
-                    projects: projects,
-                    store: store,
-                    model: model,
-                    onDeleteProject: { delete($0, store: store) }
-                )
-                .background {
-                    Button("Delete Task") {
-                        deleteSelectedTask(store: store)
-                    }
-                    .keyboardShortcut(.delete, modifiers: .command)
-                    .disabled(model.selectedTaskID == nil || model.editingTaskID != nil)
-                    .opacity(0)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-                }
+            switch layout {
+            case .vertical:
+                verticalBody(list: list, openTasks: openTasks, store: store)
+            case .horizontal:
+                horizontalBody(list: list, openTasks: openTasks, store: store)
             }
-            .padding(EdgeInsets(top: 10, leading: 14, bottom: 14, trailing: 14))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .foregroundStyle(PanelStyle.primary)
@@ -86,6 +55,92 @@ struct NotchContentView: View {
                 perform(event.command, store: store)
             }
         }
+    }
+
+    private func verticalBody(list: TaskList, openTasks: [TaskItem], store: TaskStore) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            ProjectSidebar(
+                projects: projects,
+                tasks: tasks,
+                selection: list,
+                store: store,
+                model: model,
+                onSelect: select,
+                onDelete: { delete($0, store: store) }
+            )
+            .frame(width: 172)
+
+            Rectangle()
+                .fill(PanelStyle.separator)
+                .frame(width: 1)
+
+            TaskSection(
+                list: list,
+                title: title(for: list),
+                openTasks: openTasks,
+                completedTasks: TaskQueries.completedTasks(in: list, from: tasks),
+                projects: projects,
+                store: store,
+                model: model,
+                onDeleteProject: { delete($0, store: store) }
+            )
+            .background(deleteShortcut(store: store))
+        }
+        .padding(EdgeInsets(top: 10, leading: 14, bottom: 14, trailing: 14))
+    }
+
+    private func horizontalBody(list: TaskList, openTasks: [TaskItem], store: TaskStore) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ProjectTabs(
+                projects: projects,
+                tasks: tasks,
+                selection: list,
+                store: store,
+                model: model,
+                onSelect: select,
+                onDelete: { delete($0, store: store) }
+            )
+            .padding(.bottom, 8)
+
+            if let pendingID = model.projectPendingDeletion,
+               let pending = projects.first(where: { $0.id == pendingID }) {
+                DeleteProjectConfirmation(project: pending) {
+                    model.projectPendingDeletion = nil
+                } onConfirm: {
+                    model.projectPendingDeletion = nil
+                    delete(pending, store: store)
+                }
+                .padding(.bottom, 8)
+            }
+
+            TaskListView(
+                list: list,
+                openTasks: openTasks,
+                completedTasks: TaskQueries.completedTasks(in: list, from: tasks),
+                store: store,
+                model: model
+            )
+
+            NewTaskField(model: model, placeholder: list == .today ? "New task for today" : "New task") { title in
+                withAnimation(.snappy) {
+                    _ = store.addTask(title, to: list)
+                }
+            }
+            .padding(.top, 6)
+        }
+        .background(deleteShortcut(store: store))
+        .padding(EdgeInsets(top: 6, leading: 14, bottom: 12, trailing: 14))
+    }
+
+    private func deleteShortcut(store: TaskStore) -> some View {
+        Button("Delete Task") {
+            deleteSelectedTask(store: store)
+        }
+        .keyboardShortcut(.delete, modifiers: .command)
+        .disabled(model.selectedTaskID == nil || model.editingTaskID != nil)
+        .opacity(0)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     private var selectedList: TaskList {
