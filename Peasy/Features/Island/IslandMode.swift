@@ -13,7 +13,7 @@ enum IslandMode: Equatable {
         case .indicator: 46
         case .focus: 60
         case .celebrating: 70
-        case .added: 80
+        case .added: 92
         }
     }
 

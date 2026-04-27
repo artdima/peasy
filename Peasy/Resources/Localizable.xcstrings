@@ -63,6 +63,16 @@
         }
       }
     },
+    "Add task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить задачу"
+          }
+        }
+      }
+    },
     "Add to Today" : {
       "localizations" : {
         "ru" : {
@@ -502,6 +512,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сегодня"
+          }
+        }
+      }
+    },
+    "What needs to be done?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что нужно сделать?"
           }
         }
       }

@@ -87,6 +87,7 @@ struct IslandView: View {
         case .added:
             Text("Added")
                 .font(.system(size: 12, weight: .semibold))
+                .lineLimit(1)
         }
     }
 }

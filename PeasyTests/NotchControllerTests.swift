@@ -13,6 +13,7 @@ struct NotchControllerTests {
         defer { controller.shutdown() }
 
         controller.expand()
+        model.isPinned = true
         try await Task.sleep(for: .milliseconds(600))
         #expect(controller.isExpanded)
 
