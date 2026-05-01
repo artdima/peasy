@@ -294,7 +294,7 @@ final class NotchController {
         hoverCancelTask = nil
         guard hoverOpenTask == nil else { return }
         hoverOpenTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(OpenDelay.current.seconds))
+            try? await Task.sleep(for: PanelSettings.hoverOpenDelay)
             guard !Task.isCancelled, let self else { return }
             hoverOpenTask = nil
             if presenter.phase == .collapsed {

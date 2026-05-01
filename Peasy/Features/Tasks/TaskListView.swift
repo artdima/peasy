@@ -7,7 +7,6 @@ struct TaskListView: View {
     let store: TaskStore
     let model: NotchViewModel
 
-    @AppStorage(PanelSettings.showsCompletedKey) private var showsCompletedSection = true
     @State private var showsCompleted = false
     @State private var dropTargetID: UUID?
     @State private var isEndTargeted = false
@@ -56,7 +55,7 @@ struct TaskListView: View {
                             }
                     }
 
-                    if showsCompletedSection, !completedTasks.isEmpty {
+                    if !completedTasks.isEmpty {
                         CompletedDisclosure(count: completedTasks.count, isExpanded: $showsCompleted)
                         if showsCompleted {
                             ForEach(completedTasks) { task in

@@ -7,7 +7,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var notchController: NotchController?
     private var quickAdd: QuickAddController?
     private let hotKey = GlobalHotKey()
-    private var defaultsObserver: NSObjectProtocol?
+    private var observers: [NSObjectProtocol] = []
+    private var isRecordingShortcut = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.processInfo.isRunningTests else { return }
@@ -27,7 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.quickAdd = quickAdd
         hotKey.action = { quickAdd.toggle() }
         hotKey.register(Shortcut.current)
-        defaultsObserver = NotificationCenter.default.addObserver(
+        observers.append(NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: nil,
             queue: .main
@@ -35,10 +36,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated {
                 self?.updateHotKey()
             }
-        }
+        })
+        observers.append(NotificationCenter.default.addObserver(
+            forName: .shortcutRecordingChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            let isRecording = notification.object as? Bool ?? false
+            MainActor.assumeIsolated {
+                self?.isRecordingShortcut = isRecording
+                self?.updateHotKey()
+            }
+        })
     }
 
     private func updateHotKey() {
+        if isRecordingShortcut {
+            hotKey.unregister()
+            return
+        }
         let shortcut = Shortcut.current
         if hotKey.shortcut != shortcut {
             hotKey.register(shortcut)

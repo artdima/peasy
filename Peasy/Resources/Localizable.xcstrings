@@ -113,6 +113,16 @@
         }
       }
     },
+    "Appears in the notch while a task is in focus" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Появляется в вырезе, когда задача в фокусе"
+          }
+        }
+      }
+    },
     "Built-in display" : {
       "localizations" : {
         "ru" : {
@@ -213,12 +223,42 @@
         }
       }
     },
+    "Expand on hover" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раскрывать при наведении"
+          }
+        }
+      }
+    },
     "Focus on task" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Взять в фокус"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Основные"
+          }
+        }
+      }
+    },
+    "Horizontal" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Горизонтальный"
           }
         }
       }
@@ -246,16 +286,6 @@
     "Little tasks, big growth." : {
       "shouldTranslate" : false
     },
-    "Long" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Длинная"
-          }
-        }
-      }
-    },
     "Main display" : {
       "localizations" : {
         "ru" : {
@@ -276,22 +306,22 @@
         }
       }
     },
-    "Mark as Not Done" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Снять отметку"
-          }
-        }
-      }
-    },
     "Mark as done" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отметить как выполненную"
+          }
+        }
+      }
+    },
+    "Mark as Not Done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снять отметку"
           }
         }
       }
@@ -336,32 +366,12 @@
         }
       }
     },
-    "Normal" : {
+    "Notch" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Обычная"
-          }
-        }
-      }
-    },
-    "Open Settings…" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открыть Настройки…"
-          }
-        }
-      }
-    },
-    "Open after hovering" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Задержка открытия"
+            "value" : "Вырез"
           }
         }
       }
@@ -386,16 +396,6 @@
         }
       }
     },
-    "Peasy Settings" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Настройки Peasy"
-          }
-        }
-      }
-    },
     "Pin panel" : {
       "localizations" : {
         "ru" : {
@@ -406,12 +406,82 @@
         }
       }
     },
+    "Press a new shortcut" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите новое сочетание"
+          }
+        }
+      }
+    },
+    "Press a shortcut…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите сочетание…"
+          }
+        }
+      }
+    },
+    "Progress ring and the number of tasks left in the collapsed notch" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кольцо прогресса и число оставшихся задач в свёрнутом вырезе"
+          }
+        }
+      }
+    },
     "Project name" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Название проекта"
+          }
+        }
+      }
+    },
+    "Projects as tabs on top" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проекты вкладками сверху"
+          }
+        }
+      }
+    },
+    "Projects in a column on the left" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проекты в колонке слева"
+          }
+        }
+      }
+    },
+    "Quick new task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстрая новая задача"
+          }
+        }
+      }
+    },
+    "Quick new task shortcut: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сочетание для быстрой новой задачи: %@"
           }
         }
       }
@@ -446,6 +516,16 @@
         }
       }
     },
+    "Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки"
+          }
+        }
+      }
+    },
     "Settings…" : {
       "localizations" : {
         "ru" : {
@@ -456,32 +536,22 @@
         }
       }
     },
-    "Short" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Короткая"
-          }
-        }
-      }
-    },
-    "Show completed tasks" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показывать выполненные"
-          }
-        }
-      }
-    },
     "Show on" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показывать на"
+          }
+        }
+      }
+    },
+    "Sprout" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Росток"
           }
         }
       }
@@ -506,12 +576,52 @@
         }
       }
     },
+    "The panel opens when the pointer is over the notch" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Панель открывается, когда курсор над вырезом"
+          }
+        }
+      }
+    },
+    "The panel opens when you click the notch" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Панель открывается по клику на вырез"
+          }
+        }
+      }
+    },
     "Today" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сегодня"
+          }
+        }
+      }
+    },
+    "Today indicator" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Индикатор задач на сегодня"
+          }
+        }
+      }
+    },
+    "Vertical" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вертикальный"
           }
         }
       }
