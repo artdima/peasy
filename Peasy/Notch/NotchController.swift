@@ -354,6 +354,10 @@ final class NotchController {
         }
         guard modifiers.isEmpty else { return false }
 
+        if event.keyCode == KeyCode.escape {
+            collapse()
+            return true
+        }
         let canActOnSelection = model.draft.isEmpty && model.selectedTaskID != nil
         switch event.keyCode {
         case KeyCode.down:
