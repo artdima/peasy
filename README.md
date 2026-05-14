@@ -18,13 +18,16 @@
 
 | Feature | What it does |
 | --- | --- |
-| **Notch panel** | Hover over the notch and the panel unfolds from it; move away to fold it back. Click into the panel to type: from then on it stays open until you click elsewhere or press Esc. |
-| **Projects** | Tasks live in projects. Switch with the chips in the header or ⌘1…⌘9, rename and delete from the context menu. |
-| **Quick input** | Click the notch or the panel, type a task and press Return. The panel takes the keyboard without activating Peasy, so the app you were in stays in front. |
-| **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps back to input. |
-| **Reorder** | Drag tasks inside a project and projects inside the header. |
+| **Notch panel** | Hover over the notch and the panel unfolds from it; move away to fold it back. Click into the panel to type: then it stays open until you click elsewhere or press Esc. The pin in the header keeps it open even then. |
+| **Today, Inbox, projects** | Today collects the tasks flagged for today from every list. Inbox holds tasks without a project. Projects get a color each; rename, reorder and delete them from the list. |
+| **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top. Switch in Settings. |
+| **Focus and Sprout** | Press ▶ on a task to focus on it. The panel folds away and Sprout, a little seedling, sits in the notch next to the task; hover him to see its name. Finish the task and he celebrates. |
+| **Collapsed notch** | A progress ring and the number of tasks left for today, the focused task, or a short "Added" after a quick add. |
+| **Quick add** | ⌃⌥N from any app opens a small window in the middle of the screen. Type, pick a project or Today, press Return. The shortcut is configurable. |
+| **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps to the new task field, ⌘1…⌘9 switch lists. |
+| **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
 | **Any display** | Built-in display, main display or the one with the pointer. Macs without a notch get a small black island instead. |
-| **Settings** | Open at login, display, open delay, completed tasks on or off. English and Russian. |
+| **Settings** | Layout, expand on hover or on click, Today indicator, Sprout, display, quick add shortcut, open at login. English and Russian. |
 
 ## Build
 
@@ -38,32 +41,38 @@ xcodebuild -project Peasy.xcodeproj -scheme Peasy -destination 'platform=macOS' 
 
 ```
 Peasy/
-├── App/            entry point, AppDelegate wiring, test detection
+├── App/            entry point, AppDelegate wiring, global hotkey
 ├── Notch/          NotchKit presenter setup, view model, key handling, display choice
 ├── Features/
-│   ├── Tasks/      panel content, task list, rows, quick input
-│   ├── Projects/   project switcher, first-project screen
-│   └── Settings/   settings window, launch at login, panel preferences
-├── Data/           SwiftData models, TaskStore, fractional ordering
+│   ├── Panel/      header, shared colors and controls
+│   ├── Tasks/      panel content, task list, rows, new task field
+│   ├── Projects/   sidebar and tab bar
+│   ├── Island/     collapsed notch content, Sprout, hover cloud
+│   ├── QuickAdd/   quick add window
+│   └── Settings/   settings window, shortcut recorder, launch at login
+├── Data/           SwiftData models, lists, TaskStore, fractional ordering
 └── Resources/      asset catalog, string catalog
 PeasyTests/         Swift Testing suites
 ```
 
-[NotchKit](https://github.com/duongductrong/NotchKit) owns the window, the morphing shape and the hover policy. `NotchController` configures it, routes the keyboard and keeps the panel on the chosen display. Views read data through `@Query` and relationships, and change it only through `TaskStore`. The controller talks to SwiftUI through `NotchViewModel`: selection, editing state and keyboard commands.
+[NotchKit](https://github.com/duongductrong/NotchKit) owns the window and the morphing shape. `NotchController` configures it, decides when to open on hover, routes the keyboard and keeps the panel on the chosen display. Views read data through `@Query` and relationships, and change it only through `TaskStore`. The controller talks to SwiftUI through `NotchViewModel`: the selected list and task, editing state, focus, celebrations and what the collapsed notch shows.
 
 ## Decisions worth explaining
 
 - **NotchKit for the window and the shape.** A hand-rolled panel crashed in a constraint-update loop when SwiftUI resized its window, and lost hover at the top pixel row of the screen. NotchKit keeps one fixed-size window, morphs a single shape inside it and hit-tests the visible ink only.
-- **Keyboard only after a click.** A hover-opened panel does not take the keyboard, so drifting to the top of the screen never steals keystrokes. The first click inside makes the panel key and pins it open until a click elsewhere or Esc.
+- **Keyboard only after a click.** A hover-opened panel does not take the keyboard, so drifting to the top of the screen never steals keystrokes. The first click inside makes the panel key and keeps it open until a click elsewhere or Esc.
 - **Own outside-click handling.** NotchKit can replay the dismissing click to the app underneath; Peasy turns that off and collapses from a passive global monitor instead, so a click outside is delivered exactly once.
 - **Models are CloudKit-ready from day one.** Every property has a default or is optional, relationships are optional with inverses, nothing is unique. Turning on sync is a configuration change, not a migration.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
-- **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so the first project is the user's.
+- **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so Inbox is virtual and the first project is the user's.
 - **Own key handling.** An agent app has no Edit menu, so the panel routes ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z itself, and a local key monitor handles navigation.
+- **Today is a flag, Inbox is a query.** A task belongs to at most one project and can also be marked for today, so Today never duplicates data. Inbox is simply the tasks without a project; there is no Inbox record to duplicate across Macs.
+- **Sprout runs in the render server.** He is drawn with Core Animation shape layers, so his idle animation costs nothing on the main thread and stays smooth while the app is busy. Reduce Motion stops it.
+- **Carbon for the global shortcut.** `RegisterEventHotKey` works without Accessibility permission, unlike a global key monitor.
 
 ## Tests
 
-`PeasyTests` uses Swift Testing and covers notch geometry for notched, offset and notch-less screens, display choice including a closed lid, models with cascade delete, and `TaskStore`: creation order, empty input, completion, moves, repeated moves that force renumbering, clearing completed tasks.
+`PeasyTests` uses Swift Testing and covers display choice including a closed lid, models with cascade delete, the panel surviving opening and adding tasks, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, completion, moves, repeated moves that force renumbering, clearing completed tasks.
 
 ## Known limitations
 
