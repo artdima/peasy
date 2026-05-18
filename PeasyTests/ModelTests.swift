@@ -38,3 +38,21 @@ struct ModelTests {
         #expect(try context.fetchCount(FetchDescriptor<TaskItem>()) == 0)
     }
 }
+
+struct CloudKitSchemaTests {
+    @Test func modelsFitCloudKit() {
+        for entity in Persistence.schema.entities {
+            for attribute in entity.attributes {
+                #expect(attribute.isOptional || attribute.defaultValue != nil, "\(entity.name).\(attribute.name) needs a default")
+                #expect(!attribute.isUnique, "\(entity.name).\(attribute.name) must not be unique")
+            }
+            for relationship in entity.relationships {
+                #expect(relationship.isOptional, "\(entity.name).\(relationship.name) must be optional")
+            }
+        }
+    }
+
+    @Test func unsignedBuildStaysLocal() {
+        #expect(!CloudSync.shouldSync)
+    }
+}

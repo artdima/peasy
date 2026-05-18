@@ -12,12 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.processInfo.isRunningTests else { return }
-        let container: ModelContainer
-        do {
-            container = try Persistence.makeContainer()
-        } catch {
-            fatalError("Failed to open the task store: \(error)")
-        }
+        let container = Persistence.openStore(cloudKit: CloudSync.shouldSync)
         let actions = NotchActions(
             showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
