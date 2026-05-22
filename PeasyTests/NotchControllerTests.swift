@@ -32,4 +32,27 @@ struct NotchControllerTests {
         #expect(!controller.isExpanded)
         #expect(model.selectedTaskID == nil)
     }
+
+    @Test func panelSurvivesReloadingTheStore() async throws {
+        let first = try Persistence.makeContainer(inMemory: true)
+        let model = NotchViewModel()
+        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = NotchController(model: model, actions: actions, modelContainer: first)
+        defer { controller.shutdown() }
+
+        controller.unloadStore()
+        await Task.yield()
+        let second = try Persistence.makeContainer(inMemory: true)
+        controller.loadStore(second)
+
+        controller.expand()
+        model.isPinned = true
+        try await Task.sleep(for: .milliseconds(600))
+        #expect(controller.isExpanded)
+
+        let store = TaskStore(context: second.mainContext)
+        #expect(store.addTask("After reload", to: .inbox) != nil)
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(controller.isExpanded)
+    }
 }

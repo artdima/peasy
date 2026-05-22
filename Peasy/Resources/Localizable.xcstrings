@@ -263,6 +263,26 @@
         }
       }
     },
+    "iCloud" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud"
+          }
+        }
+      }
+    },
+    "iCloud sync" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация через iCloud"
+          }
+        }
+      }
+    },
     "In focus" : {
       "localizations" : {
         "ru" : {
@@ -366,6 +386,26 @@
         }
       }
     },
+    "No connection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет подключения к сети"
+          }
+        }
+      }
+    },
+    "Not signed in to iCloud" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет входа в iCloud"
+          }
+        }
+      }
+    },
     "Notch" : {
       "localizations" : {
         "ru" : {
@@ -392,6 +432,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Панель"
+          }
+        }
+      }
+    },
+    "Peasy uses the iCloud account you’re signed in to on this Mac. Tasks are kept in your private iCloud storage." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Используется iCloud, в который вы вошли на этом Mac. Задачи хранятся в вашем личном хранилище iCloud."
           }
         }
       }
@@ -546,12 +596,32 @@
         }
       }
     },
+    "Sign in to iCloud in System Settings to sync your tasks." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войдите в iCloud в Системных настройках, чтобы синхронизировать задачи."
+          }
+        }
+      }
+    },
     "Sprout" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Росток"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статус"
           }
         }
       }
@@ -566,12 +636,92 @@
         }
       }
     },
+    "Sync error" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка синхронизации"
+          }
+        }
+      }
+    },
+    "Sync is off — tasks are stored only on this Mac." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация выключена — задачи хранятся только на этом Mac."
+          }
+        }
+      }
+    },
+    "Sync now" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировать сейчас"
+          }
+        }
+      }
+    },
+    "Synced %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировано %@"
+          }
+        }
+      }
+    },
+    "Synced today at %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировано сегодня в %@"
+          }
+        }
+      }
+    },
+    "Synced yesterday at %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировано вчера в %@"
+          }
+        }
+      }
+    },
+    "Syncing…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация…"
+          }
+        }
+      }
+    },
     "Task" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Задача"
+          }
+        }
+      }
+    },
+    "Tasks and projects on all your Macs" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задачи и проекты на всех ваших Mac"
           }
         }
       }
@@ -592,6 +742,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Панель открывается по клику на вырез"
+          }
+        }
+      }
+    },
+    "This build of Peasy is signed without iCloud, so tasks are stored only on this Mac." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта сборка Peasy подписана без iCloud, поэтому задачи хранятся только на этом Mac."
           }
         }
       }
@@ -622,6 +782,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вертикальный"
+          }
+        }
+      }
+    },
+    "Waiting to sync" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ожидает синхронизации"
           }
         }
       }

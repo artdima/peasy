@@ -3,7 +3,8 @@ import SwiftData
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let notchModel = NotchViewModel()
-    private let settingsWindow = SettingsWindowController()
+    private let sync = SyncMonitor()
+    private lazy var settingsWindow = SettingsWindowController(sync: sync)
     private var notchController: NotchController?
     private var quickAdd: QuickAddController?
     private let hotKey = GlobalHotKey()
@@ -12,7 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.processInfo.isRunningTests else { return }
-        let container = Persistence.openStore(cloudKit: CloudSync.shouldSync)
+        sync.onStoreReloadNeeded = { [weak self] in self?.reloadStore() }
+        sync.start()
+        let container = openStore()
         let actions = NotchActions(
             showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
@@ -43,6 +46,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.updateHotKey()
             }
         })
+    }
+
+    private func openStore() -> ModelContainer {
+        Persistence.openStore(cloudKit: sync.isActive) { [sync] error in
+            sync.storeFailed(error)
+        }
+    }
+
+    private func reloadStore() {
+        notchController?.unloadStore()
+        quickAdd?.unloadStore()
+        Task { [weak self] in
+            await Task.yield()
+            guard let self else { return }
+            let container = openStore()
+            notchController?.loadStore(container)
+            quickAdd?.loadStore(container)
+        }
     }
 
     private func updateHotKey() {

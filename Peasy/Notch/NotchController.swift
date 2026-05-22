@@ -9,7 +9,7 @@ final class NotchController {
     private let presenter: NotchPresenter
     private let model: NotchViewModel
     private var actions: NotchActions
-    private let modelContainer: ModelContainer
+    private var modelContainer: ModelContainer?
     private let cloud = CloudWindow()
     private var observers: [NSObjectProtocol] = []
     private var monitors: [Any] = []
@@ -64,6 +64,18 @@ final class NotchController {
         presenter.collapse()
     }
 
+    func unloadStore() {
+        collapse()
+        panel?.undoManager?.removeAllActions()
+        presenter.uninstall()
+        modelContainer = nil
+    }
+
+    func loadStore(_ container: ModelContainer) {
+        modelContainer = container
+        installPanel()
+    }
+
     func shutdown() {
         monitors.forEach(NSEvent.removeMonitor)
         monitors.removeAll()
@@ -92,9 +104,9 @@ final class NotchController {
     }
 
     private func installPanel() {
+        guard let modelContainer else { return }
         let model = model
         let actions = actions
-        let modelContainer = modelContainer
         let presenter = presenter
         presenter.install {
             IslandView(presenter: presenter, model: model)

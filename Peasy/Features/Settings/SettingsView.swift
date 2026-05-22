@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    let sync: SyncMonitor
     @AppStorage(PanelLayout.storageKey) private var layout = PanelLayout.vertical
     @AppStorage(PanelSettings.expandsOnHoverKey) private var expandsOnHover = true
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
@@ -10,6 +11,8 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
+            SyncSection(sync: sync)
+
             SettingsSection(title: "Panel") {
                 HStack(alignment: .top, spacing: 14) {
                     LayoutOption(layout: .vertical, title: "Vertical", subtitle: "Projects in a column on the left", selection: $layout)
@@ -83,6 +86,7 @@ struct SettingsView: View {
 
 struct SettingsSection<Content: View>: View {
     let title: LocalizedStringKey
+    var note: LocalizedStringKey?
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -97,6 +101,14 @@ struct SettingsSection<Content: View>: View {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .strokeBorder(.white.opacity(0.04))
                 }
+            if let note {
+                Text(note)
+                    .font(.system(size: 11.5))
+                    .lineSpacing(2)
+                    .foregroundStyle(PanelStyle.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 4)
+            }
         }
     }
 }

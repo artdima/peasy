@@ -3,7 +3,12 @@ import SwiftUI
 
 @MainActor
 final class SettingsWindowController {
+    private let sync: SyncMonitor
     private var window: NSWindow?
+
+    init(sync: SyncMonitor) {
+        self.sync = sync
+    }
 
     func show() {
         let window = self.window ?? makeWindow()
@@ -13,7 +18,7 @@ final class SettingsWindowController {
     }
 
     private func makeWindow() -> NSWindow {
-        let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView()))
+        let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(sync: sync)))
         window.title = String(localized: "Settings")
         window.styleMask = [.titled, .closable]
         window.titlebarAppearsTransparent = true

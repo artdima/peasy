@@ -20,7 +20,11 @@ enum CloudSync {
         defaults.object(forKey: enabledKey) as? Bool ?? true
     }
 
+    static var isAvailable: Bool {
+        isEntitled && !ProcessInfo.processInfo.isRunningTests
+    }
+
     static var shouldSync: Bool {
-        isEntitled && isEnabled() && !ProcessInfo.processInfo.isRunningTests
+        isAvailable && isEnabled()
     }
 }

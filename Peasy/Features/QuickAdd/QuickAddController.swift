@@ -19,14 +19,13 @@ final class QuickAddController {
     private let panel: QuickAddPanel
     private let hostingView: NSHostingView<AnyView>
     private let state = QuickAddState()
-    private let modelContainer: ModelContainer
+    private var modelContainer: ModelContainer?
     private let notchModel: NotchViewModel
     private var observers: [NSObjectProtocol] = []
     private var confirmationTask: Task<Void, Never>?
     private var isShown = false
 
     init(modelContainer: ModelContainer, notchModel: NotchViewModel) {
-        self.modelContainer = modelContainer
         self.notchModel = notchModel
         panel = QuickAddPanel(
             contentRect: .zero,
@@ -49,15 +48,7 @@ final class QuickAddController {
         container.addSubview(hostingView)
         panel.contentView = container
 
-        let state = state
-        hostingView.rootView = AnyView(
-            QuickAddView(
-                state: state,
-                onSubmit: { [weak self] in self?.submit() },
-                onCancel: { [weak self] in self?.hide() }
-            )
-            .modelContainer(modelContainer)
-        )
+        loadStore(modelContainer)
 
         let token = NotificationCenter.default.addObserver(
             forName: NSWindow.didResignKeyNotification,
@@ -71,11 +62,30 @@ final class QuickAddController {
         observers.append(token)
     }
 
+    func loadStore(_ container: ModelContainer) {
+        modelContainer = container
+        hostingView.rootView = AnyView(
+            QuickAddView(
+                state: state,
+                onSubmit: { [weak self] in self?.submit() },
+                onCancel: { [weak self] in self?.hide() }
+            )
+            .modelContainer(container)
+        )
+    }
+
+    func unloadStore() {
+        hide()
+        hostingView.rootView = AnyView(EmptyView())
+        modelContainer = nil
+    }
+
     func toggle() {
         isShown ? hide() : show()
     }
 
     func show() {
+        guard modelContainer != nil else { return }
         let selected = UserDefaults.standard.string(forKey: TaskList.storageKey).map(TaskList.init(storageValue:))
         if case .project(let id) = selected {
             state.reset(projectID: id)
@@ -115,6 +125,7 @@ final class QuickAddController {
     }
 
     private func submit() {
+        guard let modelContainer else { return }
         let store = TaskStore(context: modelContainer.mainContext)
         let project = state.projectID.flatMap { store.project(id: $0) }
         guard let task = store.addTask(state.title, project: project, isToday: state.isToday) else { return }
