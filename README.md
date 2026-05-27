@@ -26,8 +26,9 @@
 | **Quick add** | ⌃⌥N from any app opens a small window in the middle of the screen. Type, pick a project or Today, press Return. The shortcut is configurable. |
 | **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps to the new task field, ⌘1…⌘9 switch lists. |
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
+| **iCloud sync** | Projects and tasks follow your Apple ID to every Mac. Settings shows the sync status and lets you turn sync off. Without iCloud Peasy keeps everything on this Mac. |
 | **Any display** | Built-in display, main display or the one with the pointer. Macs without a notch get a small black island instead. |
-| **Settings** | Layout, expand on hover or on click, Today indicator, Sprout, display, quick add shortcut, open at login. English and Russian. |
+| **Settings** | iCloud sync, layout, expand on hover or on click, Today indicator, Sprout, display, quick add shortcut, open at login. English and Russian. |
 
 ## Build
 
@@ -36,6 +37,16 @@
 open Peasy.xcodeproj
 xcodebuild -project Peasy.xcodeproj -scheme Peasy -destination 'platform=macOS' test
 ```
+
+### Turning on iCloud sync
+
+A build without a development team keeps tasks on this Mac, and Settings says so. To sync:
+
+1. In the Peasy target, Signing & Capabilities, choose your team.
+2. Add **iCloud** with **CloudKit** and the container `iCloud.com.artdima.Peasy`, then add **Push Notifications**.
+3. Build and run. Settings → iCloud shows the status. Debug builds use the Development environment in CloudKit, so real data is never touched.
+
+Before the first public build, deploy the CloudKit schema to Production in CloudKit Console.
 
 ## Architecture
 
@@ -55,7 +66,7 @@ Peasy/
 PeasyTests/         Swift Testing suites
 ```
 
-[NotchKit](https://github.com/duongductrong/NotchKit) owns the window and the morphing shape. `NotchController` configures it, decides when to open on hover, routes the keyboard and keeps the panel on the chosen display. Views read data through `@Query` and relationships, and change it only through `TaskStore`. The controller talks to SwiftUI through `NotchViewModel`: the selected list and task, editing state, focus, celebrations and what the collapsed notch shows.
+[NotchKit](https://github.com/duongductrong/NotchKit) owns the window and the morphing shape. `NotchController` configures it, decides when to open on hover, routes the keyboard and keeps the panel on the chosen display. Views read data through `@Query` and relationships, and change it only through `TaskStore`. `SyncMonitor` follows CloudKit events and the iCloud account; when sync is switched, `AppDelegate` reopens the store and hands the new container to the panel and the quick add window. The controller talks to SwiftUI through `NotchViewModel`: the selected list and task, editing state, focus, celebrations and what the collapsed notch shows.
 
 ## Decisions worth explaining
 
@@ -63,6 +74,8 @@ PeasyTests/         Swift Testing suites
 - **Keyboard only after a click.** A hover-opened panel does not take the keyboard, so drifting to the top of the screen never steals keystrokes. The first click inside makes the panel key and keeps it open until a click elsewhere or Esc.
 - **Own outside-click handling.** NotchKit can replay the dismissing click to the app underneath; Peasy turns that off and collapses from a passive global monitor instead, so a click outside is delivered exactly once.
 - **Models are CloudKit-ready from day one.** Every property has a default or is optional, relationships are optional with inverses, nothing is unique. Turning on sync is a configuration change, not a migration.
+- **Sync turns itself on.** At launch Peasy reads its own entitlements: a build signed with the iCloud container syncs, an unsigned one stays local. The project builds and tests without a team, and nothing crashes on a missing entitlement.
+- **Sync now reopens the store.** SwiftData has no call to force a sync. Reopening the store makes CloudKit set up, import and export again, which is what the button promises.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
 - **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so Inbox is virtual and the first project is the user's.
 - **Own key handling.** An agent app has no Edit menu, so the panel routes ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z itself, and a local key monitor handles navigation.
@@ -72,11 +85,12 @@ PeasyTests/         Swift Testing suites
 
 ## Tests
 
-`PeasyTests` uses Swift Testing and covers display choice including a closed lid, models with cascade delete, the panel surviving opening and adding tasks, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, completion, moves, repeated moves that force renumbering, clearing completed tasks.
+`PeasyTests` uses Swift Testing and covers display choice including a closed lid, models with cascade delete, the panel surviving opening and adding tasks and a store reload, sync status from CloudKit events, errors and account changes, CloudKit rules for the models, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, completion, moves, repeated moves that force renumbering, clearing completed tasks.
 
 ## Known limitations
 
-- iCloud sync is not switched on yet: it needs a development team and the CloudKit container.
+- iCloud sync needs a build signed with a development team and the iCloud capability; see above.
+- After signing out of iCloud or switching Apple ID, CloudKit may clear this Mac's copy of the previous account's tasks. They come back when you sign in to that account again; changes that never reached iCloud are lost.
 - The panel has a fixed size; a long list scrolls inside it.
 - In full-screen apps the panel still appears at the top of the screen.
 - Open at login is reliable only for a signed build in `/Applications`.
