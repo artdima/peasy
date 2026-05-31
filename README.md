@@ -35,18 +35,16 @@
 ```sh
 # Xcode 26+, runs on macOS 14+
 open Peasy.xcodeproj
-xcodebuild -project Peasy.xcodeproj -scheme Peasy -destination 'platform=macOS' test
+xcodebuild -project Peasy.xcodeproj -scheme Peasy -destination 'platform=macOS' -allowProvisioningUpdates test
 ```
 
-### Turning on iCloud sync
+### iCloud sync
 
-A build without a development team keeps tasks on this Mac, and Settings says so. To sync:
+`Peasy/Peasy.entitlements` turns on iCloud with CloudKit (container `iCloud.com.artdima.Peasy`) and push notifications, which CloudKit uses to report changes from other Macs. The first build needs the team's Apple account in Xcode → Settings → Accounts: Xcode registers the container and creates the provisioning profile. From the command line, add `-allowProvisioningUpdates` to `xcodebuild`.
 
-1. In the Peasy target, Signing & Capabilities, choose your team.
-2. Add **iCloud** with **CloudKit** and the container `iCloud.com.artdima.Peasy`, then add **Push Notifications**.
-3. Build and run. Settings → iCloud shows the status. Debug builds use the Development environment in CloudKit, so real data is never touched.
+Debug builds use the Development environment in CloudKit, so real data is never touched. Before the first public build, deploy the CloudKit schema to Production in CloudKit Console.
 
-Before the first public build, deploy the CloudKit schema to Production in CloudKit Console.
+To build under another team, change the team in Signing & Capabilities and the container in `CloudSync.containerIdentifier` and the entitlements. A build signed without the iCloud entitlement keeps tasks on this Mac, and Settings says so.
 
 ## Architecture
 
@@ -89,7 +87,6 @@ PeasyTests/         Swift Testing suites
 
 ## Known limitations
 
-- iCloud sync needs a build signed with a development team and the iCloud capability; see above.
 - After signing out of iCloud or switching Apple ID, CloudKit may clear this Mac's copy of the previous account's tasks. They come back when you sign in to that account again; changes that never reached iCloud are lost.
 - The panel has a fixed size; a long list scrolls inside it.
 - In full-screen apps the panel still appears at the top of the screen.
