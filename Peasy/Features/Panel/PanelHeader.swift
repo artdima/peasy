@@ -18,8 +18,10 @@ struct PanelHeader: View {
                     .foregroundStyle(PanelStyle.secondary)
             }
             Spacer()
-            IconButton(systemImage: model.isPinned ? "pin.fill" : "pin", label: "Pin panel", isOn: model.isPinned) {
+            IconButton(label: "Pin panel", isOn: model.isPinned) {
                 model.isPinned.toggle()
+            } icon: {
+                Glyph(kind: .pin, size: 14, filled: model.isPinned)
             }
             .accessibilityAddTraits(model.isPinned ? .isSelected : [])
         }

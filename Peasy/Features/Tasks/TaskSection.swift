@@ -35,7 +35,8 @@ struct TaskSection: View {
                         .foregroundStyle(PanelStyle.tertiary)
                 }
             }
-            .padding(EdgeInsets(top: 4, leading: 10, bottom: 10, trailing: 10))
+            .frame(height: 24)
+            .padding(EdgeInsets(top: 4.5, leading: 10, bottom: 9.5, trailing: 10))
 
             TaskListView(
                 list: list,

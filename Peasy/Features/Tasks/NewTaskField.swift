@@ -9,15 +9,14 @@ struct NewTaskField: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: "plus")
-                .font(.system(size: 11, weight: .semibold))
+            Glyph(kind: .plus, size: 12)
                 .foregroundStyle(PanelStyle.tertiary)
                 .frame(width: 30)
-                .accessibilityHidden(true)
             TextField(placeholder, text: $model.draft)
                 .textFieldStyle(.plain)
                 .font(.system(size: 14))
                 .focused($isFocused)
+                .offset(y: 1)
                 .onSubmit {
                     onSubmit(model.draft)
                     model.draft = ""

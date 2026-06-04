@@ -6,8 +6,7 @@ struct SyncSection: View {
     var body: some View {
         SettingsSection(title: "iCloud", note: note) {
             SettingsRow {
-                Image(systemName: "icloud")
-                    .font(.system(size: 13, weight: .medium))
+                Glyph(kind: .cloud, size: 18)
                     .foregroundStyle(Color(hex: "#64D2FF"))
                     .frame(width: 28, height: 28)
                     .background(Color(hex: "#2C2C2E"), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
@@ -32,8 +31,10 @@ struct SyncSection: View {
                         .settingsTitle()
                         .frame(maxWidth: .infinity, alignment: .leading)
                     SyncStatusLabel(status: sync.status)
-                    IconButton(systemImage: "arrow.clockwise", label: "Sync now") {
+                    IconButton(label: "Sync now", color: PanelStyle.secondary) {
                         sync.syncNow()
+                    } icon: {
+                        Glyph(kind: .refresh, size: 14)
                     }
                     .disabled(!sync.canSyncNow)
                     .opacity(sync.canSyncNow ? 1 : 0.4)
@@ -96,13 +97,9 @@ struct SyncSpinner: View {
     @State private var isSpinning = false
 
     var body: some View {
-        Circle()
-            .trim(from: 0, to: 0.75)
-            .stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-            .frame(width: 9.6, height: 9.6)
+        Glyph(kind: .spinner, size: 12)
             .rotationEffect(.degrees(isSpinning ? 360 : 0))
             .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: isSpinning)
-            .frame(width: 12, height: 12)
             .onAppear { isSpinning = true }
     }
 }

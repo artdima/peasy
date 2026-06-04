@@ -47,8 +47,7 @@ struct QuickAddView: View {
                     .focused($isFocused)
                     .onSubmit(onSubmit)
                 Button(action: onSubmit) {
-                    Image(systemName: "return")
-                        .font(.system(size: 13, weight: .bold))
+                    Glyph(kind: .returnKey, size: 14)
                         .foregroundStyle(isReady ? Color.black : Color(hex: "#636366"))
                         .frame(width: 30, height: 30)
                         .background(isReady ? color : Color.white.opacity(0.08), in: Circle())

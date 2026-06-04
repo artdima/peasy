@@ -63,7 +63,7 @@ struct TaskRow: View {
                     .opacity(isHovered ? 0 : 1)
 
                     RowActionButton(
-                        systemImage: isFocused ? "stop.fill" : "play.fill",
+                        glyph: isFocused ? .stop : .play,
                         label: isFocused ? "Stop focus" : "Focus on task"
                     ) {
                         if isFocused {
@@ -176,8 +176,7 @@ struct CheckRing: View {
                     .fill(color.opacity(isOn ? 1 : isHovered ? 0.24 : 0))
                 Circle()
                     .strokeBorder(color, lineWidth: 1.5)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 8, weight: .heavy))
+                Glyph(kind: .check, size: 10)
                     .foregroundStyle(.black)
                     .opacity(isOn ? 1 : 0)
                     .scaleEffect(isOn ? 1 : 0.6)
@@ -198,7 +197,7 @@ struct CheckRing: View {
 }
 
 struct RowActionButton: View {
-    let systemImage: String
+    let glyph: Glyph.Kind
     let label: LocalizedStringKey
     let action: () -> Void
 
@@ -206,8 +205,7 @@ struct RowActionButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(size: 9, weight: .bold))
+            Glyph(kind: glyph, size: 10)
                 .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.secondary)
                 .frame(width: 24, height: 24)
                 .background(.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 6, style: .continuous))

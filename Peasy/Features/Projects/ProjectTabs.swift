@@ -162,8 +162,7 @@ struct AddTabButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "plus")
-                .font(.system(size: 11, weight: .semibold))
+            Glyph(kind: .plus, size: 12)
                 .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.tertiary)
                 .frame(width: 30, height: 30)
                 .background(.white.opacity(isHovered ? 0.08 : 0), in: Circle())

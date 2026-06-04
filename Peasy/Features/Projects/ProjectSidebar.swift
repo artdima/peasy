@@ -178,9 +178,9 @@ struct NewProjectRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Image(systemName: "plus")
-                    .font(.system(size: 10, weight: .semibold))
+                Glyph(kind: .plus, size: 10)
                     .frame(width: 8)
+                    .offset(x: 1)
                 Text("New project")
                     .font(.system(size: 13))
                 Spacer(minLength: 0)

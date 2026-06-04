@@ -133,8 +133,7 @@ struct CheckBadge: View {
             .fill(Color(hex: colorHex))
             .frame(width: size, height: size)
             .overlay {
-                Image(systemName: "checkmark")
-                    .font(.system(size: size * 0.5, weight: .heavy))
+                Glyph(kind: .checkBold, size: (size * 4 / 7).rounded())
                     .foregroundStyle(.black)
             }
             .accessibilityHidden(true)

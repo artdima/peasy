@@ -42,7 +42,7 @@ struct TaskListView: View {
                             .padding(.vertical, 10)
                     } else {
                         Color.clear
-                            .frame(height: 8)
+                            .frame(height: 6)
                             .dropDestination(for: String.self) { items, _ in
                                 moveTask(withID: items.first, before: nil)
                             } isTargeted: { targeted in
@@ -102,8 +102,7 @@ struct CompletedDisclosure: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 9, weight: .semibold))
+                Glyph(kind: .chevron, size: 10)
                     .rotationEffect(.degrees(isExpanded ? 90 : 0))
                 Text("Completed · \(count)")
             }
@@ -115,7 +114,6 @@ struct CompletedDisclosure: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
-        .padding(.top, 6)
         .accessibilityAddTraits(isExpanded ? .isSelected : [])
     }
 }

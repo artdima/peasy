@@ -31,19 +31,19 @@ struct ColorDot: View {
     }
 }
 
-struct IconButton: View {
-    let systemImage: String
+struct IconButton<Icon: View>: View {
     let label: LocalizedStringKey
     var isOn = false
+    var color = PanelStyle.tertiary
     let action: () -> Void
+    @ViewBuilder let icon: () -> Icon
 
     @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(isOn || isHovered ? PanelStyle.primary : PanelStyle.tertiary)
+            icon()
+                .foregroundStyle(isOn || isHovered ? PanelStyle.primary : color)
                 .frame(width: 28, height: 28)
                 .background(.white.opacity(isHovered ? 0.08 : 0), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 .contentShape(Rectangle())
