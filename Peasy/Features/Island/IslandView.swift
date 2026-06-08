@@ -17,7 +17,7 @@ struct IslandView: View {
             cutoutWidth: geometry.notchWidth,
             gutterWidth: presenter.collapsedGutterWidth,
             pillHeight: geometry.collapsedHeight,
-            edgeInset: 13
+            edgeInset: 15
         ) {
             leading(for: mode)
         } trailing: {
@@ -64,8 +64,10 @@ struct IslandView: View {
             ProgressRing(progress: progress)
         case .focus(_, _, _, let growth):
             BuddyView(mood: .focus, growth: growth)
+                .offset(x: -2)
         case .celebrating(_, _, let growth):
             BuddyView(mood: .done, growth: growth)
+                .offset(x: -2)
         case .added(let colorHex):
             CheckBadge(colorHex: colorHex, size: 16)
         }

@@ -12,6 +12,7 @@ struct NewTaskField: View {
             Glyph(kind: .plus, size: 12)
                 .foregroundStyle(PanelStyle.tertiary)
                 .frame(width: 30)
+                .offset(y: 0.5)
             TextField(placeholder, text: $model.draft)
                 .textFieldStyle(.plain)
                 .font(.system(size: 14))
