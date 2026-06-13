@@ -15,8 +15,7 @@ struct SyncSection: View {
                     Text("iCloud sync")
                         .settingsTitle()
                     Text("Tasks and projects on all your Macs")
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(PanelStyle.secondary)
+                        .settingsSubtitle()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Toggle("iCloud sync", isOn: Binding(get: { sync.isActive }, set: { sync.setEnabled($0) }))

@@ -138,8 +138,7 @@ struct SettingsToggleRow: View {
                     .settingsTitle()
                 if let subtitle {
                     Text(subtitle)
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(PanelStyle.secondary)
+                        .settingsSubtitle()
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -154,6 +153,8 @@ struct SettingsDivider: View {
         Rectangle()
             .fill(.white.opacity(0.07))
             .frame(height: 1)
+            .padding(.bottom, -1)
+            .zIndex(1)
     }
 }
 
@@ -161,6 +162,13 @@ extension Text {
     func settingsTitle() -> some View {
         font(.system(size: 13))
             .foregroundStyle(PanelStyle.primary)
+            .frame(height: 17)
+    }
+
+    func settingsSubtitle() -> some View {
+        font(.system(size: 11.5))
+            .foregroundStyle(PanelStyle.secondary)
+            .frame(height: 15)
     }
 }
 
@@ -181,19 +189,21 @@ struct LayoutOption: View {
                 LayoutThumbnail(layout: layout)
                     .aspectRatio(200 / 112, contentMode: .fit)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        let width: CGFloat = isSelected ? 2 : 1
+                        RoundedRectangle(cornerRadius: 9 + width, style: .continuous)
                             .strokeBorder(
                                 isSelected ? PanelStyle.green : .white.opacity(isHovered ? 0.28 : 0.1),
-                                lineWidth: isSelected ? 2 : 1
+                                lineWidth: width
                             )
+                            .padding(-width)
                     }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.system(size: 13))
                         .foregroundStyle(isSelected ? PanelStyle.primary : PanelStyle.secondary)
+                        .frame(height: 17)
                     Text(subtitle)
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(PanelStyle.secondary)
+                        .settingsSubtitle()
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
