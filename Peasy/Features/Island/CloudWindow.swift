@@ -75,7 +75,8 @@ struct CloudView: View {
                 .padding(.top, 6)
             Text(verbatim: title)
                 .font(.system(size: 13, weight: .medium))
-                .lineSpacing(3)
+                .lineSpacing(3.5)
+                .padding(.bottom, 3.5)
                 .foregroundStyle(PanelStyle.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
