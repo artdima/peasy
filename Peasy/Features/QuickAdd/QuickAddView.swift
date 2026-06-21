@@ -40,12 +40,24 @@ struct QuickAddView: View {
                     .frame(width: 20, height: 20)
                     .frame(width: 30, height: 30)
                     .accessibilityHidden(true)
-                TextField("What needs to be done?", text: $state.title)
+                TextField("", text: $state.title, prompt: Text(verbatim: ""))
                     .textFieldStyle(.plain)
                     .font(.system(size: 20, weight: .medium))
                     .tracking(-0.2)
                     .focused($isFocused)
                     .onSubmit(onSubmit)
+                    .accessibilityLabel("Task title")
+                    .overlay(alignment: .leading) {
+                        if state.title.isEmpty {
+                            Text("What needs to be done?")
+                                .font(.system(size: 20))
+                                .tracking(-0.2)
+                                .foregroundStyle(PanelStyle.tertiary)
+                                .allowsHitTesting(false)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .offset(y: 1)
                 Button(action: onSubmit) {
                     Glyph(kind: .returnKey, size: 14)
                         .foregroundStyle(isReady ? Color.black : Color(hex: "#636366"))
