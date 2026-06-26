@@ -24,7 +24,7 @@ final class CloudWindow {
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
         panel.alphaValue = 0
         hostingView = NSHostingView(rootView: CloudView(title: "", colorHex: ProjectPalette.inbox))
-        hostingView.sizingOptions = []
+        hostingView.sizingOptions = .intrinsicContentSize
         let container = NSView()
         container.addSubview(hostingView)
         panel.contentView = container
@@ -32,7 +32,8 @@ final class CloudWindow {
 
     func show(title: String, colorHex: String, below pill: CGRect) {
         hostingView.rootView = CloudView(title: title, colorHex: colorHex)
-        let size = hostingView.fittingSize
+        let size = hostingView.intrinsicContentSize
+        guard size.width > 0, size.height > 0 else { return }
         hostingView.frame = CGRect(origin: .zero, size: size)
         let frame = CGRect(
             x: pill.minX + 4 - Self.margin,

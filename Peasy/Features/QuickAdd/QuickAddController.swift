@@ -43,7 +43,7 @@ final class QuickAddController {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
         panel.appearance = NSAppearance(named: .darkAqua)
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
-        hostingView.sizingOptions = []
+        hostingView.sizingOptions = .intrinsicContentSize
         let container = NSView()
         container.addSubview(hostingView)
         panel.contentView = container
@@ -94,7 +94,8 @@ final class QuickAddController {
         }
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         guard let screen else { return }
-        let size = hostingView.fittingSize
+        let size = hostingView.intrinsicContentSize
+        guard size.width > 0, size.height > 0 else { return }
         hostingView.frame = CGRect(origin: .zero, size: size)
         let top = screen.frame.maxY - screen.frame.height * 0.41 + QuickAddView.shadowRoom.top
         panel.setFrame(

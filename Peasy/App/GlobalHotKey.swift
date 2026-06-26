@@ -70,12 +70,14 @@ final class GlobalHotKey {
     private var hotKeyRef: EventHotKeyRef?
     private var handlerRef: EventHandlerRef?
 
-    func register(_ shortcut: Shortcut) {
+    @discardableResult
+    func register(_ shortcut: Shortcut) -> OSStatus {
         unregister()
         installHandlerIfNeeded()
         let id = EventHotKeyID(signature: OSType(0x5045_4153), id: 1)
-        RegisterEventHotKey(shortcut.keyCode, shortcut.carbonModifiers, id, GetApplicationEventTarget(), 0, &hotKeyRef)
-        self.shortcut = shortcut
+        let status = RegisterEventHotKey(shortcut.keyCode, shortcut.carbonModifiers, id, GetApplicationEventTarget(), 0, &hotKeyRef)
+        self.shortcut = status == noErr ? shortcut : nil
+        return status
     }
 
     func unregister() {

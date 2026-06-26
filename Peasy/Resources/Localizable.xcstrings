@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "%lld tasks" : {
       "localizations" : {
         "en" : {
@@ -24,12 +27,6 @@
         "ru" : {
           "variations" : {
             "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld задача"
-                }
-              },
               "few" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -40,6 +37,12 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld задач"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задача"
                 }
               },
               "other" : {
@@ -163,22 +166,22 @@
         }
       }
     },
-    "Delete Task" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить задачу"
-          }
-        }
-      }
-    },
     "Delete “%@” and all its tasks?" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить «%@» вместе со всеми задачами?"
+          }
+        }
+      }
+    },
+    "Delete Task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить задачу"
           }
         }
       }
@@ -316,16 +319,6 @@
         }
       }
     },
-    "Mark as Done" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Отметить выполненной"
-          }
-        }
-      }
-    },
     "Mark as done" : {
       "localizations" : {
         "ru" : {
@@ -336,12 +329,12 @@
         }
       }
     },
-    "Mark as Not Done" : {
+    "Mark as Done" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Снять отметку"
+            "value" : "Отметить выполненной"
           }
         }
       }
@@ -352,6 +345,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отметить как невыполненную"
+          }
+        }
+      }
+    },
+    "Mark as Not Done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снять отметку"
           }
         }
       }
@@ -715,6 +718,9 @@
           }
         }
       }
+    },
+    "Task title" : {
+
     },
     "Tasks and projects on all your Macs" : {
       "localizations" : {

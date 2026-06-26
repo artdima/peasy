@@ -45,6 +45,9 @@ struct ShortcutRecorder: View {
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
         .onDisappear(perform: stop)
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification)) { _ in
+            stop()
+        }
         .accessibilityLabel(isRecording ? Text("Press a new shortcut") : Text("Quick new task shortcut: \(shortcut.symbols.joined(separator: " "))"))
     }
 
