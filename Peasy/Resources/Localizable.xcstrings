@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
     "%lld tasks" : {
       "localizations" : {
         "en" : {
@@ -720,7 +717,14 @@
       }
     },
     "Task title" : {
-
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название задачи"
+          }
+        }
+      }
     },
     "Tasks and projects on all your Macs" : {
       "localizations" : {

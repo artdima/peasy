@@ -40,13 +40,14 @@ struct QuickAddView: View {
                     .frame(width: 20, height: 20)
                     .frame(width: 30, height: 30)
                     .accessibilityHidden(true)
-                TextField("", text: $state.title, prompt: Text(verbatim: ""))
+                TextField(text: $state.title, prompt: Text(verbatim: "")) {
+                    Text("Task title")
+                }
                     .textFieldStyle(.plain)
                     .font(.system(size: 20, weight: .medium))
                     .tracking(-0.2)
                     .focused($isFocused)
                     .onSubmit(onSubmit)
-                    .accessibilityLabel("Task title")
                     .overlay(alignment: .leading) {
                         if state.title.isEmpty {
                             Text("What needs to be done?")
