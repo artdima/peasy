@@ -127,3 +127,35 @@ struct TaskStoreTests {
         #expect(Ordering.orders(count: 3, between: nil, and: nil) == [0, 1, 2])
     }
 }
+
+@MainActor
+struct ProjectColorTests {
+    @Test func duplicateColorsGetFreeOnes() throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let context = container.mainContext
+        for (index, name) in ["A", "B", "C"].enumerated() {
+            context.insert(Project(name: name, order: Double(index), colorHex: "#0A84FF"))
+        }
+        try context.save()
+        let store = TaskStore(context: context)
+
+        store.assignDistinctColors()
+
+        let colors = store.projects().map(\.colorHex)
+        #expect(colors == ["#0A84FF", "#FF9F0A", "#30D158"])
+        #expect(Set(colors).count == 3)
+    }
+
+    @Test func distinctColorsStayUntouched() throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let store = TaskStore(context: container.mainContext)
+        let home = try #require(store.createProject(named: "Home"))
+        let work = try #require(store.createProject(named: "Work"))
+        store.setColor(work, to: "#FFD60A")
+
+        store.assignDistinctColors()
+
+        #expect(home.colorHex == "#0A84FF")
+        #expect(work.colorHex == "#FFD60A")
+    }
+}

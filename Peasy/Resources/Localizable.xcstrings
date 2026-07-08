@@ -123,6 +123,26 @@
         }
       }
     },
+    "Blue" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синий"
+          }
+        }
+      }
+    },
+    "Brown" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коричневый"
+          }
+        }
+      }
+    },
     "Built-in display" : {
       "localizations" : {
         "ru" : {
@@ -143,12 +163,32 @@
         }
       }
     },
+    "Color" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цвет"
+          }
+        }
+      }
+    },
     "Completed · %lld" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выполнено · %lld"
+          }
+        }
+      }
+    },
+    "Cyan" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голубой"
           }
         }
       }
@@ -163,22 +203,22 @@
         }
       }
     },
-    "Delete “%@” and all its tasks?" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить «%@» вместе со всеми задачами?"
-          }
-        }
-      }
-    },
     "Delete Task" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить задачу"
+          }
+        }
+      }
+    },
+    "Delete “%@” and all its tasks?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить «%@» вместе со всеми задачами?"
           }
         }
       }
@@ -249,6 +289,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Основные"
+          }
+        }
+      }
+    },
+    "Green" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зелёный"
           }
         }
       }
@@ -426,6 +476,16 @@
         }
       }
     },
+    "Orange" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оранжевый"
+          }
+        }
+      }
+    },
     "Panel" : {
       "localizations" : {
         "ru" : {
@@ -452,6 +512,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Закрепить панель"
+          }
+        }
+      }
+    },
+    "Pink" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розовый"
           }
         }
       }
@@ -512,6 +582,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Проекты в колонке слева"
+          }
+        }
+      }
+    },
+    "Purple" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фиолетовый"
           }
         }
       }
@@ -812,6 +892,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что нужно сделать?"
+          }
+        }
+      }
+    },
+    "Yellow" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жёлтый"
           }
         }
       }

@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sync.onStoreReloadNeeded = { [weak self] in self?.reloadStore() }
         sync.start()
         let container = openStore()
+        TaskStore(context: container.mainContext).assignDistinctColors()
         let actions = NotchActions(
             showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
@@ -61,6 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             await Task.yield()
             guard let self else { return }
             let container = openStore()
+            TaskStore(context: container.mainContext).assignDistinctColors()
             notchController?.loadStore(container)
             quickAdd?.loadStore(container)
         }

@@ -50,6 +50,29 @@ struct TaskStore {
         save()
     }
 
+    func setColor(_ project: Project, to colorHex: String) {
+        guard project.colorHex != colorHex else { return }
+        project.colorHex = colorHex
+        save()
+    }
+
+    /// Projects created before colors were assigned all carry the default
+    /// color; give every duplicate the next free one.
+    func assignDistinctColors() {
+        var used: [String] = []
+        var changed = false
+        for project in projects() {
+            if used.contains(project.colorHex) {
+                project.colorHex = ProjectPalette.nextColor(excluding: used)
+                changed = true
+            }
+            used.append(project.colorHex)
+        }
+        if changed {
+            save()
+        }
+    }
+
     func delete(_ project: Project) {
         context.delete(project)
         save()

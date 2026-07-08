@@ -99,6 +99,7 @@ struct ProjectSidebar: View {
                 Button("Rename") {
                     model.projectEditor = .renaming(project.id)
                 }
+                ProjectColorMenu(project: project, store: store)
                 Button("Delete…", role: .destructive) {
                     requestDeletion(of: project)
                 }
