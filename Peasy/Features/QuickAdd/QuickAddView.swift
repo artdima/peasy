@@ -79,12 +79,12 @@ struct QuickAddView: View {
 
             ScrollView(.horizontal) {
                 HStack(spacing: 4) {
-                    QuickAddChip(title: Text("Inbox"), colorHex: ProjectPalette.inbox, isOn: state.projectID == nil) {
+                    QuickAddChip(title: String(localized: "Inbox"), colorHex: ProjectPalette.inbox, isOn: state.projectID == nil) {
                         state.projectID = nil
                     }
                     ForEach(projects) { project in
                         QuickAddChip(
-                            title: Text(verbatim: project.name),
+                            title: project.name,
                             colorHex: project.colorHex,
                             isOn: state.projectID == project.id
                         ) {
@@ -125,7 +125,7 @@ struct QuickAddView: View {
 }
 
 struct QuickAddChip: View {
-    let title: Text
+    let title: String
     let colorHex: String
     let isOn: Bool
     let action: () -> Void
@@ -136,10 +136,8 @@ struct QuickAddChip: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 ColorDot(hex: colorHex, size: 6)
-                title
-                    .lineLimit(1)
+                FittedText(string: title, size: 12, weight: .medium)
             }
-            .font(.system(size: 12, weight: .medium))
             .foregroundStyle(isOn || isHovered ? PanelStyle.primary : PanelStyle.secondary)
             .padding(.horizontal, 10)
             .frame(height: 28)
@@ -164,9 +162,8 @@ struct TodayChip: View {
             HStack(spacing: 6) {
                 SproutIcon(color: isOn ? PanelStyle.green : (isHovered ? PanelStyle.primary : PanelStyle.secondary))
                     .frame(width: 12, height: 12)
-                Text("Today")
+                FittedText(string: String(localized: "Today"), size: 12, weight: .medium)
             }
-            .font(.system(size: 12, weight: .medium))
             .foregroundStyle(isOn ? PanelStyle.green : (isHovered ? PanelStyle.primary : PanelStyle.secondary))
             .padding(.horizontal, 10)
             .frame(height: 28)

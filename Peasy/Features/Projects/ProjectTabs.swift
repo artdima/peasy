@@ -12,48 +12,47 @@ struct ProjectTabs: View {
     @State private var dropTargetID: UUID?
 
     var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 4) {
-                TabPill(title: Text("Today"), count: count(in: .today), isSelected: selection == .today) {
-                    SproutIcon()
-                        .frame(width: 12, height: 12)
-                } action: {
-                    onSelect(.today)
-                }
+        FlowLayout(spacing: 4, rowSpacing: 4) {
+            TabPill(title: String(localized: "Today"), count: count(in: .today), isSelected: selection == .today) {
+                SproutIcon()
+                    .frame(width: 12, height: 12)
+            } action: {
+                onSelect(.today)
+            }
 
-                TabPill(title: Text("Inbox"), count: count(in: .inbox), isSelected: selection == .inbox) {
-                    ColorDot(hex: ProjectPalette.inbox, size: 6)
-                } action: {
-                    onSelect(.inbox)
-                }
+            TabPill(title: String(localized: "Inbox"), count: count(in: .inbox), isSelected: selection == .inbox) {
+                ColorDot(hex: ProjectPalette.inbox, size: 6)
+            } action: {
+                onSelect(.inbox)
+            }
 
-                ForEach(projects) { project in
-                    projectTab(project)
-                }
+            ForEach(projects) { project in
+                projectTab(project)
+            }
 
-                if model.projectEditor == .adding {
-                    TabNameField(
-                        colorHex: ProjectPalette.nextColor(excluding: projects.map(\.colorHex)),
-                        initialName: ""
-                    ) { name in
-                        if let project = store.createProject(named: name) {
-                            onSelect(.project(project.id))
-                        }
-                        model.projectEditor = nil
-                    } onCancel: {
-                        model.projectEditor = nil
+            if model.projectEditor == .adding {
+                TabNameField(
+                    colorHex: ProjectPalette.nextColor(excluding: projects.map(\.colorHex)),
+                    initialName: ""
+                ) { name in
+                    if let project = store.createProject(named: name) {
+                        onSelect(.project(project.id))
                     }
-                } else {
-                    AddTabButton {
-                        model.projectEditor = .adding
-                    }
-                    .dropDestination(for: String.self) { items, _ in
-                        moveProject(withID: items.first, before: nil)
-                    }
+                    model.projectEditor = nil
+                } onCancel: {
+                    model.projectEditor = nil
+                }
+            } else {
+                AddTabButton {
+                    model.projectEditor = .adding
+                }
+                .overflowAllowance(8)
+                .dropDestination(for: String.self) { items, _ in
+                    moveProject(withID: items.first, before: nil)
                 }
             }
         }
-        .scrollIndicators(.hidden)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -67,7 +66,7 @@ struct ProjectTabs: View {
             }
         } else {
             TabPill(
-                title: Text(verbatim: project.name),
+                title: project.name,
                 count: count(in: .project(project.id)),
                 isSelected: selection == .project(project.id)
             ) {
@@ -122,7 +121,7 @@ struct ProjectTabs: View {
 }
 
 struct TabPill<Icon: View>: View {
-    let title: Text
+    let title: String
     let count: Int
     let isSelected: Bool
     @ViewBuilder let icon: () -> Icon
@@ -134,13 +133,9 @@ struct TabPill<Icon: View>: View {
         Button(action: action) {
             HStack(spacing: 7) {
                 icon()
-                title
-                    .font(.system(size: 13))
-                    .lineLimit(1)
+                FittedText(string: title)
                 if count > 0 {
-                    Text(count, format: .number)
-                        .font(.system(size: 12))
-                        .monospacedDigit()
+                    FittedText(string: count.formatted(), size: 12, tabular: true)
                         .foregroundStyle(PanelStyle.tertiary)
                 }
             }
