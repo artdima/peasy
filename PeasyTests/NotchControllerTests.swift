@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import SwiftData
 import Testing
 @testable import Peasy
@@ -43,6 +44,30 @@ struct NotchControllerTests {
 
         #expect(controller.expandedPanelSize == PanelLayout.current.panelSize)
         #expect(model.headerHeight > 0)
+    }
+
+    @Test func draggingResizesAndClampsThePanel() throws {
+        let layout = PanelLayout.current
+        defer { layout.resetSize() }
+        let container = try Persistence.makeContainer(inMemory: true)
+        let model = NotchViewModel()
+        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        defer { controller.shutdown() }
+
+        model.onResize(CGSize(width: 760, height: 500), false)
+        #expect(controller.expandedPanelSize == CGSize(width: 760, height: 500))
+        #expect(!model.hasCustomSize)
+
+        model.onResize(CGSize(width: 100, height: 100), true)
+        #expect(controller.expandedPanelSize == layout.minimumSize)
+        #expect(model.hasCustomSize)
+        #expect(layout.panelSize == layout.minimumSize)
+
+        model.onResetSize()
+        #expect(controller.expandedPanelSize == layout.defaultSize)
+        #expect(!model.hasCustomSize)
+        #expect(layout.customSize(in: .standard) == nil)
     }
 
     @Test func panelSurvivesReloadingTheStore() async throws {

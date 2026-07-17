@@ -26,11 +26,13 @@ final class NotchController {
         self.modelContainer = modelContainer
         self.actions = actions
         presenter = NotchPresenter(
-            configuration: Self.configuration(layout: PanelLayout.current, reserve: model.island.reserve, pinned: false, notchHeight: 0)
+            configuration: Self.configuration(layout: PanelLayout.current, size: model.panelSize, reserve: model.island.reserve, pinned: false, notchHeight: 0)
         )
         self.actions.collapse = { [weak self] in self?.collapse() }
         model.onFocusStarted = { [weak self] in self?.collapseSoon() }
         model.onCelebration = { [weak self] in self?.celebrationStarted() }
+        model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
+        model.onResetSize = { [weak self] in self?.resetSize() }
 
         presenter.preferredScreenID = preferredScreenID()
         presenter.configuration = makeConfiguration(pinned: false)
@@ -101,6 +103,7 @@ final class NotchController {
     private func makeConfiguration(pinned: Bool) -> NotchConfiguration {
         Self.configuration(
             layout: layout,
+            size: model.panelSize,
             reserve: model.island.reserve,
             pinned: pinned,
             notchHeight: presenter.geometry.collapsedHeight
@@ -109,11 +112,11 @@ final class NotchController {
 
     // NotchKit's expandedSize spans the concave ears and excludes the notch row;
     // the mockups measure the panel body below the ears, including that row.
-    private static func configuration(layout: PanelLayout, reserve: CGFloat, pinned: Bool, notchHeight: CGFloat) -> NotchConfiguration {
+    private static func configuration(layout: PanelLayout, size: CGSize, reserve: CGFloat, pinned: Bool, notchHeight: CGFloat) -> NotchConfiguration {
         NotchConfiguration(
             expandedSize: CGSize(
-                width: layout.panelSize.width + earRadius * 2,
-                height: max(layout.panelSize.height - notchHeight, 0)
+                width: size.width + earRadius * 2,
+                height: max(size.height - notchHeight, 0)
             ),
             collapsedWidth: .wrapCutout(reserve: reserve),
             expandedTopCornerRadius: earRadius,
@@ -263,11 +266,37 @@ final class NotchController {
         let layout = PanelLayout.current
         if layout != self.layout {
             self.layout = layout
+            model.panelSize = layout.panelSize
+            model.hasCustomSize = layout.customSize(in: .standard) != nil
             collapse()
             presenter.uninstall()
             presenter.configuration = makeConfiguration(pinned: false)
             installPanel()
         }
+    }
+
+    private var sizeLimit: CGSize {
+        let screen = displayPreference.pick(from: NSScreen.screens, pointer: NSEvent.mouseLocation)
+        let frame = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
+        return CGSize(width: frame.width - 40, height: frame.height - 40)
+    }
+
+    private func resize(to size: CGSize, finished: Bool) {
+        let clamped = layout.clamp(size, to: sizeLimit)
+        if clamped != model.panelSize {
+            model.panelSize = clamped
+            presenter.configuration = makeConfiguration(pinned: model.isPinned)
+        }
+        if finished {
+            layout.saveSize(clamped)
+            model.hasCustomSize = layout.customSize(in: .standard) != nil
+        }
+    }
+
+    private func resetSize() {
+        layout.resetSize()
+        model.hasCustomSize = false
+        resize(to: layout.defaultSize, finished: true)
     }
 
     private func preferredScreenID() -> String? {

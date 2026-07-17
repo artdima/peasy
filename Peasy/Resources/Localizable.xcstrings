@@ -646,6 +646,26 @@
         }
       }
     },
+    "Reset Panel Size" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сбросить размер панели"
+          }
+        }
+      }
+    },
+    "Resize panel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить размер панели"
+          }
+        }
+      }
+    },
     "Settings" : {
       "localizations" : {
         "ru" : {

@@ -38,11 +38,17 @@ struct NotchContentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .overlay(alignment: .bottomTrailing) {
+            ResizeGrip(model: model)
+        }
         .foregroundStyle(PanelStyle.primary)
         .contentShape(Rectangle())
         .contextMenu {
             Button("About Peasy", action: actions.showAbout)
             Button("Settings…", action: actions.openSettings)
+            if model.hasCustomSize {
+                Button("Reset Panel Size", action: model.onResetSize)
+            }
             Divider()
             Button("Quit Peasy", action: actions.quit)
         }

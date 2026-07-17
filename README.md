@@ -20,7 +20,8 @@
 | --- | --- |
 | **Notch panel** | Hover over the notch and the panel unfolds from it; move away to fold it back. Click into the panel to type: then it stays open until you click elsewhere or press Esc. The pin in the header keeps it open even then. |
 | **Today, Inbox, projects** | Today collects the tasks flagged for today from every list. Inbox holds tasks without a project. Projects get a color each; rename, reorder and delete them from the list. |
-| **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top. Switch in Settings. |
+| **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top, wrapping onto new rows when they run out of room. Switch in Settings. |
+| **Resizable** | Drag the bottom-right corner to resize the panel; each layout remembers its size. Reset from the context menu. |
 | **Focus and Sprout** | Press ▶ on a task to focus on it. The panel folds away and Sprout, a little seedling, sits in the notch next to the task; hover him to see its name. Finish the task and he celebrates. |
 | **Collapsed notch** | A progress ring and the number of tasks left for today, the focused task, or a short "Added" after a quick add. |
 | **Quick add** | ⌃⌥N from any app opens a small window in the middle of the screen. Type, pick a project or Today, press Return. The shortcut is configurable. |
@@ -88,6 +89,6 @@ PeasyTests/         Swift Testing suites
 ## Known limitations
 
 - After signing out of iCloud or switching Apple ID, CloudKit may clear this Mac's copy of the previous account's tasks. They come back when you sign in to that account again; changes that never reached iCloud are lost.
-- The panel has a fixed size; a long list scrolls inside it.
+- A long list scrolls inside the panel.
 - In full-screen apps the panel still appears at the top of the screen.
 - Open at login is reliable only for a signed build in `/Applications`.

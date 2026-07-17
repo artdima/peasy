@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Observation
 
@@ -46,6 +47,10 @@ final class NotchViewModel {
 
     @ObservationIgnored var onFocusStarted: () -> Void = {}
     @ObservationIgnored var onCelebration: () -> Void = {}
+    @ObservationIgnored var onResize: (CGSize, Bool) -> Void = { _, _ in }
+    @ObservationIgnored var onResetSize: () -> Void = {}
+    var panelSize = PanelLayout.current.panelSize
+    var hasCustomSize = PanelLayout.current.customSize(in: .standard) != nil
     private(set) var newTaskFocusRequest = 0
 
     var acceptsNavigationKeys: Bool {
