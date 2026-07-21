@@ -29,7 +29,7 @@
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
 | **iCloud sync** | Projects and tasks follow your Apple ID to every Mac. Settings shows the sync status and lets you turn sync off. Without iCloud Peasy keeps everything on this Mac. |
 | **Any display** | Built-in display, main display or the one with the pointer. Macs without a notch get a small black island instead. |
-| **Settings** | iCloud sync, layout, expand on hover or on click, Today indicator, Sprout, display, quick add shortcut, open at login. English and Russian. |
+| **Settings** | iCloud sync, layout, multiline tasks, expand on hover or on click, Today indicator, Sprout, display, quick add shortcut, open at login. English and Russian. |
 
 ## Build
 

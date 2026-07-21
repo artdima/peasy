@@ -6,6 +6,7 @@ struct TaskRow: View {
     let store: TaskStore
     @Bindable var model: NotchViewModel
 
+    @AppStorage(PanelSettings.multilineTasksKey) private var isMultiline = false
     @State private var isHovered = false
     @State private var isChecking = false
     @State private var editedTitle = ""
@@ -16,9 +17,11 @@ struct TaskRow: View {
     private var isFocused: Bool { model.focusedTaskID == task.id && !task.isDone }
 
     var body: some View {
-        HStack(spacing: 8) {
+        let wraps = isMultiline && !isEditing
+        HStack(alignment: wraps ? .top : .center, spacing: 8) {
             CheckRing(color: accent, isOn: task.isDone || isChecking, isFocused: isFocused, action: toggle)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
+                .padding(.top, wraps ? 4 : 0)
 
             if isEditing {
                 TextField("Task", text: $editedTitle)
@@ -40,8 +43,11 @@ struct TaskRow: View {
                 Text(task.title)
                     .font(.system(size: 14))
                     .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
-                    .lineLimit(1)
+                    .lineLimit(wraps ? nil : 1)
+                    .lineSpacing(wraps ? 3 : 0)
                     .truncationMode(.tail)
+                    .fixedSize(horizontal: false, vertical: wraps)
+                    .padding(.vertical, wraps ? 10.5 : 0)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture(count: 2, perform: startEditing)
             }
@@ -75,6 +81,7 @@ struct TaskRow: View {
                     .opacity(isHovered ? 1 : 0)
                 }
                 .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
+                .padding(.top, wraps ? 7 : 0)
             }
         }
         .padding(.leading, 4)

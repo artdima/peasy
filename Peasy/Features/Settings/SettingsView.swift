@@ -4,6 +4,7 @@ struct SettingsView: View {
     let sync: SyncMonitor
     @AppStorage(PanelLayout.storageKey) private var layout = PanelLayout.vertical
     @AppStorage(PanelSettings.expandsOnHoverKey) private var expandsOnHover = true
+    @AppStorage(PanelSettings.multilineTasksKey) private var multilineTasks = false
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
     @AppStorage(PanelSettings.showsBuddyKey) private var showsBuddy = true
     @AppStorage(DisplayPreference.storageKey) private var display = DisplayPreference.builtIn
@@ -19,6 +20,12 @@ struct SettingsView: View {
                     LayoutOption(layout: .horizontal, title: "Horizontal", subtitle: "Projects as tabs on top", selection: $layout)
                 }
                 .padding(14)
+                SettingsDivider()
+                SettingsToggleRow(
+                    title: "Multiline tasks",
+                    subtitle: multilineTasks ? "Long titles wrap onto new lines" : "Long titles are cut off with an ellipsis",
+                    isOn: $multilineTasks
+                )
             }
 
             SettingsSection(title: "Notch") {

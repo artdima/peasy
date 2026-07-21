@@ -356,6 +356,26 @@
     "Little tasks, big growth." : {
       "shouldTranslate" : false
     },
+    "Long titles are cut off with an ellipsis" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длинные названия обрезаются многоточием"
+          }
+        }
+      }
+    },
+    "Long titles wrap onto new lines" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длинные названия переносятся на новые строки"
+          }
+        }
+      }
+    },
     "Main display" : {
       "localizations" : {
         "ru" : {
@@ -402,6 +422,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Снять отметку"
+          }
+        }
+      }
+    },
+    "Multiline tasks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Многострочные задачи"
           }
         }
       }

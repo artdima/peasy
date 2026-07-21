@@ -48,7 +48,11 @@ struct NotchControllerTests {
 
     @Test func draggingResizesAndClampsThePanel() throws {
         let layout = PanelLayout.current
-        defer { layout.resetSize() }
+        let savedSize = layout.customSize(in: .standard)
+        layout.resetSize()
+        defer {
+            if let savedSize { layout.saveSize(savedSize) } else { layout.resetSize() }
+        }
         let container = try Persistence.makeContainer(inMemory: true)
         let model = NotchViewModel()
         let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
