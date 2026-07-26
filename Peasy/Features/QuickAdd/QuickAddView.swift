@@ -77,29 +77,27 @@ struct QuickAddView: View {
                 .frame(height: 1)
                 .padding(.horizontal, -14)
 
-            ScrollView(.horizontal) {
-                HStack(spacing: 4) {
-                    QuickAddChip(title: String(localized: "Inbox"), colorHex: ProjectPalette.inbox, isOn: state.projectID == nil) {
-                        state.projectID = nil
+            FlowLayout(spacing: 4, rowSpacing: 4) {
+                QuickAddChip(title: String(localized: "Inbox"), colorHex: ProjectPalette.inbox, isOn: state.projectID == nil) {
+                    state.projectID = nil
+                }
+                ForEach(projects) { project in
+                    QuickAddChip(
+                        title: project.name,
+                        colorHex: project.colorHex,
+                        isOn: state.projectID == project.id
+                    ) {
+                        state.projectID = project.id
                     }
-                    ForEach(projects) { project in
-                        QuickAddChip(
-                            title: project.name,
-                            colorHex: project.colorHex,
-                            isOn: state.projectID == project.id
-                        ) {
-                            state.projectID = project.id
-                        }
-                    }
+                }
+                HStack(spacing: 10) {
                     Rectangle()
                         .fill(.white.opacity(0.14))
                         .frame(width: 1, height: 16)
-                        .padding(.horizontal, 6)
+                        .padding(.leading, 6)
                     TodayChip(isOn: $state.isToday)
                 }
             }
-            .scrollIndicators(.hidden)
-            .fixedSize(horizontal: false, vertical: true)
             .padding(.leading, 30)
         }
         .padding(14)
