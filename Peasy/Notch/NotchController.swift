@@ -32,6 +32,7 @@ final class NotchController {
         model.onFocusStarted = { [weak self] in self?.collapseSoon() }
         model.onCelebration = { [weak self] in self?.celebrationStarted() }
         model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
+        model.onCommitEdit = { [weak self] id, title in self?.commitEdit(of: id, title: title) }
         model.onResetSize = { [weak self] in self?.resetSize() }
 
         presenter.preferredScreenID = preferredScreenID()
@@ -318,7 +319,28 @@ final class NotchController {
             MainActor.assumeIsolated { self?.pointerMoved() }
             return event
         }
-        monitors = [keys, outsideClicks, moves, localMoves].compactMap { $0 }
+        let localClicks = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            MainActor.assumeIsolated { self?.handleLocalClick(event) }
+            return event
+        }
+        monitors = [keys, outsideClicks, moves, localMoves, localClicks].compactMap { $0 }
+    }
+
+    /// A click anywhere but inside the field being edited ends the edit.
+    private func handleLocalClick(_ event: NSEvent) {
+        guard model.editingTaskID != nil, let window = event.window, window is NotchPanel else { return }
+        let hit = window.contentView?.hitTest(event.locationInWindow)
+        if let editor = window.firstResponder as? NSView, let hit, hit.isDescendant(of: editor) {
+            return
+        }
+        model.commitEditing()
+    }
+
+    private func commitEdit(of id: UUID, title: String) {
+        guard let modelContainer else { return }
+        let store = TaskStore(context: modelContainer.mainContext)
+        guard let task = store.allTasks().first(where: { $0.id == id }) else { return }
+        store.rename(task, to: title)
     }
 
     private func handleOutsideClick() {

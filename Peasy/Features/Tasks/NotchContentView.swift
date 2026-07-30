@@ -200,7 +200,9 @@ struct NotchContentView: View {
             let remaining = store.openTasks(in: selectedList)
             model.selectedTaskID = remaining.isEmpty ? nil : remaining[min(index, remaining.count - 1)].id
         case .editSelected:
-            model.editingTaskID = model.selectedTaskID
+            if let task = tasks.first(where: { $0.id == model.selectedTaskID }) {
+                model.startEditing(task)
+            }
         }
     }
 
@@ -212,8 +214,8 @@ struct NotchContentView: View {
 
     private func select(_ list: TaskList) {
         selectedListValue = list.storageValue
+        model.commitEditing()
         model.selectedTaskID = nil
-        model.editingTaskID = nil
     }
 
     private func delete(_ project: Project, store: TaskStore) {

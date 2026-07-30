@@ -74,6 +74,28 @@ struct NotchControllerTests {
         #expect(layout.customSize(in: .standard) == nil)
     }
 
+    @Test func foldingThePanelSavesTheEdit() async throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let model = NotchViewModel()
+        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        defer { controller.shutdown() }
+        let store = TaskStore(context: container.mainContext)
+        let task = try #require(store.addTask("Draft", to: .inbox))
+
+        model.startEditing(task)
+        model.editingDraft = "Draft, edited"
+        model.resetInteraction()
+
+        #expect(task.title == "Draft, edited")
+        #expect(model.editingTaskID == nil)
+
+        model.startEditing(task)
+        model.editingDraft = "Thrown away"
+        model.cancelEditing()
+        #expect(task.title == "Draft, edited")
+    }
+
     @Test func panelSurvivesReloadingTheStore() async throws {
         let first = try Persistence.makeContainer(inMemory: true)
         let model = NotchViewModel()

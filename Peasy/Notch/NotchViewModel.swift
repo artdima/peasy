@@ -35,7 +35,9 @@ final class NotchViewModel {
     var isPinned = false
     var headerHeight: CGFloat = 34
     var selectedTaskID: UUID?
-    var editingTaskID: UUID?
+    private(set) var editingTaskID: UUID?
+    var editingDraft = ""
+    @ObservationIgnored var onCommitEdit: (UUID, String) -> Void = { _, _ in }
     var projectEditor: ProjectEditor?
     var projectPendingDeletion: UUID?
     private(set) var lastCommand: CommandEvent?
@@ -63,6 +65,27 @@ final class NotchViewModel {
 
     func focusNewTask() {
         newTaskFocusRequest += 1
+    }
+
+    func startEditing(_ task: TaskItem) {
+        selectedTaskID = task.id
+        editingDraft = task.title
+        editingTaskID = task.id
+    }
+
+    /// Saves the draft and ends editing: on Return, on focus loss, on a click
+    /// anywhere else, and when the panel folds away.
+    func commitEditing() {
+        guard let id = editingTaskID else { return }
+        editingTaskID = nil
+        onCommitEdit(id, editingDraft)
+        focusNewTask()
+    }
+
+    func cancelEditing() {
+        guard editingTaskID != nil else { return }
+        editingTaskID = nil
+        focusNewTask()
     }
 
     func startFocus(on task: TaskItem) {
@@ -94,9 +117,9 @@ final class NotchViewModel {
     }
 
     func resetInteraction() {
+        commitEditing()
         isPinned = false
         selectedTaskID = nil
-        editingTaskID = nil
         projectEditor = nil
         projectPendingDeletion = nil
     }

@@ -9,7 +9,6 @@ struct TaskRow: View {
     @AppStorage(PanelSettings.multilineTasksKey) private var isMultiline = false
     @State private var isHovered = false
     @State private var isChecking = false
-    @State private var editedTitle = ""
     @FocusState private var isEditorFocused: Bool
 
     private var isEditing: Bool { model.editingTaskID == task.id }
@@ -24,19 +23,18 @@ struct TaskRow: View {
                 .padding(.top, wraps ? 4 : 0)
 
             if isEditing {
-                TextField("Task", text: $editedTitle)
+                TextField("Task", text: $model.editingDraft)
                     .textFieldStyle(.plain)
                     .font(.system(size: 14))
                     .focused($isEditorFocused)
-                    .onSubmit(commitEdit)
-                    .onExitCommand(perform: cancelEdit)
+                    .onSubmit(model.commitEditing)
+                    .onExitCommand(perform: model.cancelEditing)
                     .onAppear {
-                        editedTitle = task.title
                         isEditorFocused = true
                     }
                     .onChange(of: isEditorFocused) { _, focused in
-                        if !focused {
-                            commitEdit()
+                        if !focused, isEditing {
+                            model.commitEditing()
                         }
                     }
             } else {
@@ -142,20 +140,7 @@ struct TaskRow: View {
     }
 
     private func startEditing() {
-        model.selectedTaskID = task.id
-        model.editingTaskID = task.id
-    }
-
-    private func commitEdit() {
-        guard isEditing else { return }
-        store.rename(task, to: editedTitle)
-        model.editingTaskID = nil
-        model.focusNewTask()
-    }
-
-    private func cancelEdit() {
-        model.editingTaskID = nil
-        model.focusNewTask()
+        model.startEditing(task)
     }
 
     private func delete() {
