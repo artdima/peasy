@@ -4,10 +4,11 @@ struct PanelHeader: View {
     @Bindable var model: NotchViewModel
     let focusTask: TaskItem?
     let growth: CGFloat
+    let onOpenSettings: () -> Void
     let onGoToFocus: () -> Void
 
     var body: some View {
-        HStack {
+        HStack(spacing: 2) {
             if model.celebration != nil {
                 FocusBand(mood: .done, growth: growth, text: Text("Done"), action: {})
             } else if focusTask != nil {
@@ -18,6 +19,11 @@ struct PanelHeader: View {
                     .foregroundStyle(PanelStyle.secondary)
             }
             Spacer()
+            IconButton(label: "Settings") {
+                onOpenSettings()
+            } icon: {
+                Glyph(kind: .gear, size: 14)
+            }
             IconButton(label: "Pin panel", isOn: model.isPinned) {
                 model.isPinned.toggle()
             } icon: {

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Glyph: View {
     enum Kind {
-        case pin, plus, chevron, check, checkBold, play, stop, returnKey, refresh, cloud, spinner
+        case pin, plus, chevron, check, checkBold, play, stop, returnKey, refresh, cloud, spinner, gear
     }
 
     let kind: Kind
@@ -28,7 +28,7 @@ struct Glyph: View {
 extension Glyph.Kind {
     var viewBox: CGFloat {
         switch self {
-        case .pin: 16
+        case .pin, .gear: 16
         case .chevron: 10
         case .returnKey, .refresh: 14
         case .cloud: 18
@@ -38,7 +38,7 @@ extension Glyph.Kind {
 
     var strokeWidth: CGFloat? {
         switch self {
-        case .pin: 1.4
+        case .pin, .gear: 1.4
         case .plus: 1.6
         case .chevron: 1.5
         case .check: 1.8
@@ -122,6 +122,29 @@ struct GlyphShape: Shape {
         case .spinner:
             path.move(to: CGPoint(x: 6, y: 1.2))
             path.addSVGArc(to: CGPoint(x: 1.2, y: 6), radius: 4.8, largeArc: true, sweep: true)
+        case .gear:
+            let center = CGPoint(x: 8, y: 8)
+            let teeth = 8
+            let outer: CGFloat = 6.9
+            let inner: CGFloat = 5.2
+            for tooth in 0..<teeth {
+                let pitch = .pi * 2 / CGFloat(teeth)
+                let start = pitch * CGFloat(tooth) - .pi / 2
+                let points = [
+                    (start - pitch * 0.17, outer), (start + pitch * 0.17, outer),
+                    (start + pitch * 0.3, inner), (start + pitch * 0.7, inner),
+                ]
+                for (index, (angle, radius)) in points.enumerated() {
+                    let point = CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius)
+                    if tooth == 0, index == 0 {
+                        path.move(to: point)
+                    } else {
+                        path.addLine(to: point)
+                    }
+                }
+            }
+            path.closeSubpath()
+            path.addEllipse(in: CGRect(x: center.x - 2, y: center.y - 2, width: 4, height: 4))
         }
         return path
     }
