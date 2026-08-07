@@ -29,6 +29,16 @@ final class NotchController {
             configuration: Self.configuration(layout: PanelLayout.current, size: model.panelSize, reserve: model.island.reserve, pinned: false, notchHeight: 0)
         )
         self.actions.collapse = { [weak self] in self?.collapse() }
+        let openSettings = actions.openSettings
+        let showAbout = actions.showAbout
+        self.actions.openSettings = { [weak self] in
+            self?.collapse()
+            openSettings()
+        }
+        self.actions.showAbout = { [weak self] in
+            self?.collapse()
+            showAbout()
+        }
         model.onFocusStarted = { [weak self] in self?.collapseSoon() }
         model.onCelebration = { [weak self] in self?.celebrationStarted() }
         model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
