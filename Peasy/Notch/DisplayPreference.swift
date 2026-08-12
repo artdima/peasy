@@ -14,11 +14,11 @@ enum DisplayPreference: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
-        case .builtIn: "Built-in display"
-        case .main: "Main display"
-        case .pointer: "Display with the pointer"
+        case .builtIn: String(localized: "Built-in display")
+        case .main: String(localized: "Main display")
+        case .pointer: String(localized: "Display with the pointer")
         }
     }
 

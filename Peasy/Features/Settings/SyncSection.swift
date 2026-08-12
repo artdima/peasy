@@ -4,7 +4,7 @@ struct SyncSection: View {
     let sync: SyncMonitor
 
     var body: some View {
-        SettingsSection(title: "iCloud", note: note) {
+        SettingsCard(note: note) {
             SettingsRow {
                 Glyph(kind: .cloud, size: 18)
                     .foregroundStyle(Color(hex: "#64D2FF"))
@@ -24,8 +24,7 @@ struct SyncSection: View {
                     .opacity(sync.isAvailable ? 1 : 0.4)
             }
             if sync.isActive {
-                SettingsDivider()
-                SettingsRow(minHeight: 44) {
+                SettingsRow(minHeight: 44, separated: true) {
                     Text("Status")
                         .settingsTitle()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,9 +64,11 @@ struct SyncStatusLabel: View {
                     .frame(width: 7, height: 7)
             }
             text
+                .lineLimit(1)
         }
         .font(.system(size: 12))
         .foregroundStyle(PanelStyle.secondary)
+        .fixedSize()
     }
 
     private var text: Text {

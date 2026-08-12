@@ -29,6 +29,12 @@ struct ShortcutRecorder: View {
                                 .padding(.horizontal, 6)
                                 .frame(minWidth: 22, minHeight: 22)
                                 .background(.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                .overlay(alignment: .bottom) {
+                                    Rectangle()
+                                        .fill(.white.opacity(0.06))
+                                        .frame(height: 1)
+                                }
+                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                         }
                     }
                     .padding(.horizontal, 4)

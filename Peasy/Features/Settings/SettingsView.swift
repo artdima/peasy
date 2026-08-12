@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SettingsView: View {
     let sync: SyncMonitor
+    var onTitleChange: (String) -> Void = { _ in }
+    @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general
     @AppStorage(PanelLayout.storageKey) private var layout = PanelLayout.vertical
     @AppStorage(PanelSettings.expandsOnHoverKey) private var expandsOnHover = true
     @AppStorage(PanelSettings.multilineTasksKey) private var multilineTasks = false
@@ -11,97 +13,108 @@ struct SettingsView: View {
     @State private var launchAtLogin = LaunchAtLogin()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            SyncSection(sync: sync)
-
-            SettingsSection(title: "Panel") {
-                HStack(alignment: .top, spacing: 14) {
-                    LayoutOption(layout: .vertical, title: "Vertical", subtitle: "Projects in a column on the left", selection: $layout)
-                    LayoutOption(layout: .horizontal, title: "Horizontal", subtitle: "Projects as tabs on top", selection: $layout)
-                }
-                .padding(14)
-                SettingsDivider()
-                SettingsToggleRow(
-                    title: "Multiline tasks",
-                    subtitle: multilineTasks ? "Long titles wrap onto new lines" : "Long titles are cut off with an ellipsis",
-                    isOn: $multilineTasks
-                )
-            }
-
-            SettingsSection(title: "Notch") {
-                SettingsToggleRow(
-                    title: "Expand on hover",
-                    subtitle: expandsOnHover ? "The panel opens when the pointer is over the notch" : "The panel opens when you click the notch",
-                    isOn: $expandsOnHover
-                )
-                SettingsDivider()
-                SettingsToggleRow(
-                    title: "Today indicator",
-                    subtitle: "Progress ring and the number of tasks left in the collapsed notch",
-                    isOn: $showsIndicator
-                )
-                SettingsDivider()
-                SettingsToggleRow(title: "Sprout", subtitle: "Appears in the notch while a task is in focus", isOn: $showsBuddy)
-                SettingsDivider()
-                SettingsRow(minHeight: 44) {
-                    Text("Show on")
-                        .settingsTitle()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Picker("Show on", selection: $display) {
-                        ForEach(DisplayPreference.allCases) { preference in
-                            Text(preference.title).tag(preference)
-                        }
-                    }
-                    .labelsHidden()
-                    .fixedSize()
-                }
-            }
-
-            SettingsSection(title: "General") {
-                SettingsRow(minHeight: 44) {
-                    Text("Quick new task")
-                        .settingsTitle()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    ShortcutRecorder()
-                }
-                SettingsDivider()
-                SettingsToggleRow(
-                    title: "Open at login",
-                    subtitle: launchAtLogin.needsApproval ? "Allow Peasy in Login Items to finish." : nil,
-                    isOn: Binding(get: { launchAtLogin.isOn }, set: { launchAtLogin.set($0) }),
-                    minHeight: 44
-                )
-                if let message = launchAtLogin.errorMessage {
-                    Text(message)
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, 14)
-                        .padding(.bottom, 10)
-                }
-            }
+        VStack(spacing: 0) {
+            SettingsTabBar(selection: $tab)
+            pane
+                .id(tab)
+                .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 4)), removal: .identity))
         }
-        .padding(EdgeInsets(top: 4, leading: 24, bottom: 24, trailing: 24))
-        .frame(width: 600)
+        .padding(.top, 34)
+        .frame(width: 560)
         .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(hex: "#1E1E20"))
+        .ignoresSafeArea()
         .environment(\.colorScheme, .dark)
+        .onChange(of: tab, initial: true) { _, tab in
+            onTitleChange(tab.title)
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             launchAtLogin.refresh()
         }
     }
+
+    private var pane: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            switch tab {
+            case .general: generalPane
+            case .panel: panelPane
+            case .notch: notchPane
+            case .icloud: SyncSection(sync: sync)
+            }
+        }
+        .padding(EdgeInsets(top: 20, leading: 24, bottom: 24, trailing: 24))
+    }
+
+    private var generalPane: some View {
+        SettingsCard {
+            SettingsRow(minHeight: 44) {
+                Text("Quick new task")
+                    .settingsTitle()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ShortcutRecorder()
+            }
+            SettingsToggleRow(
+                title: "Open at login",
+                subtitle: launchAtLogin.needsApproval ? "Allow Peasy in Login Items to finish." : nil,
+                isOn: Binding(get: { launchAtLogin.isOn }, set: { launchAtLogin.set($0) }),
+                minHeight: 44,
+                separated: true
+            )
+            if let message = launchAtLogin.errorMessage {
+                Text(message)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 10)
+            }
+        }
+    }
+
+    private var panelPane: some View {
+        SettingsCard {
+            HStack(alignment: .top, spacing: 14) {
+                LayoutOption(layout: .vertical, title: "Vertical", subtitle: "Projects in a column on the left", selection: $layout)
+                LayoutOption(layout: .horizontal, title: "Horizontal", subtitle: "Projects as tabs on top", selection: $layout)
+            }
+            .padding(14)
+            SettingsToggleRow(title: "Multiline tasks", subtitle: "Long titles wrap onto new lines", isOn: $multilineTasks, separated: true)
+        }
+    }
+
+    private var notchPane: some View {
+        SettingsCard {
+            SettingsToggleRow(
+                title: "Expand on hover",
+                subtitle: expandsOnHover ? "The panel opens when the pointer is over the notch" : "The panel opens when you click the notch",
+                isOn: $expandsOnHover
+            )
+            SettingsToggleRow(
+                title: "Today indicator",
+                subtitle: "Progress ring and the number of tasks left in the collapsed notch",
+                isOn: $showsIndicator,
+                separated: true
+            )
+            SettingsToggleRow(title: "Sprout", subtitle: "Appears in the notch while a task is in focus", isOn: $showsBuddy, separated: true)
+            SettingsRow(minHeight: 44, separated: true) {
+                Text("Show on")
+                    .settingsTitle()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                SettingsPopUp(
+                    options: DisplayPreference.allCases.map { ($0, $0.title) },
+                    selection: $display
+                )
+            }
+        }
+    }
 }
 
-struct SettingsSection<Content: View>: View {
-    let title: LocalizedStringKey
+struct SettingsCard<Content: View>: View {
     var note: LocalizedStringKey?
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(PanelStyle.secondary)
-                .padding(.leading, 4)
             VStack(spacing: 0, content: content)
                 .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
@@ -112,6 +125,7 @@ struct SettingsSection<Content: View>: View {
                 Text(note)
                     .font(.system(size: 11.5))
                     .lineSpacing(2)
+                    .padding(.vertical, 1)
                     .foregroundStyle(PanelStyle.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 4)
@@ -120,15 +134,26 @@ struct SettingsSection<Content: View>: View {
     }
 }
 
+/// A card row. `separated` draws the hairline above it inside the row's
+/// height, as a CSS top border does in the mockups.
 struct SettingsRow<Content: View>: View {
     var minHeight: CGFloat = 52
+    var separated = false
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         HStack(spacing: 12, content: content)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
+            .padding(.top, separated ? 1 : 0)
             .frame(minHeight: minHeight)
+            .overlay(alignment: .top) {
+                if separated {
+                    Rectangle()
+                        .fill(.white.opacity(0.07))
+                        .frame(height: 1)
+                }
+            }
     }
 }
 
@@ -137,9 +162,10 @@ struct SettingsToggleRow: View {
     let subtitle: LocalizedStringKey?
     @Binding var isOn: Bool
     var minHeight: CGFloat = 52
+    var separated = false
 
     var body: some View {
-        SettingsRow(minHeight: minHeight) {
+        SettingsRow(minHeight: minHeight, separated: separated) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .settingsTitle()
@@ -152,16 +178,6 @@ struct SettingsToggleRow: View {
             Toggle(title, isOn: $isOn)
                 .toggleStyle(PeasySwitchStyle())
         }
-    }
-}
-
-struct SettingsDivider: View {
-    var body: some View {
-        Rectangle()
-            .fill(.white.opacity(0.07))
-            .frame(height: 1)
-            .padding(.bottom, -1)
-            .zIndex(1)
     }
 }
 

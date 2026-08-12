@@ -3,6 +3,7 @@ import SwiftUI
 struct Glyph: View {
     enum Kind {
         case pin, plus, chevron, check, checkBold, play, stop, returnKey, refresh, cloud, spinner, gear
+        case sliders, sidebar, notchFrame, notchTab, cloudTab
     }
 
     let kind: Kind
@@ -32,6 +33,7 @@ extension Glyph.Kind {
         case .chevron: 10
         case .returnKey, .refresh: 14
         case .cloud: 18
+        case .sliders, .sidebar, .notchFrame, .notchTab, .cloudTab: 20
         default: 12
         }
     }
@@ -47,11 +49,13 @@ extension Glyph.Kind {
         case .stop: nil
         case .returnKey: 1.8
         case .refresh, .cloud, .spinner: 1.5
+        case .sliders, .sidebar, .notchFrame, .cloudTab: 1.5
+        case .notchTab: nil
         }
     }
 
     var fillsShape: Bool {
-        self == .play || self == .stop
+        self == .play || self == .stop || self == .notchTab
     }
 }
 
@@ -122,6 +126,38 @@ struct GlyphShape: Shape {
         case .spinner:
             path.move(to: CGPoint(x: 6, y: 1.2))
             path.addSVGArc(to: CGPoint(x: 1.2, y: 6), radius: 4.8, largeArc: true, sweep: true)
+        case .sliders:
+            for (from, to) in [(3.0, 11.0), (15.0, 17.0)] {
+                path.move(to: CGPoint(x: from, y: 6.5))
+                path.addLine(to: CGPoint(x: to, y: 6.5))
+            }
+            for (from, to) in [(3.0, 5.0), (9.0, 17.0)] {
+                path.move(to: CGPoint(x: from, y: 13.5))
+                path.addLine(to: CGPoint(x: to, y: 13.5))
+            }
+            path.addEllipse(in: CGRect(x: 11, y: 4.5, width: 4, height: 4))
+            path.addEllipse(in: CGRect(x: 5, y: 11.5, width: 4, height: 4))
+        case .sidebar:
+            path.addRoundedRect(in: CGRect(x: 2.75, y: 4.25, width: 14.5, height: 11.5), cornerSize: CGSize(width: 2.5, height: 2.5))
+            path.move(to: CGPoint(x: 7.75, y: 4.25))
+            path.addLine(to: CGPoint(x: 7.75, y: 15.75))
+        case .notchFrame:
+            path.addRoundedRect(in: CGRect(x: 2.75, y: 3.75, width: 14.5, height: 12.5), cornerSize: CGSize(width: 2.5, height: 2.5))
+        case .notchTab:
+            path.move(to: CGPoint(x: 7.5, y: 3.75))
+            path.addLine(to: CGPoint(x: 12.5, y: 3.75))
+            path.addLine(to: CGPoint(x: 12.5, y: 5.25))
+            path.addSVGArc(to: CGPoint(x: 11.25, y: 6.5), radius: 1.25, largeArc: false, sweep: true)
+            path.addLine(to: CGPoint(x: 8.75, y: 6.5))
+            path.addSVGArc(to: CGPoint(x: 7.5, y: 5.25), radius: 1.25, largeArc: false, sweep: true)
+            path.closeSubpath()
+        case .cloudTab:
+            path.move(to: CGPoint(x: 5.8, y: 15.5))
+            path.addLine(to: CGPoint(x: 14.2, y: 15.5))
+            path.addSVGArc(to: CGPoint(x: 14.75, y: 8.54), radius: 3.5, largeArc: false, sweep: false)
+            path.addSVGArc(to: CGPoint(x: 4.9, y: 9.3), radius: 5.1, largeArc: false, sweep: false)
+            path.addSVGArc(to: CGPoint(x: 5.8, y: 15.5), radius: 3.2, largeArc: false, sweep: false)
+            path.closeSubpath()
         case .gear:
             let center = CGPoint(x: 8, y: 8)
             let teeth = 8

@@ -356,16 +356,6 @@
     "Little tasks, big growth." : {
       "shouldTranslate" : false
     },
-    "Long titles are cut off with an ellipsis" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Длинные названия обрезаются многоточием"
-          }
-        }
-      }
-    },
     "Long titles wrap onto new lines" : {
       "localizations" : {
         "ru" : {
