@@ -79,13 +79,11 @@ final class NotchViewModel {
         guard let id = editingTaskID else { return }
         editingTaskID = nil
         onCommitEdit(id, editingDraft)
-        focusNewTask()
     }
 
     func cancelEditing() {
         guard editingTaskID != nil else { return }
         editingTaskID = nil
-        focusNewTask()
     }
 
     func startFocus(on task: TaskItem) {

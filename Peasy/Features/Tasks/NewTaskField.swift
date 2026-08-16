@@ -41,9 +41,6 @@ struct NewTaskField: View {
                 .fill(PanelStyle.separator)
                 .frame(height: 1)
         }
-        .onAppear {
-            isFocused = true
-        }
         .onChange(of: model.newTaskFocusRequest) {
             isFocused = true
         }

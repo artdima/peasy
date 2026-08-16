@@ -228,9 +228,6 @@ final class NotchController {
         if presenter.phase == .expanded, presenter.expandReason != .click {
             presenter.expand(reason: .click)
         }
-        if model.acceptsNavigationKeys {
-            model.focusNewTask()
-        }
     }
 
     private func collapseSoon() {
@@ -330,7 +327,10 @@ final class NotchController {
             return event
         }
         let localClicks = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            MainActor.assumeIsolated { self?.handleLocalClick(event) }
+            MainActor.assumeIsolated {
+                self?.handleLocalClick(event)
+                self?.focusClickedField(event)
+            }
             return event
         }
         monitors = [keys, outsideClicks, moves, localMoves, localClicks].compactMap { $0 }
@@ -344,6 +344,16 @@ final class NotchController {
             return
         }
         model.commitEditing()
+    }
+
+    private func focusClickedField(_ event: NSEvent) {
+        guard let window = event.window, window is NotchPanel, !window.isKeyWindow else { return }
+        var view = window.contentView?.hitTest(event.locationInWindow)
+        while let current = view, !(current is NSTextField) {
+            view = current.superview
+        }
+        guard let field = view as? NSTextField, field.currentEditor() == nil else { return }
+        window.makeFirstResponder(field)
     }
 
     private func commitEdit(of id: UUID, title: String) {
