@@ -160,7 +160,7 @@ struct SidebarRow<Icon: View>: View {
             .padding(.horizontal, 10)
             .frame(height: 32)
             .background(
-                .white.opacity(isSelected ? 0.12 : isHovered ? 0.06 : 0),
+                isSelected ? PanelStyle.selection : isHovered ? PanelStyle.hover : .clear,
                 in: RoundedRectangle(cornerRadius: 8, style: .continuous)
             )
             .contentShape(Rectangle())
@@ -189,7 +189,7 @@ struct NewProjectRow: View {
             .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.tertiary)
             .padding(.horizontal, 10)
             .frame(height: 32)
-            .background(.white.opacity(isHovered ? 0.06 : 0), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(isHovered ? PanelStyle.hover : .clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -223,7 +223,7 @@ struct ProjectNameField: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 32)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .background(PanelStyle.selection, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .onAppear {
             name = initialName
             isFocused = true

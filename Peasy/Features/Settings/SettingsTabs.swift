@@ -56,12 +56,12 @@ struct SettingsTabBar: View {
             .frame(maxWidth: .infinity)
 
             Rectangle()
-                .fill(.black.opacity(0.45))
+                .fill(SettingsStyle.tabBarShade)
                 .frame(height: 1)
         }
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(.white.opacity(0.05))
+                .fill(SettingsStyle.tabBarHighlight)
                 .frame(height: 1)
                 .offset(y: 1)
         }
@@ -85,7 +85,7 @@ struct SettingsTabButton: View {
                     .foregroundStyle(isSelected || isHovered ? PanelStyle.primary : PanelStyle.secondary)
             }
             .frame(width: 76, height: 52)
-            .background(.white.opacity(isSelected ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .background(isSelected ? SettingsStyle.tabSelected : .clear, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

@@ -1,21 +1,54 @@
+import AppKit
 import SwiftUI
 
+/// Colors of the panel and the windows around it. Each one resolves against the
+/// appearance it is drawn in, so the theme is chosen by setting a window's appearance.
 enum PanelStyle {
-    static let primary = Color(hex: "#F5F5F7")
-    static let secondary = Color(hex: "#98989F")
-    static let tertiary = Color(hex: "#8E8E93")
-    static let separator = Color.white.opacity(0.08)
+    static let primary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F")
+    static let secondary = Color.themed(dark: "#98989F", light: "#6E6E73")
+    static let tertiary = Color.themed(dark: "#8E8E93", light: "#6E6E73")
+    static let separator = Color.themed(white: 0.08, black: 0.08)
+    static let hover = Color.themed(white: 0.06, black: 0.045)
+    static let strongHover = Color.themed(white: 0.1, black: 0.07)
+    static let selection = Color.themed(white: 0.12, black: 0.075)
+    static let pillSelection = Color.themed(white: 0.13, black: 0.075)
+    static let keyBorder = Color.themed(white: 0.18, black: 0.16)
     static let green = Color(hex: "#30D158")
+
+    /// The collapsed notch and its cloud stay black in every theme.
+    static let onBlack = Color(hex: "#F5F5F7")
+    static let lightInk = Color(red: 0.965, green: 0.965, blue: 0.975)
 }
 
 extension Color {
     init(hex: String) {
+        self.init(nsColor: NSColor(hex: hex))
+    }
+
+    static func themed(dark: String, light: String) -> Color {
+        themed(dark: NSColor(hex: dark), light: NSColor(hex: light))
+    }
+
+    /// A white overlay in dark mode, a black one in light mode.
+    static func themed(white: CGFloat, black: CGFloat) -> Color {
+        themed(dark: NSColor.white.withAlphaComponent(white), light: NSColor.black.withAlphaComponent(black))
+    }
+
+    static func themed(dark: NSColor, light: NSColor) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? light : dark
+        })
+    }
+}
+
+extension NSColor {
+    convenience init(hex: String) {
         let value = UInt64(hex.trimmingCharacters(in: CharacterSet(charactersIn: "#")), radix: 16) ?? 0
         self.init(
-            .sRGB,
-            red: Double((value >> 16) & 0xFF) / 255,
-            green: Double((value >> 8) & 0xFF) / 255,
-            blue: Double(value & 0xFF) / 255
+            srgbRed: CGFloat((value >> 16) & 0xFF) / 255,
+            green: CGFloat((value >> 8) & 0xFF) / 255,
+            blue: CGFloat(value & 0xFF) / 255,
+            alpha: 1
         )
     }
 }
@@ -45,7 +78,7 @@ struct IconButton<Icon: View>: View {
             icon()
                 .foregroundStyle(isOn || isHovered ? PanelStyle.primary : color)
                 .frame(width: 28, height: 28)
-                .background(.white.opacity(isHovered ? 0.08 : 0), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background(isHovered ? PanelStyle.strongHover : .clear, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

@@ -23,7 +23,9 @@ struct IslandView: View {
         } trailing: {
             trailing(for: mode)
         }
-        .foregroundStyle(PanelStyle.primary)
+        .foregroundStyle(PanelStyle.onBlack)
+        .background(.black)
+        .environment(\.colorScheme, .dark)
         .onChange(of: mode, initial: true) { _, mode in
             model.island = mode
         }
@@ -103,7 +105,7 @@ struct ProgressRing: View {
                 .stroke(.white.opacity(0.22), lineWidth: 2)
             Circle()
                 .trim(from: 0, to: progress)
-                .stroke(PanelStyle.primary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .stroke(PanelStyle.onBlack, style: StrokeStyle(lineWidth: 2, lineCap: .round))
                 .rotationEffect(.degrees(-90))
         }
         .frame(width: 12.5, height: 12.5)

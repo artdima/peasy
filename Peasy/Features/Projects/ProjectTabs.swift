@@ -142,7 +142,7 @@ struct TabPill<Icon: View>: View {
             .foregroundStyle(isSelected || isHovered ? PanelStyle.primary : PanelStyle.secondary)
             .padding(.horizontal, 11)
             .frame(height: 30)
-            .background(.white.opacity(isSelected ? 0.13 : 0), in: Capsule())
+            .background(isSelected ? PanelStyle.pillSelection : .clear, in: Capsule())
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -161,7 +161,7 @@ struct AddTabButton: View {
             Glyph(kind: .plus, size: 12)
                 .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.tertiary)
                 .frame(width: 30, height: 30)
-                .background(.white.opacity(isHovered ? 0.08 : 0), in: Circle())
+                .background(isHovered ? PanelStyle.strongHover : .clear, in: Circle())
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -198,7 +198,7 @@ struct TabNameField: View {
         }
         .padding(.horizontal, 11)
         .frame(height: 30)
-        .background(.white.opacity(0.13), in: Capsule())
+        .background(PanelStyle.pillSelection, in: Capsule())
         .onAppear {
             name = initialName
             isFocused = true

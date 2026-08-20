@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
     @AppStorage(PanelSettings.showsBuddyKey) private var showsBuddy = true
     @AppStorage(DisplayPreference.storageKey) private var display = DisplayPreference.builtIn
+    @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
     @State private var launchAtLogin = LaunchAtLogin()
 
     var body: some View {
@@ -23,9 +24,8 @@ struct SettingsView: View {
         .frame(width: 560)
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color(hex: "#1E1E20"))
+        .background(SettingsStyle.window)
         .ignoresSafeArea()
-        .environment(\.colorScheme, .dark)
         .onChange(of: tab, initial: true) { _, tab in
             onTitleChange(tab.title)
         }
@@ -53,6 +53,12 @@ struct SettingsView: View {
                     .settingsTitle()
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ShortcutRecorder()
+            }
+            SettingsRow(minHeight: 44, separated: true) {
+                Text("Appearance")
+                    .settingsTitle()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                SettingsPopUp(options: AppTheme.allCases.map { ($0, $0.title) }, selection: $theme)
             }
             SettingsToggleRow(
                 title: "Open at login",
@@ -116,10 +122,10 @@ struct SettingsCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(spacing: 0, content: content)
-                .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(SettingsStyle.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(.white.opacity(0.04))
+                        .strokeBorder(SettingsStyle.cardStroke)
                 }
             if let note {
                 Text(note)
@@ -150,7 +156,7 @@ struct SettingsRow<Content: View>: View {
             .overlay(alignment: .top) {
                 if separated {
                     Rectangle()
-                        .fill(.white.opacity(0.07))
+                        .fill(SettingsStyle.rowDivider)
                         .frame(height: 1)
                 }
             }
@@ -215,7 +221,7 @@ struct LayoutOption: View {
                         let width: CGFloat = isSelected ? 2 : 1
                         RoundedRectangle(cornerRadius: 9 + width, style: .continuous)
                             .strokeBorder(
-                                isSelected ? PanelStyle.green : .white.opacity(isHovered ? 0.28 : 0.1),
+                                isSelected ? PanelStyle.green : isHovered ? SettingsStyle.optionHoverStroke : SettingsStyle.optionStroke,
                                 lineWidth: width
                             )
                             .padding(-width)
@@ -240,6 +246,9 @@ struct LayoutOption: View {
 
 struct LayoutThumbnail: View {
     let layout: PanelLayout
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var isLight: Bool { colorScheme == .light }
 
     var body: some View {
         Canvas { context, size in
@@ -247,11 +256,11 @@ struct LayoutThumbnail: View {
             context.scaleBy(x: scale, y: scale)
             context.fill(
                 Path(roundedRect: CGRect(x: 0, y: 0, width: 200, height: 112), cornerRadius: 9),
-                with: .color(Color(hex: "#2C2C2F"))
+                with: .color(SettingsStyle.thumbnailFrame)
             )
             context.fill(
                 Path(roundedRect: CGRect(x: 24, y: -14, width: 152, height: 110), cornerRadius: 14),
-                with: .color(.black)
+                with: .color(isLight ? PanelStyle.lightInk : .black)
             )
             switch layout {
             case .vertical: drawVertical(in: context)
@@ -301,7 +310,7 @@ struct LayoutThumbnail: View {
     private func bar(_ context: GraphicsContext, x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat, radius: CGFloat, opacity: Double) {
         context.fill(
             Path(roundedRect: CGRect(x: x, y: y, width: width, height: height), cornerRadius: radius),
-            with: .color(.white.opacity(opacity))
+            with: .color((isLight ? Color.black : .white).opacity(opacity))
         )
     }
 
@@ -327,7 +336,7 @@ struct PeasySwitchStyle: ToggleStyle {
         } label: {
             ZStack(alignment: configuration.isOn ? .trailing : .leading) {
                 Capsule()
-                    .fill(configuration.isOn ? PanelStyle.green : Color.white.opacity(0.2))
+                    .fill(configuration.isOn ? PanelStyle.green : SettingsStyle.switchOff)
                 Circle()
                     .fill(.white)
                     .frame(width: 18, height: 18)
@@ -344,4 +353,26 @@ struct PeasySwitchStyle: ToggleStyle {
             }
         }
     }
+}
+
+enum SettingsStyle {
+    static let window = Color.themed(dark: "#1E1E20", light: "#ECECEE")
+    static let windowNS = NSColor(name: nil) { appearance in
+        NSColor(hex: appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? "#ECECEE" : "#1E1E20")
+    }
+    static let card = Color.themed(dark: NSColor.white.withAlphaComponent(0.05), light: NSColor.white.withAlphaComponent(0.75))
+    static let cardStroke = Color.themed(white: 0.04, black: 0.05)
+    static let rowDivider = Color.themed(white: 0.07, black: 0.07)
+    static let tabSelected = Color.themed(white: 0.1, black: 0.07)
+    static let tabBarShade = Color.themed(dark: NSColor.black.withAlphaComponent(0.45), light: NSColor.black.withAlphaComponent(0.1))
+    static let tabBarHighlight = Color.themed(dark: NSColor.white.withAlphaComponent(0.05), light: NSColor.white.withAlphaComponent(0.7))
+    static let optionStroke = Color.themed(white: 0.1, black: 0.1)
+    static let optionHoverStroke = Color.themed(white: 0.28, black: 0.2)
+    static let switchOff = Color.themed(white: 0.2, black: 0.12)
+    static let control = Color.themed(white: 0.1, black: 0.06)
+    static let controlHover = Color.themed(white: 0.14, black: 0.09)
+    static let chevron = Color.themed(dark: "#C7C7CC", light: "#6E6E73")
+    static let keyCapEdge = Color.themed(dark: NSColor.white.withAlphaComponent(0.06), light: NSColor.black.withAlphaComponent(0.06))
+    static let iconTile = Color.themed(dark: NSColor(hex: "#2C2C2E"), light: NSColor.black.withAlphaComponent(0.05))
+    static let thumbnailFrame = Color.themed(dark: "#2C2C2F", light: "#DCDCE0")
 }

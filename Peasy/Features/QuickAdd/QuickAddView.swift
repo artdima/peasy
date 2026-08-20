@@ -28,6 +28,15 @@ struct QuickAddView: View {
     @Query(sort: [SortDescriptor(\Project.order), SortDescriptor(\Project.createdAt)])
     private var projects: [Project]
     @FocusState private var isFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
+
+    private static let card = Color.themed(dark: "#151517", light: "#F7F7F9")
+    private static let stroke = Color.themed(white: 0.09, black: 0.08)
+    private static let divider = Color.themed(white: 0.07, black: 0.07)
+    private static let groupSeparator = Color.themed(white: 0.14, black: 0.12)
+    private static let idleSend = Color.themed(white: 0.08, black: 0.06)
+    private static let idleSendGlyph = Color.themed(dark: "#636366", light: "#AEAEB2")
+    private static let shadow = Color(red: 10 / 255, green: 12 / 255, blue: 18 / 255)
 
     var body: some View {
         let colorHex = projects.first { $0.id == state.projectID }?.colorHex ?? ProjectPalette.inbox
@@ -61,9 +70,9 @@ struct QuickAddView: View {
                     .offset(y: 1)
                 Button(action: onSubmit) {
                     Glyph(kind: .returnKey, size: 14)
-                        .foregroundStyle(isReady ? Color.black : Color(hex: "#636366"))
+                        .foregroundStyle(isReady ? Color.black : Self.idleSendGlyph)
                         .frame(width: 30, height: 30)
-                        .background(isReady ? color : Color.white.opacity(0.08), in: Circle())
+                        .background(isReady ? color : Self.idleSend, in: Circle())
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -73,7 +82,7 @@ struct QuickAddView: View {
             .frame(height: 44)
 
             Rectangle()
-                .fill(.white.opacity(0.07))
+                .fill(Self.divider)
                 .frame(height: 1)
                 .padding(.horizontal, -14)
 
@@ -92,7 +101,7 @@ struct QuickAddView: View {
                 }
                 HStack(spacing: 10) {
                     Rectangle()
-                        .fill(.white.opacity(0.14))
+                        .fill(Self.groupSeparator)
                         .frame(width: 1, height: 16)
                         .padding(.leading, 6)
                     TodayChip(isOn: $state.isToday)
@@ -102,16 +111,23 @@ struct QuickAddView: View {
         }
         .padding(14)
         .frame(width: 560)
-        .background(Color(hex: "#151517"), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Self.card)
+                    .shadow(color: Self.shadow.opacity(0.55), radius: 45, y: 40)
+                    .shadow(color: Self.shadow.opacity(0.35), radius: 15, y: 10)
+                if colorScheme == .light {
+                    GlassBackground(topRadius: 18, bottomRadius: 18)
+                }
+            }
+        }
         .overlay {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(.white.opacity(0.09))
+                .strokeBorder(Self.stroke)
         }
-        .shadow(color: Color(red: 10 / 255, green: 12 / 255, blue: 18 / 255).opacity(0.55), radius: 45, y: 40)
-        .shadow(color: Color(red: 10 / 255, green: 12 / 255, blue: 18 / 255).opacity(0.35), radius: 15, y: 10)
         .padding(Self.shadowRoom)
         .foregroundStyle(PanelStyle.primary)
-        .environment(\.colorScheme, .dark)
         .onExitCommand(perform: onCancel)
         .onAppear {
             isFocused = true
@@ -168,7 +184,7 @@ struct TodayChip: View {
             .background(PanelStyle.green.opacity(isOn ? 0.18 : 0), in: Capsule())
             .overlay {
                 Capsule()
-                    .strokeBorder(.white.opacity(isOn ? 0 : 0.16))
+                    .strokeBorder(isOn ? .clear : Color.themed(white: 0.16, black: 0.14))
             }
             .contentShape(Capsule())
         }

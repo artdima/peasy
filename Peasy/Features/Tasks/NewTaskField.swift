@@ -29,7 +29,7 @@ struct NewTaskField: View {
                     .foregroundStyle(PanelStyle.secondary)
                     .padding(.horizontal, 6)
                     .frame(height: 18)
-                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.white.opacity(0.18)))
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(PanelStyle.keyBorder))
                     .accessibilityHidden(true)
             }
         }

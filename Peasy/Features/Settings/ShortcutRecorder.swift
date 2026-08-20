@@ -28,10 +28,10 @@ struct ShortcutRecorder: View {
                                 .foregroundStyle(PanelStyle.primary)
                                 .padding(.horizontal, 6)
                                 .frame(minWidth: 22, minHeight: 22)
-                                .background(.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                .background(SettingsStyle.control, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                                 .overlay(alignment: .bottom) {
                                     Rectangle()
-                                        .fill(.white.opacity(0.06))
+                                        .fill(SettingsStyle.keyCapEdge)
                                         .frame(height: 1)
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -41,7 +41,7 @@ struct ShortcutRecorder: View {
                 }
             }
             .frame(height: 30)
-            .background(.white.opacity(isHovered && !isRecording ? 0.06 : 0), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(isHovered && !isRecording ? PanelStyle.hover : .clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(PanelStyle.green, lineWidth: isRecording ? 1.5 : 0)

@@ -17,10 +17,10 @@ struct SettingsPopUp<Value: Hashable>: View {
                 .padding(.leading, 12)
                 .padding(.trailing, 30)
                 .frame(height: 28)
-                .background(.white.opacity(isHovered ? 0.14 : 0.1), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background(isHovered ? SettingsStyle.controlHover : SettingsStyle.control, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 .overlay(alignment: .trailing) {
                     UpDownChevron()
-                        .stroke(Color(hex: "#C7C7CC"), style: StrokeStyle(lineWidth: 1.4, lineCap: .round, lineJoin: .round))
+                        .stroke(SettingsStyle.chevron, style: StrokeStyle(lineWidth: 1.4, lineCap: .round, lineJoin: .round))
                         .frame(width: 9, height: 12)
                         .padding(.trailing, 9)
                 }
@@ -33,7 +33,7 @@ struct SettingsPopUp<Value: Hashable>: View {
 
     private func showMenu() {
         let menu = NSMenu()
-        menu.appearance = NSAppearance(named: .darkAqua)
+        menu.appearance = NSApp.keyWindow?.effectiveAppearance
         var current: NSMenuItem?
         for option in options {
             let item = ClosureMenuItem(title: option.title) { selection = option.value }

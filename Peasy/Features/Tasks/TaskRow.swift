@@ -86,7 +86,7 @@ struct TaskRow: View {
         .padding(.trailing, 8)
         .frame(minHeight: 38)
         .background(
-            .white.opacity(isSelected || isFocused ? 0.08 : isHovered ? 0.05 : 0),
+            isSelected || isFocused ? PanelStyle.strongHover : isHovered ? PanelStyle.hover : .clear,
             in: RoundedRectangle(cornerRadius: 9, style: .continuous)
         )
         .contentShape(Rectangle())
@@ -200,7 +200,7 @@ struct RowActionButton: View {
             Glyph(kind: glyph, size: 10)
                 .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.secondary)
                 .frame(width: 24, height: 24)
-                .background(.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .background(isHovered ? PanelStyle.strongHover : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

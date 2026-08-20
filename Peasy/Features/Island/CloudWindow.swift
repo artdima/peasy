@@ -23,6 +23,7 @@ final class CloudWindow {
         panel.ignoresMouseEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
         panel.alphaValue = 0
+        panel.appearance = NSAppearance(named: .darkAqua)
         hostingView = NSHostingView(rootView: CloudView(title: "", colorHex: ProjectPalette.inbox))
         hostingView.sizingOptions = .intrinsicContentSize
         let container = NSView()
@@ -78,7 +79,7 @@ struct CloudView: View {
                 .font(.system(size: 13, weight: .medium))
                 .lineSpacing(3.5)
                 .padding(.bottom, 3.5)
-                .foregroundStyle(PanelStyle.primary)
+                .foregroundStyle(PanelStyle.onBlack)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(EdgeInsets(top: 8, leading: 11, bottom: 9, trailing: 13))

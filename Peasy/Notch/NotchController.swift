@@ -15,6 +15,9 @@ final class NotchController {
     private var monitors: [Any] = []
     private var displayPreference = DisplayPreference.current
     private var layout = PanelLayout.current
+    private var theme = AppTheme.current
+    private var isLight = AppTheme.current.isLight
+    private var appearanceObservation: NSKeyValueObservation?
     private var focusReturnTask: Task<Void, Never>?
     private var hoverOpenTask: Task<Void, Never>?
     private var hoverCancelTask: Task<Void, Never>?
@@ -26,7 +29,15 @@ final class NotchController {
         self.modelContainer = modelContainer
         self.actions = actions
         presenter = NotchPresenter(
-            configuration: Self.configuration(layout: PanelLayout.current, size: model.panelSize, reserve: model.island.reserve, pinned: false, notchHeight: 0)
+            configuration: Self.configuration(
+                layout: PanelLayout.current,
+                size: model.panelSize,
+                reserve: model.island.reserve,
+                pinned: false,
+                notchHeight: 0,
+                light: AppTheme.current.isLight
+            ),
+            style: Self.style(light: AppTheme.current.isLight)
         )
         self.actions.collapse = { [weak self] in self?.collapse() }
         let openSettings = actions.openSettings
@@ -60,6 +71,11 @@ final class NotchController {
         }
         observe(UserDefaults.didChangeNotification) { controller, _ in
             controller.settingsDidChange()
+        }
+        appearanceObservation = NSApp.observe(\.effectiveAppearance) { [weak self] _, _ in
+            Task { @MainActor [weak self] in
+                self?.applyTheme()
+            }
         }
         startMonitors()
         observePhase()
@@ -117,22 +133,47 @@ final class NotchController {
             size: model.panelSize,
             reserve: model.island.reserve,
             pinned: pinned,
-            notchHeight: presenter.geometry.collapsedHeight
+            notchHeight: presenter.geometry.collapsedHeight,
+            light: isLight
+        )
+    }
+
+    /// The light panel in the mockup hangs flat from the top edge (no concave
+    /// ears), with rounder bottom corners and a softer shadow.
+    private static func bottomRadius(layout: PanelLayout, light: Bool) -> CGFloat {
+        layout.bottomCornerRadius + (light ? 4 : 0)
+    }
+
+    private static func style(light: Bool) -> NotchStyle {
+        guard light else { return .standard }
+        return NotchStyle(
+            ink: PanelStyle.lightInk,
+            shadowColor: Color(red: 16 / 255, green: 18 / 255, blue: 24 / 255).opacity(0.32),
+            foreground: Color(hex: "#1D1D1F"),
+            colorScheme: .light
         )
     }
 
     // NotchKit's expandedSize spans the concave ears and excludes the notch row;
     // the mockups measure the panel body below the ears, including that row.
-    private static func configuration(layout: PanelLayout, size: CGSize, reserve: CGFloat, pinned: Bool, notchHeight: CGFloat) -> NotchConfiguration {
-        NotchConfiguration(
+    private static func configuration(
+        layout: PanelLayout,
+        size: CGSize,
+        reserve: CGFloat,
+        pinned: Bool,
+        notchHeight: CGFloat,
+        light: Bool
+    ) -> NotchConfiguration {
+        let ear = light ? 0 : earRadius
+        return NotchConfiguration(
             expandedSize: CGSize(
-                width: size.width + earRadius * 2,
+                width: size.width + ear * 2,
                 height: max(size.height - notchHeight, 0)
             ),
             collapsedWidth: .wrapCutout(reserve: reserve),
-            expandedTopCornerRadius: earRadius,
-            expandedBottomCornerRadius: layout.bottomCornerRadius,
-            expandedContentInsetsOverride: EdgeInsets(top: 0, leading: earRadius, bottom: 0, trailing: earRadius),
+            expandedTopCornerRadius: ear,
+            expandedBottomCornerRadius: bottomRadius(layout: layout, light: light),
+            expandedContentInsetsOverride: EdgeInsets(top: 0, leading: ear, bottom: 0, trailing: ear),
             expandedTopReserve: .none,
             expandsOnHover: false,
             collapsesOnPointerExit: !pinned,
@@ -149,13 +190,20 @@ final class NotchController {
         let model = model
         let actions = actions
         let presenter = presenter
+        let glassRadius: CGFloat? = isLight ? Self.bottomRadius(layout: layout, light: true) : nil
         presenter.install {
             IslandView(presenter: presenter, model: model)
                 .modelContainer(modelContainer)
         } expanded: {
             NotchContentView(model: model, actions: actions)
                 .modelContainer(modelContainer)
+                .background {
+                    if let glassRadius {
+                        PanelGlass(bottomRadius: glassRadius, isVisible: model.isPanelOpen)
+                    }
+                }
         }
+        panel?.appearance = theme.appearance
         modelContainer.mainContext.undoManager = panel?.undoManager
         model.headerHeight = presenter.geometry.collapsedHeight
     }
@@ -217,6 +265,7 @@ final class NotchController {
     }
 
     private func phaseDidChange() {
+        model.isPanelOpen = presenter.phase == .expanded
         cloud.hide()
         cancelHoverOpen(immediately: true)
         guard presenter.phase == .collapsed else { return }
@@ -271,6 +320,7 @@ final class NotchController {
             displayPreference = preference
             presenter.preferredScreenID = preferredScreenID()
         }
+        applyTheme()
         let layout = PanelLayout.current
         if layout != self.layout {
             self.layout = layout
@@ -281,6 +331,21 @@ final class NotchController {
             presenter.configuration = makeConfiguration(pinned: false)
             installPanel()
         }
+    }
+
+    private func applyTheme() {
+        let theme = AppTheme.current
+        let light = theme.isLight
+        guard theme != self.theme || light != isLight else { return }
+        self.theme = theme
+        panel?.appearance = theme.appearance
+        guard light != isLight else { return }
+        isLight = light
+        collapse()
+        presenter.uninstall()
+        presenter.style = Self.style(light: light)
+        presenter.configuration = makeConfiguration(pinned: false)
+        installPanel()
     }
 
     private var sizeLimit: CGSize {

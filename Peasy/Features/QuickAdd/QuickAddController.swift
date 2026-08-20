@@ -41,7 +41,6 @@ final class QuickAddController {
         panel.hidesOnDeactivate = false
         panel.isReleasedWhenClosed = false
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
-        panel.appearance = NSAppearance(named: .darkAqua)
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
         hostingView.sizingOptions = .intrinsicContentSize
         let container = NSView()
@@ -86,6 +85,7 @@ final class QuickAddController {
 
     func show() {
         guard modelContainer != nil else { return }
+        panel.appearance = AppTheme.current.appearance
         let selected = UserDefaults.standard.string(forKey: TaskList.storageKey).map(TaskList.init(storageValue:))
         if case .project(let id) = selected {
             state.reset(projectID: id)

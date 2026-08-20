@@ -7,6 +7,7 @@ final class SettingsWindowController {
     private var window: NSWindow?
     private var hosting: NSHostingController<SettingsView>?
     private var sizeObservation: NSKeyValueObservation?
+    private var themeObserver: NSObjectProtocol?
 
     init(sync: SyncMonitor) {
         self.sync = sync
@@ -27,8 +28,8 @@ final class SettingsWindowController {
             defer: false
         )
         window.titlebarAppearsTransparent = true
-        window.appearance = NSAppearance(named: .darkAqua)
-        window.backgroundColor = NSColor(srgbRed: 0x1E / 255, green: 0x1E / 255, blue: 0x20 / 255, alpha: 1)
+        window.appearance = AppTheme.current.appearance
+        window.backgroundColor = SettingsStyle.windowNS
         window.isReleasedWhenClosed = false
 
         let hosting = NSHostingController(rootView: SettingsView(sync: sync) { [weak window] title in
@@ -43,6 +44,15 @@ final class SettingsWindowController {
 
         // The window keeps its top edge while it follows the pane's height,
         // like the system's own settings windows.
+        themeObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak window] _ in
+            MainActor.assumeIsolated {
+                window?.appearance = AppTheme.current.appearance
+            }
+        }
         sizeObservation = hosting.observe(\.preferredContentSize, options: [.new]) { [weak self] _, _ in
             Task { @MainActor [weak self] in
                 self?.fitWindow()

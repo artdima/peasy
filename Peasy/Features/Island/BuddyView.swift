@@ -10,6 +10,7 @@ struct BuddyView: NSViewRepresentable {
 
     var mood: Mood
     var growth: CGFloat
+    var outlined = false
 
     func makeNSView(context: Context) -> BuddyLayerView {
         BuddyLayerView()
@@ -17,6 +18,7 @@ struct BuddyView: NSViewRepresentable {
 
     func updateNSView(_ view: BuddyLayerView, context: Context) {
         view.update(mood: mood, growth: growth)
+        view.setOutlined(outlined)
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, nsView: BuddyLayerView, context: Context) -> CGSize? {
@@ -34,6 +36,7 @@ final class BuddyLayerView: NSView {
     private let eyesGroup = BuddyLayerView.group(anchor: CGPoint(x: 12, y: 14.7))
     private let openEyes = CAShapeLayer()
     private let happyEyes = CAShapeLayer()
+    private var bodyShape: CAShapeLayer?
     private var sparkles: [CAShapeLayer] = []
     private var mood: BuddyView.Mood?
     private var growth: CGFloat?
@@ -55,6 +58,12 @@ final class BuddyLayerView: NSView {
     override func layout() {
         super.layout()
         content.frame = bounds
+    }
+
+    /// On a light panel the white body needs an edge to stand out.
+    func setOutlined(_ outlined: Bool) {
+        bodyShape?.strokeColor = outlined ? NSColor.black.withAlphaComponent(0.2).cgColor : nil
+        bodyShape?.lineWidth = outlined ? 0.7 : 0
     }
 
     func update(mood: BuddyView.Mood, growth: CGFloat) {
@@ -124,6 +133,7 @@ final class BuddyLayerView: NSView {
         bodyPath.closeSubpath()
         body.path = bodyPath
         bodyGroup.addSublayer(body)
+        bodyShape = body
 
         bodyGroup.addSublayer(eyesGroup)
         openEyes.frame = CGRect(x: 0, y: 0, width: Self.side, height: Self.side)

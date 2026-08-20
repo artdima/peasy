@@ -52,6 +52,8 @@ final class NotchViewModel {
     @ObservationIgnored var onResize: (CGSize, Bool) -> Void = { _, _ in }
     @ObservationIgnored var onResetSize: () -> Void = {}
     var panelSize = PanelLayout.current.panelSize
+    /// Fully open: the light panel's glass shows only then, since it can't follow the morph.
+    var isPanelOpen = false
     var hasCustomSize = PanelLayout.current.customSize(in: .standard) != nil
     private(set) var newTaskFocusRequest = 0
 

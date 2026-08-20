@@ -9,7 +9,7 @@ struct SyncSection: View {
                 Glyph(kind: .cloud, size: 18)
                     .foregroundStyle(Color(hex: "#64D2FF"))
                     .frame(width: 28, height: 28)
-                    .background(Color(hex: "#2C2C2E"), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .background(SettingsStyle.iconTile, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("iCloud sync")

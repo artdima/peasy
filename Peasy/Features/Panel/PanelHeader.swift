@@ -48,11 +48,12 @@ struct FocusBand: View {
     let action: () -> Void
 
     @State private var isHovered = false
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                BuddyView(mood: mood, growth: growth)
+                BuddyView(mood: mood, growth: growth, outlined: colorScheme == .light)
                 text
             }
             .font(.system(size: 12, weight: .medium))
@@ -60,7 +61,7 @@ struct FocusBand: View {
             .padding(.leading, 6)
             .padding(.trailing, 10)
             .frame(height: 30)
-            .background(.white.opacity(isHovered ? 0.06 : 0), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(isHovered ? PanelStyle.hover : .clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

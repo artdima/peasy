@@ -113,6 +113,16 @@
         }
       }
     },
+    "Appearance" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оформление"
+          }
+        }
+      }
+    },
     "Appears in the notch while a task is in focus" : {
       "localizations" : {
         "ru" : {
@@ -189,6 +199,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Голубой"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёмное"
           }
         }
       }
@@ -353,6 +373,16 @@
         }
       }
     },
+    "Light" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Светлое"
+          }
+        }
+      }
+    },
     "Little tasks, big growth." : {
       "shouldTranslate" : false
     },
@@ -412,6 +442,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Снять отметку"
+          }
+        }
+      }
+    },
+    "Match System" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как в системе"
           }
         }
       }
