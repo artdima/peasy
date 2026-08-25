@@ -1,23 +1,31 @@
 import AppKit
+import NotchKit
 import SwiftUI
 
 /// Colors of the panel and the windows around it. Each one resolves against the
 /// appearance it is drawn in, so the theme is chosen by setting a window's appearance.
+/// Gray is a dark appearance with its own values, so dark ↔ gray needs a rebuild.
 enum PanelStyle {
-    static let primary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F")
-    static let secondary = Color.themed(dark: "#98989F", light: "#6E6E73")
-    static let tertiary = Color.themed(dark: "#8E8E93", light: "#6E6E73")
+    static let primary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F", gray: "#E9E9E9")
+    static let secondary = Color.themed(dark: "#98989F", light: "#6E6E73", gray: "#A8A7A8")
+    static let tertiary = Color.themed(dark: "#8E8E93", light: "#6E6E73", gray: "#9B9C9E")
     static let separator = Color.themed(white: 0.08, black: 0.08)
-    static let hover = Color.themed(white: 0.06, black: 0.045)
-    static let strongHover = Color.themed(white: 0.1, black: 0.07)
-    static let selection = Color.themed(white: 0.12, black: 0.075)
-    static let pillSelection = Color.themed(white: 0.13, black: 0.075)
+    static let hover = Color.themed(white: 0.06, black: 0.045, gray: "#2C2B2C")
+    static let strongHover = Color.themed(white: 0.1, black: 0.07, gray: "#333233")
+    static let selection = Color.themed(white: 0.12, black: 0.075, gray: "#2458CA")
+    static let pillSelection = Color.themed(white: 0.13, black: 0.075, gray: "#2458CA")
+    static let selectedPrimary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F", gray: "#FFFFFF")
+    static let selectedTertiary = Color.themed(dark: "#8E8E93", light: "#6E6E73", gray: "#BDCDEF")
+    static let nameField = Color.themed(white: 0.12, black: 0.075, gray: "#333233")
+    static let pillNameField = Color.themed(white: 0.13, black: 0.075, gray: "#333233")
     static let keyBorder = Color.themed(white: 0.18, black: 0.16)
     static let green = Color(hex: "#30D158")
 
     /// The collapsed notch and its cloud stay black in every theme.
     static let onBlack = Color(hex: "#F5F5F7")
     static let lightInk = Color(red: 0.965, green: 0.965, blue: 0.975)
+    static let grayInk = Color(hex: "#212121")
+    static let grayEdge = Color(hex: "#4D4D4D")
 }
 
 extension Color {
@@ -25,18 +33,28 @@ extension Color {
         self.init(nsColor: NSColor(hex: hex))
     }
 
-    static func themed(dark: String, light: String) -> Color {
-        themed(dark: NSColor(hex: dark), light: NSColor(hex: light))
+    static func themed(dark: String, light: String, gray: String? = nil) -> Color {
+        themed(dark: NSColor(hex: dark), light: NSColor(hex: light), gray: gray.map { NSColor(hex: $0) })
     }
 
     /// A white overlay in dark mode, a black one in light mode.
-    static func themed(white: CGFloat, black: CGFloat) -> Color {
-        themed(dark: NSColor.white.withAlphaComponent(white), light: NSColor.black.withAlphaComponent(black))
+    static func themed(white: CGFloat, black: CGFloat, gray: String? = nil) -> Color {
+        themed(
+            dark: NSColor.white.withAlphaComponent(white),
+            light: NSColor.black.withAlphaComponent(black),
+            gray: gray.map { NSColor(hex: $0) }
+        )
     }
 
-    static func themed(dark: NSColor, light: NSColor) -> Color {
+    static func themed(dark: NSColor, light: NSColor, gray: NSColor? = nil) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
-            appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? light : dark
+            if appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua {
+                return light
+            }
+            if let gray, AppTheme.isGray {
+                return gray
+            }
+            return dark
         })
     }
 }
@@ -114,5 +132,16 @@ struct SproutIcon: View {
             context.fill(leaves.applying(scale), with: .color(color))
         }
         .accessibilityHidden(true)
+    }
+}
+
+struct PanelEdge: View {
+    let bottomRadius: CGFloat
+
+    var body: some View {
+        NotchShape(topCornerRadius: 0, bottomCornerRadius: bottomRadius)
+            .stroke(PanelStyle.grayEdge, lineWidth: 2)
+            .padding(.top, -2)
+            .allowsHitTesting(false)
     }
 }

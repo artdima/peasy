@@ -5,8 +5,6 @@ import SwiftUI
 final class SettingsWindowController {
     private let sync: SyncMonitor
     private var window: NSWindow?
-    private var hosting: NSHostingController<SettingsView>?
-    private var sizeObservation: NSKeyValueObservation?
     private var themeObserver: NSObjectProtocol?
 
     init(sync: SyncMonitor) {
@@ -32,44 +30,41 @@ final class SettingsWindowController {
         window.backgroundColor = SettingsStyle.windowNS
         window.isReleasedWhenClosed = false
 
-        let hosting = NSHostingController(rootView: SettingsView(sync: sync) { [weak window] title in
+        let view = NSHostingView(rootView: SettingsView(sync: sync) { [weak window] title in
             window?.title = title
+        } onHeightChange: { [weak self] height in
+            Task { @MainActor [weak self] in
+                self?.fitWindow(toHeight: height)
+            }
         })
-        hosting.sizingOptions = .preferredContentSize
-        window.contentViewController = hosting
-        self.hosting = hosting
-        hosting.view.layoutSubtreeIfNeeded()
-        window.setContentSize(hosting.preferredContentSize)
+        let size = view.fittingSize
+        view.sizingOptions = []
+        window.contentView = view
+        window.setContentSize(CGSize(width: size.width, height: size.height.rounded(.up)))
         window.center()
 
-        // The window keeps its top edge while it follows the pane's height,
-        // like the system's own settings windows.
         themeObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: nil,
             queue: .main
         ) { [weak window] _ in
             MainActor.assumeIsolated {
-                window?.appearance = AppTheme.current.appearance
-            }
-        }
-        sizeObservation = hosting.observe(\.preferredContentSize, options: [.new]) { [weak self] _, _ in
-            Task { @MainActor [weak self] in
-                self?.fitWindow()
+                let appearance = AppTheme.current.appearance
+                if window?.appearance?.name != appearance?.name {
+                    window?.appearance = appearance
+                }
             }
         }
         return window
     }
 
-    private func fitWindow() {
-        guard let window, let hosting, let content = window.contentView else { return }
-        let target = hosting.preferredContentSize
-        guard target.width > 0, target.height > 0 else { return }
-        let dw = target.width - content.frame.width
-        let dh = target.height - content.frame.height
-        guard abs(dw) > 0.5 || abs(dh) > 0.5 else { return }
+    // The window keeps its top edge while it follows the pane's height,
+    // like the system's own settings windows.
+    private func fitWindow(toHeight height: CGFloat) {
+        guard let window, let content = window.contentView else { return }
+        let dh = height.rounded(.up) - content.frame.height
+        guard abs(dh) > 0.5 else { return }
         var frame = window.frame
-        frame.size.width += dw
         frame.size.height += dh
         frame.origin.y -= dh
         window.setFrame(frame, display: true, animate: window.isVisible)

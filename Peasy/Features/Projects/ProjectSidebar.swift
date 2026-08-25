@@ -153,10 +153,10 @@ struct SidebarRow<Icon: View>: View {
                     Text(count, format: .number)
                         .font(.system(size: 12))
                         .monospacedDigit()
-                        .foregroundStyle(PanelStyle.tertiary)
+                        .foregroundStyle(isSelected ? PanelStyle.selectedTertiary : PanelStyle.tertiary)
                 }
             }
-            .foregroundStyle(PanelStyle.primary)
+            .foregroundStyle(isSelected ? PanelStyle.selectedPrimary : PanelStyle.primary)
             .padding(.horizontal, 10)
             .frame(height: 32)
             .background(
@@ -223,7 +223,7 @@ struct ProjectNameField: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 32)
-        .background(PanelStyle.selection, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .background(PanelStyle.nameField, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .onAppear {
             name = initialName
             isFocused = true

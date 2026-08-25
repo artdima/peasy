@@ -136,10 +136,10 @@ struct TabPill<Icon: View>: View {
                 FittedText(string: title)
                 if count > 0 {
                     FittedText(string: count.formatted(), size: 12, tabular: true)
-                        .foregroundStyle(PanelStyle.tertiary)
+                        .foregroundStyle(isSelected ? PanelStyle.selectedTertiary : PanelStyle.tertiary)
                 }
             }
-            .foregroundStyle(isSelected || isHovered ? PanelStyle.primary : PanelStyle.secondary)
+            .foregroundStyle(isSelected ? PanelStyle.selectedPrimary : isHovered ? PanelStyle.primary : PanelStyle.secondary)
             .padding(.horizontal, 11)
             .frame(height: 30)
             .background(isSelected ? PanelStyle.pillSelection : .clear, in: Capsule())
@@ -198,7 +198,7 @@ struct TabNameField: View {
         }
         .padding(.horizontal, 11)
         .frame(height: 30)
-        .background(PanelStyle.pillSelection, in: Capsule())
+        .background(PanelStyle.pillNameField, in: Capsule())
         .onAppear {
             name = initialName
             isFocused = true

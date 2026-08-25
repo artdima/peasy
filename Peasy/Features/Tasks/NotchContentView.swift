@@ -22,7 +22,7 @@ struct NotchContentView: View {
             PanelHeader(
                 model: model,
                 focusTask: focusTask,
-                growth: IslandMode.growth(done: progress.done, total: progress.total),
+                stage: PeaStage(done: progress.done, total: progress.total),
                 onOpenSettings: actions.openSettings
             ) {
                 if let focusTask {

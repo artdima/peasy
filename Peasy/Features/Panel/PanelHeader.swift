@@ -3,16 +3,16 @@ import SwiftUI
 struct PanelHeader: View {
     @Bindable var model: NotchViewModel
     let focusTask: TaskItem?
-    let growth: CGFloat
+    let stage: PeaStage
     let onOpenSettings: () -> Void
     let onGoToFocus: () -> Void
 
     var body: some View {
         HStack(spacing: 2) {
             if model.celebration != nil {
-                FocusBand(mood: .done, growth: growth, text: Text("Done"), action: {})
+                FocusBand(mood: .done, stage: stage, text: Text("Done"), action: {})
             } else if focusTask != nil {
-                FocusBand(mood: .focus, growth: growth, text: Text(Self.dateTitle()), action: onGoToFocus)
+                FocusBand(mood: .focus, stage: stage, text: Text(Self.dateTitle()), action: onGoToFocus)
             } else {
                 Text(Self.dateTitle())
                     .font(.system(size: 12, weight: .medium))
@@ -43,7 +43,7 @@ struct PanelHeader: View {
 
 struct FocusBand: View {
     let mood: BuddyView.Mood
-    let growth: CGFloat
+    let stage: PeaStage
     let text: Text
     let action: () -> Void
 
@@ -53,7 +53,7 @@ struct FocusBand: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                BuddyView(mood: mood, growth: growth, outlined: colorScheme == .light)
+                BuddyView(mood: mood, stage: stage, outlined: colorScheme == .light)
                 text
             }
             .font(.system(size: 12, weight: .medium))

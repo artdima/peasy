@@ -16,7 +16,7 @@ final class NotchController {
     private var displayPreference = DisplayPreference.current
     private var layout = PanelLayout.current
     private var theme = AppTheme.current
-    private var isLight = AppTheme.current.isLight
+    private var surface = Surface(theme: AppTheme.current)
     private var appearanceObservation: NSKeyValueObservation?
     private var focusReturnTask: Task<Void, Never>?
     private var hoverOpenTask: Task<Void, Never>?
@@ -35,9 +35,9 @@ final class NotchController {
                 reserve: model.island.reserve,
                 pinned: false,
                 notchHeight: 0,
-                light: AppTheme.current.isLight
+                flat: Surface(theme: AppTheme.current) != .black
             ),
-            style: Self.style(light: AppTheme.current.isLight)
+            style: Self.style(for: Surface(theme: AppTheme.current))
         )
         self.actions.collapse = { [weak self] in self?.collapse() }
         let openSettings = actions.openSettings
@@ -134,24 +134,44 @@ final class NotchController {
             reserve: model.island.reserve,
             pinned: pinned,
             notchHeight: presenter.geometry.collapsedHeight,
-            light: isLight
+            flat: surface != .black
         )
     }
 
-    /// The light panel in the mockup hangs flat from the top edge (no concave
-    /// ears), with rounder bottom corners and a softer shadow.
-    private static func bottomRadius(layout: PanelLayout, light: Bool) -> CGFloat {
-        layout.bottomCornerRadius + (light ? 4 : 0)
+    private enum Surface {
+        case black
+        case gray
+        case glass
+
+        init(theme: AppTheme) {
+            if theme.isLight {
+                self = .glass
+            } else {
+                self = theme == .gray ? .gray : .black
+            }
+        }
     }
 
-    private static func style(light: Bool) -> NotchStyle {
-        guard light else { return .standard }
-        return NotchStyle(
-            ink: PanelStyle.lightInk,
-            shadowColor: Color(red: 16 / 255, green: 18 / 255, blue: 24 / 255).opacity(0.32),
-            foreground: Color(hex: "#1D1D1F"),
-            colorScheme: .light
-        )
+    /// Only a black panel can merge with the notch. The light and gray ones hang
+    /// flat from the top edge (no concave ears), with rounder bottom corners.
+    private static func bottomRadius(layout: PanelLayout, flat: Bool) -> CGFloat {
+        layout.bottomCornerRadius + (flat ? 4 : 0)
+    }
+
+    private static func style(for surface: Surface) -> NotchStyle {
+        switch surface {
+        case .black:
+            .standard
+        case .gray:
+            NotchStyle(ink: PanelStyle.grayInk, foreground: Color(hex: "#E9E9E9"))
+        case .glass:
+            NotchStyle(
+                ink: PanelStyle.lightInk,
+                shadowColor: Color(red: 16 / 255, green: 18 / 255, blue: 24 / 255).opacity(0.32),
+                foreground: Color(hex: "#1D1D1F"),
+                colorScheme: .light
+            )
+        }
     }
 
     // NotchKit's expandedSize spans the concave ears and excludes the notch row;
@@ -162,9 +182,9 @@ final class NotchController {
         reserve: CGFloat,
         pinned: Bool,
         notchHeight: CGFloat,
-        light: Bool
+        flat: Bool
     ) -> NotchConfiguration {
-        let ear = light ? 0 : earRadius
+        let ear = flat ? 0 : earRadius
         return NotchConfiguration(
             expandedSize: CGSize(
                 width: size.width + ear * 2,
@@ -172,7 +192,7 @@ final class NotchController {
             ),
             collapsedWidth: .wrapCutout(reserve: reserve),
             expandedTopCornerRadius: ear,
-            expandedBottomCornerRadius: bottomRadius(layout: layout, light: light),
+            expandedBottomCornerRadius: bottomRadius(layout: layout, flat: flat),
             expandedContentInsetsOverride: EdgeInsets(top: 0, leading: ear, bottom: 0, trailing: ear),
             expandedTopReserve: .none,
             expandsOnHover: false,
@@ -190,7 +210,8 @@ final class NotchController {
         let model = model
         let actions = actions
         let presenter = presenter
-        let glassRadius: CGFloat? = isLight ? Self.bottomRadius(layout: layout, light: true) : nil
+        let surface = surface
+        let radius = Self.bottomRadius(layout: layout, flat: surface != .black)
         presenter.install {
             IslandView(presenter: presenter, model: model)
                 .modelContainer(modelContainer)
@@ -198,8 +219,13 @@ final class NotchController {
             NotchContentView(model: model, actions: actions)
                 .modelContainer(modelContainer)
                 .background {
-                    if let glassRadius {
-                        PanelGlass(bottomRadius: glassRadius, isVisible: model.isPanelOpen)
+                    if surface == .glass {
+                        PanelGlass(bottomRadius: radius, isVisible: model.isPanelOpen)
+                    }
+                }
+                .overlay {
+                    if surface == .gray {
+                        PanelEdge(bottomRadius: radius)
                     }
                 }
         }
@@ -335,15 +361,15 @@ final class NotchController {
 
     private func applyTheme() {
         let theme = AppTheme.current
-        let light = theme.isLight
-        guard theme != self.theme || light != isLight else { return }
+        let surface = Surface(theme: theme)
+        guard theme != self.theme || surface != self.surface else { return }
         self.theme = theme
         panel?.appearance = theme.appearance
-        guard light != isLight else { return }
-        isLight = light
+        guard surface != self.surface else { return }
+        self.surface = surface
         collapse()
         presenter.uninstall()
-        presenter.style = Self.style(light: light)
+        presenter.style = Self.style(for: surface)
         presenter.configuration = makeConfiguration(pinned: false)
         installPanel()
     }

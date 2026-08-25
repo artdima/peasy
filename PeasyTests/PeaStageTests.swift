@@ -1,6 +1,7 @@
 import Testing
 @testable import Peasy
 
+@MainActor
 struct PeaStageTests {
     @Test(arguments: [
         (0, 0, PeaStage.pea),

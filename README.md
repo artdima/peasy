@@ -23,7 +23,7 @@
 | **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top, wrapping onto new rows when they run out of room. Switch in Settings. |
 | **Resizable** | Drag the bottom-right corner to resize the panel; each layout remembers its size. Reset from the context menu. |
 | **Focus and Sprout** | Press ▶ on a task to focus on it. The panel folds away and Sprout, a little seedling, sits in the notch next to the task; hover him to see its name. Finish the task and he celebrates. |
-| **Collapsed notch** | A progress ring and the number of tasks left for today, the focused task, or a short "Added" after a quick add. |
+| **Collapsed notch** | A pea that grows as today's tasks get done: it sprouts, puts out leaves and a bud, and flowers when the day is complete. Also the focused task, or a short "Added" after a quick add. |
 | **Quick add** | ⌃⌥N from any app opens a small window in the middle of the screen. Type, pick a project or Today, press Return. The shortcut is configurable. |
 | **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps to the new task field, ⌘1…⌘9 switch lists. |
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |

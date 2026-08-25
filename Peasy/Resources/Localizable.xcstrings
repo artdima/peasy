@@ -53,6 +53,16 @@
         }
       }
     },
+    "A pea in the collapsed notch that grows as you finish today's tasks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Горошина в свёрнутом вырезе, которая растёт по мере выполнения задач на сегодня"
+          }
+        }
+      }
+    },
     "About Peasy" : {
       "localizations" : {
         "ru" : {
@@ -309,6 +319,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Основные"
+          }
+        }
+      }
+    },
+    "Gray" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Серое"
           }
         }
       }
@@ -602,16 +622,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нажмите сочетание…"
-          }
-        }
-      }
-    },
-    "Progress ring and the number of tasks left in the collapsed notch" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кольцо прогресса и число оставшихся задач в свёрнутом вырезе"
           }
         }
       }

@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     let sync: SyncMonitor
     var onTitleChange: (String) -> Void = { _ in }
+    var onHeightChange: (CGFloat) -> Void = { _ in }
     @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general
     @AppStorage(PanelLayout.storageKey) private var layout = PanelLayout.vertical
     @AppStorage(PanelSettings.expandsOnHoverKey) private var expandsOnHover = true
@@ -23,9 +24,13 @@ struct SettingsView: View {
         .padding(.top, 34)
         .frame(width: 560)
         .fixedSize(horizontal: false, vertical: true)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            onHeightChange(height)
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(SettingsStyle.window)
         .ignoresSafeArea()
+        .id(theme)
         .onChange(of: tab, initial: true) { _, tab in
             onTitleChange(tab.title)
         }
@@ -97,7 +102,7 @@ struct SettingsView: View {
             )
             SettingsToggleRow(
                 title: "Today indicator",
-                subtitle: "Progress ring and the number of tasks left in the collapsed notch",
+                subtitle: "A pea in the collapsed notch that grows as you finish today's tasks",
                 isOn: $showsIndicator,
                 separated: true
             )
@@ -260,7 +265,7 @@ struct LayoutThumbnail: View {
             )
             context.fill(
                 Path(roundedRect: CGRect(x: 24, y: -14, width: 152, height: 110), cornerRadius: 14),
-                with: .color(isLight ? PanelStyle.lightInk : .black)
+                with: .color(isLight ? PanelStyle.lightInk : AppTheme.isGray ? PanelStyle.grayInk : .black)
             )
             switch layout {
             case .vertical: drawVertical(in: context)
@@ -356,11 +361,18 @@ struct PeasySwitchStyle: ToggleStyle {
 }
 
 enum SettingsStyle {
-    static let window = Color.themed(dark: "#1E1E20", light: "#ECECEE")
+    static let window = Color.themed(dark: "#1E1E20", light: "#ECECEE", gray: "#212121")
     static let windowNS = NSColor(name: nil) { appearance in
-        NSColor(hex: appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? "#ECECEE" : "#1E1E20")
+        if appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua {
+            return NSColor(hex: "#ECECEE")
+        }
+        return NSColor(hex: AppTheme.isGray ? "#212121" : "#1E1E20")
     }
-    static let card = Color.themed(dark: NSColor.white.withAlphaComponent(0.05), light: NSColor.white.withAlphaComponent(0.75))
+    static let card = Color.themed(
+        dark: NSColor.white.withAlphaComponent(0.05),
+        light: NSColor.white.withAlphaComponent(0.75),
+        gray: NSColor(hex: "#282828")
+    )
     static let cardStroke = Color.themed(white: 0.04, black: 0.05)
     static let rowDivider = Color.themed(white: 0.07, black: 0.07)
     static let tabSelected = Color.themed(white: 0.1, black: 0.07)
@@ -374,5 +386,5 @@ enum SettingsStyle {
     static let chevron = Color.themed(dark: "#C7C7CC", light: "#6E6E73")
     static let keyCapEdge = Color.themed(dark: NSColor.white.withAlphaComponent(0.06), light: NSColor.black.withAlphaComponent(0.06))
     static let iconTile = Color.themed(dark: NSColor(hex: "#2C2C2E"), light: NSColor.black.withAlphaComponent(0.05))
-    static let thumbnailFrame = Color.themed(dark: "#2C2C2F", light: "#DCDCE0")
+    static let thumbnailFrame = Color.themed(dark: "#2C2C2F", light: "#DCDCE0", gray: "#2C2B2C")
 }

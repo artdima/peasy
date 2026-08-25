@@ -7,23 +7,48 @@ struct GlassBackground: NSViewRepresentable {
     var topRadius: CGFloat = 0
     var bottomRadius: CGFloat
 
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
+    func makeNSView(context: Context) -> GlassEffectView {
+        let view = GlassEffectView()
         view.material = .popover
         view.blendingMode = .behindWindow
         view.state = .active
-        view.maskImage = Self.mask(top: topRadius, bottom: bottomRadius)
         return view
     }
 
-    func updateNSView(_ view: NSVisualEffectView, context: Context) {
-        view.maskImage = Self.mask(top: topRadius, bottom: bottomRadius)
+    func updateNSView(_ view: GlassEffectView, context: Context) {
+        view.setRadii(top: topRadius, bottom: bottomRadius)
+    }
+}
+
+final class GlassEffectView: NSVisualEffectView {
+    private var topRadius: CGFloat = 0
+    private var bottomRadius: CGFloat = 0
+    private var maskedSize: CGSize?
+
+    func setRadii(top: CGFloat, bottom: CGFloat) {
+        guard top != topRadius || bottom != bottomRadius else { return }
+        topRadius = top
+        bottomRadius = bottom
+        maskedSize = nil
+        updateMask()
     }
 
-    static func mask(top: CGFloat, bottom: CGFloat) -> NSImage {
-        let side = max(top, bottom)
-        let size = NSSize(width: side * 2 + 1, height: top + bottom + 1)
-        let image = NSImage(size: size, flipped: false) { rect in
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        updateMask()
+    }
+
+    private func updateMask() {
+        let size = bounds.size
+        guard size.width > 0, size.height > 0, size != maskedSize else { return }
+        maskedSize = size
+        maskImage = Self.mask(size: size, top: topRadius, bottom: bottomRadius)
+    }
+
+    static func mask(size: CGSize, top: CGFloat, bottom: CGFloat) -> NSImage {
+        NSImage(size: size, flipped: false) { rect in
+            let top = min(top, rect.width / 2, rect.height / 2)
+            let bottom = min(bottom, rect.width / 2, rect.height / 2)
             let w = rect.width
             let h = rect.height
             let path = NSBezierPath()
@@ -41,9 +66,6 @@ struct GlassBackground: NSViewRepresentable {
             path.fill()
             return true
         }
-        image.capInsets = NSEdgeInsets(top: top, left: side, bottom: bottom, right: side)
-        image.resizingMode = .stretch
-        return image
     }
 }
 
