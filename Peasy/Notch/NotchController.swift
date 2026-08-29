@@ -11,7 +11,7 @@ final class NotchController {
     private var actions: NotchActions
     private var modelContainer: ModelContainer?
     private let cloud = CloudWindow()
-    private var observers: [NSObjectProtocol] = []
+    private var observers: [(NotificationCenter, NSObjectProtocol)] = []
     private var monitors: [Any] = []
     private var displayPreference = DisplayPreference.current
     private var layout = PanelLayout.current
@@ -72,6 +72,11 @@ final class NotchController {
         observe(UserDefaults.didChangeNotification) { controller, _ in
             controller.settingsDidChange()
         }
+        observe(NSWorkspace.didActivateApplicationNotification, in: NSWorkspace.shared.notificationCenter) { controller, notification in
+            let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            guard app?.processIdentifier != NSRunningApplication.current.processIdentifier else { return }
+            controller.collapseUnlessPinned()
+        }
         appearanceObservation = NSApp.observe(\.effectiveAppearance) { [weak self] _, _ in
             Task { @MainActor [weak self] in
                 self?.applyTheme()
@@ -119,7 +124,7 @@ final class NotchController {
     func shutdown() {
         monitors.forEach(NSEvent.removeMonitor)
         monitors.removeAll()
-        observers.forEach(NotificationCenter.default.removeObserver)
+        observers.forEach { center, token in center.removeObserver(token) }
         observers.removeAll()
         cloud.hide()
         presenter.uninstall()
@@ -234,15 +239,19 @@ final class NotchController {
         model.headerHeight = presenter.geometry.collapsedHeight
     }
 
-    private func observe(_ name: Notification.Name, perform action: @escaping (NotchController, Notification) -> Void) {
-        let token = NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] notification in
+    private func observe(
+        _ name: Notification.Name,
+        in center: NotificationCenter = .default,
+        perform action: @escaping (NotchController, Notification) -> Void
+    ) {
+        let token = center.addObserver(forName: name, object: nil, queue: .main) { [weak self] notification in
             MainActor.assumeIsolated {
                 if let self {
                     action(self, notification)
                 }
             }
         }
-        observers.append(token)
+        observers.append((center, token))
     }
 
     private func observePhase() {
@@ -408,7 +417,7 @@ final class NotchController {
             return handled ? nil : event
         }
         let outsideClicks = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            MainActor.assumeIsolated { self?.handleOutsideClick() }
+            MainActor.assumeIsolated { self?.collapseUnlessPinned() }
         }
         let moves = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
             MainActor.assumeIsolated { self?.pointerMoved() }
@@ -454,7 +463,7 @@ final class NotchController {
         store.rename(task, to: title)
     }
 
-    private func handleOutsideClick() {
+    private func collapseUnlessPinned() {
         if presenter.phase == .expanded, !model.isPinned {
             collapse()
         }
