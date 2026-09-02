@@ -9,7 +9,6 @@ struct SettingsView: View {
     @AppStorage(PanelSettings.expandsOnHoverKey) private var expandsOnHover = true
     @AppStorage(PanelSettings.multilineTasksKey) private var multilineTasks = false
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
-    @AppStorage(PanelSettings.showsBuddyKey) private var showsBuddy = true
     @AppStorage(DisplayPreference.storageKey) private var display = DisplayPreference.builtIn
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
     @State private var launchAtLogin = LaunchAtLogin()
@@ -106,7 +105,6 @@ struct SettingsView: View {
                 isOn: $showsIndicator,
                 separated: true
             )
-            SettingsToggleRow(title: "Sprout", subtitle: "Appears in the notch while a task is in focus", isOn: $showsBuddy, separated: true)
             SettingsRow(minHeight: 44, separated: true) {
                 Text("Show on")
                     .settingsTitle()

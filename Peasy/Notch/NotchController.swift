@@ -10,9 +10,10 @@ final class NotchController {
     private let model: NotchViewModel
     private var actions: NotchActions
     private var modelContainer: ModelContainer?
-    private let cloud = CloudWindow()
     private var observers: [(NotificationCenter, NSObjectProtocol)] = []
     private var monitors: [Any] = []
+    private let schedulePicker = SchedulePickerWindow()
+    private var pickerTaskID: UUID?
     private var displayPreference = DisplayPreference.current
     private var layout = PanelLayout.current
     private var theme = AppTheme.current
@@ -21,8 +22,6 @@ final class NotchController {
     private var focusReturnTask: Task<Void, Never>?
     private var hoverOpenTask: Task<Void, Never>?
     private var hoverCancelTask: Task<Void, Never>?
-    private var collapseSoonTask: Task<Void, Never>?
-    private var celebrationTask: Task<Void, Never>?
 
     init(model: NotchViewModel, actions: NotchActions, modelContainer: ModelContainer) {
         self.model = model
@@ -50,11 +49,10 @@ final class NotchController {
             self?.collapse()
             showAbout()
         }
-        model.onFocusStarted = { [weak self] in self?.collapseSoon() }
-        model.onCelebration = { [weak self] in self?.celebrationStarted() }
         model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
         model.onCommitEdit = { [weak self] id, title in self?.commitEdit(of: id, title: title) }
         model.onResetSize = { [weak self] in self?.resetSize() }
+        schedulePicker.onResignKey = { [weak self] in self?.model.schedulingTaskID = nil }
 
         presenter.preferredScreenID = preferredScreenID()
         presenter.configuration = makeConfiguration(pinned: false)
@@ -110,6 +108,7 @@ final class NotchController {
     }
 
     func unloadStore() {
+        closeSchedulePicker()
         collapse()
         panel?.undoManager?.removeAllActions()
         presenter.uninstall()
@@ -126,7 +125,7 @@ final class NotchController {
         monitors.removeAll()
         observers.forEach { center, token in center.removeObserver(token) }
         observers.removeAll()
-        cloud.hide()
+        closeSchedulePicker()
         presenter.uninstall()
     }
 
@@ -268,13 +267,62 @@ final class NotchController {
     private func observePin() {
         withObservationTracking {
             _ = model.isPinned
+            _ = model.schedulingTaskID
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in
-                guard let self else { return }
-                presenter.configuration.collapsesOnPointerExit = !model.isPinned
-                observePin()
+                self?.holdDidChange()
+                self?.observePin()
             }
         }
+    }
+
+    private var holdsOpen: Bool {
+        model.isPinned || model.schedulingTaskID != nil
+    }
+
+    private func holdDidChange() {
+        presenter.configuration.collapsesOnPointerExit = !holdsOpen
+        if let id = model.schedulingTaskID {
+            if id != pickerTaskID {
+                showSchedulePicker(for: id)
+            }
+        } else {
+            closeSchedulePicker()
+        }
+    }
+
+    private func showSchedulePicker(for id: UUID) {
+        closeSchedulePicker()
+        guard let panel else { return }
+        let anchor = model.scheduleAnchor
+        let target = CGRect(
+            x: panel.frame.minX + anchor.minX,
+            y: panel.frame.maxY - anchor.maxY,
+            width: anchor.width,
+            height: anchor.height
+        )
+        let visible = (panel.screen ?? NSScreen.main)?.visibleFrame ?? panel.frame
+        let placement = SchedulePickerWindow.placement(pointingAt: target, within: visible)
+        pickerTaskID = id
+        let picker = TaskSchedulePicker(model: model, arrowEdge: placement.arrowEdge, arrowY: placement.arrowY) { [weak self] in
+            self?.model.schedulingTaskID = nil
+        }
+        schedulePicker.show(picker, frame: placement.frame, appearance: theme.appearance)
+    }
+
+    /// The choice is saved only now, so a task does not leave the list while it is being planned.
+    private func closeSchedulePicker() {
+        guard let id = pickerTaskID else { return }
+        pickerTaskID = nil
+        let returnsKeyboard = schedulePicker.isKey && presenter.phase == .expanded
+        schedulePicker.hide()
+        if returnsKeyboard {
+            panel?.makeKey()
+        }
+        guard let modelContainer else { return }
+        let store = TaskStore(context: modelContainer.mainContext)
+        guard let task = store.allTasks().first(where: { $0.id == id }) else { return }
+        store.schedule(task, on: model.scheduleDraft.date, hasTime: model.scheduleDraft.hasTime)
     }
 
     private func observeIsland() {
@@ -289,9 +337,6 @@ final class NotchController {
     }
 
     private func islandDidChange() {
-        if model.island.focusTitle == nil {
-            cloud.hide()
-        }
         let width = NotchCollapsedWidth.wrapCutout(reserve: model.island.reserve)
         guard presenter.configuration.collapsedWidth != width else { return }
         withAnimation(.smooth(duration: 0.46)) {
@@ -301,7 +346,6 @@ final class NotchController {
 
     private func phaseDidChange() {
         model.isPanelOpen = presenter.phase == .expanded
-        cloud.hide()
         cancelHoverOpen(immediately: true)
         guard presenter.phase == .collapsed else { return }
         model.resetInteraction()
@@ -311,29 +355,6 @@ final class NotchController {
     private func panelDidBecomeKey() {
         if presenter.phase == .expanded, presenter.expandReason != .click {
             presenter.expand(reason: .click)
-        }
-    }
-
-    private func collapseSoon() {
-        guard !model.isPinned else { return }
-        collapseSoonTask?.cancel()
-        collapseSoonTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(280))
-            guard !Task.isCancelled, let self, !model.isPinned else { return }
-            collapse()
-        }
-    }
-
-    private func celebrationStarted() {
-        if presenter.phase == .expanded, !model.isPinned {
-            collapse()
-        }
-        guard let id = model.celebration?.id else { return }
-        celebrationTask?.cancel()
-        celebrationTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(3.4))
-            guard !Task.isCancelled else { return }
-            self?.model.endCelebration(id)
         }
     }
 
@@ -464,6 +485,7 @@ final class NotchController {
     }
 
     private func collapseUnlessPinned() {
+        model.schedulingTaskID = nil
         if presenter.phase == .expanded, !model.isPinned {
             collapse()
         }
@@ -472,26 +494,11 @@ final class NotchController {
     private func pointerMoved() {
         followPointer()
         guard presenter.phase == .collapsed, let panel else {
-            cloud.hide()
             cancelHoverOpen(immediately: true)
             return
         }
         let location = NSEvent.mouseLocation
         let pill = presenter.interactiveRect(in: panel.frame)
-        if let title = model.island.focusTitle, let colorHex = model.island.focusColorHex {
-            let buddyZone = CGRect(
-                x: pill.minX,
-                y: pill.minY,
-                width: presenter.collapsedGutterWidth + presenter.configuration.collapsedHitPadding,
-                height: pill.height
-            )
-            if NotchGeometry.contains(buddyZone, location) {
-                cancelHoverOpen(immediately: true)
-                cloud.show(title: title, colorHex: colorHex, below: pill)
-                return
-            }
-        }
-        cloud.hide()
         if NotchGeometry.contains(pill, location), PanelSettings.flag(PanelSettings.expandsOnHoverKey) {
             scheduleHoverOpen()
         } else {

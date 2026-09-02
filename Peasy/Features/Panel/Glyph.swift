@@ -2,7 +2,8 @@ import SwiftUI
 
 struct Glyph: View {
     enum Kind {
-        case pin, plus, chevron, check, checkBold, play, stop, returnKey, refresh, cloud, spinner, gear
+        case pin, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, spinner, gear
+        case sun, sofa, nextWeek
         case sliders, sidebar, notchFrame, notchTab, cloudTab
     }
 
@@ -31,7 +32,7 @@ extension Glyph.Kind {
         switch self {
         case .pin, .gear: 16
         case .chevron: 10
-        case .returnKey, .refresh: 14
+        case .returnKey, .refresh, .sun, .sofa, .nextWeek: 14
         case .cloud: 18
         case .sliders, .sidebar, .notchFrame, .notchTab, .cloudTab: 20
         default: 12
@@ -45,8 +46,8 @@ extension Glyph.Kind {
         case .chevron: 1.5
         case .check: 1.8
         case .checkBold: 2.2
-        case .play: 1
-        case .stop: nil
+        case .calendar: 1.1
+        case .sun, .sofa, .nextWeek: 1.3
         case .returnKey: 1.8
         case .refresh, .cloud, .spinner: 1.5
         case .sliders, .sidebar, .notchFrame, .cloudTab: 1.5
@@ -55,7 +56,7 @@ extension Glyph.Kind {
     }
 
     var fillsShape: Bool {
-        self == .play || self == .stop || self == .notchTab
+        self == .notchTab
     }
 }
 
@@ -95,13 +96,51 @@ struct GlyphShape: Shape {
             path.move(to: CGPoint(x: 2.5, y: 6.2))
             path.addLine(to: CGPoint(x: 4.8, y: 8.5))
             path.addLine(to: CGPoint(x: 9.5, y: 3.8))
-        case .play:
-            path.move(to: CGPoint(x: 3.8, y: 2.6))
-            path.addLine(to: CGPoint(x: 3.8, y: 9.4))
-            path.addLine(to: CGPoint(x: 9.4, y: 6))
+        case .calendar:
+            path.addRoundedRect(in: CGRect(x: 1.75, y: 2.5, width: 8.5, height: 8), cornerSize: CGSize(width: 1.8, height: 1.8))
+            path.move(to: CGPoint(x: 1.75, y: 5))
+            path.addLine(to: CGPoint(x: 10.25, y: 5))
+            for x in [4.25, 7.75] {
+                path.move(to: CGPoint(x: x, y: 1.25))
+                path.addLine(to: CGPoint(x: x, y: 3.25))
+            }
+        case .sun:
+            path.addEllipse(in: CGRect(x: 4.4, y: 4.4, width: 5.2, height: 5.2))
+            for ray in 0..<8 {
+                let angle = CGFloat(ray) * .pi / 4
+                path.move(to: CGPoint(x: 7 + cos(angle) * 4.5, y: 7 + sin(angle) * 4.5))
+                path.addLine(to: CGPoint(x: 7 + cos(angle) * 6.1, y: 7 + sin(angle) * 6.1))
+            }
+        case .sofa:
+            path.move(to: CGPoint(x: 3.4, y: 6.6))
+            path.addLine(to: CGPoint(x: 3.4, y: 4.2))
+            path.addQuadCurve(to: CGPoint(x: 4.9, y: 2.7), control: CGPoint(x: 3.4, y: 2.7))
+            path.addLine(to: CGPoint(x: 9.1, y: 2.7))
+            path.addQuadCurve(to: CGPoint(x: 10.6, y: 4.2), control: CGPoint(x: 10.6, y: 2.7))
+            path.addLine(to: CGPoint(x: 10.6, y: 6.6))
+            path.move(to: CGPoint(x: 3.4, y: 8.3))
+            path.addLine(to: CGPoint(x: 10.6, y: 8.3))
+            path.addLine(to: CGPoint(x: 10.6, y: 7.3))
+            path.addQuadCurve(to: CGPoint(x: 11.6, y: 6.3), control: CGPoint(x: 10.6, y: 6.3))
+            path.addQuadCurve(to: CGPoint(x: 12.6, y: 7.3), control: CGPoint(x: 12.6, y: 6.3))
+            path.addLine(to: CGPoint(x: 12.6, y: 10.4))
+            path.addLine(to: CGPoint(x: 1.4, y: 10.4))
+            path.addLine(to: CGPoint(x: 1.4, y: 7.3))
+            path.addQuadCurve(to: CGPoint(x: 2.4, y: 6.3), control: CGPoint(x: 1.4, y: 6.3))
+            path.addQuadCurve(to: CGPoint(x: 3.4, y: 7.3), control: CGPoint(x: 3.4, y: 6.3))
             path.closeSubpath()
-        case .stop:
-            path.addRoundedRect(in: CGRect(x: 2.5, y: 2.5, width: 7, height: 7), cornerSize: CGSize(width: 1.5, height: 1.5))
+            for x in [2.4, 11.6] {
+                path.move(to: CGPoint(x: x, y: 10.4))
+                path.addLine(to: CGPoint(x: x, y: 11.6))
+            }
+        case .nextWeek:
+            path.move(to: CGPoint(x: 1.5, y: 7))
+            path.addLine(to: CGPoint(x: 9.5, y: 7))
+            path.move(to: CGPoint(x: 6.6, y: 4.1))
+            path.addLine(to: CGPoint(x: 9.5, y: 7))
+            path.addLine(to: CGPoint(x: 6.6, y: 9.9))
+            path.move(to: CGPoint(x: 12.4, y: 2.6))
+            path.addLine(to: CGPoint(x: 12.4, y: 11.4))
         case .returnKey:
             path.move(to: CGPoint(x: 11.5, y: 3))
             path.addLine(to: CGPoint(x: 11.5, y: 6.8))

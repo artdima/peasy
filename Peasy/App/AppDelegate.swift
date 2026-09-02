@@ -1,10 +1,12 @@
 import AppKit
+import CoreData
 import SwiftData
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let notchModel = NotchViewModel()
     private let sync = SyncMonitor()
     private lazy var settingsWindow = SettingsWindowController(sync: sync)
+    private var container: ModelContainer?
     private var notchController: NotchController?
     private var quickAdd: QuickAddController?
     private let hotKey = GlobalHotKey()
@@ -16,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sync.onStoreReloadNeeded = { [weak self] in self?.reloadStore() }
         sync.start()
         let container = openStore()
-        TaskStore(context: container.mainContext).assignDistinctColors()
+        prepare(container)
         let actions = NotchActions(
             showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
@@ -27,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.quickAdd = quickAdd
         hotKey.action = { quickAdd.toggle() }
         hotKey.register(Shortcut.current)
+        startReminders()
         observers.append(NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: nil,
@@ -55,6 +58,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func prepare(_ container: ModelContainer) {
+        self.container = container
+        let store = TaskStore(context: container.mainContext)
+        store.assignDistinctColors()
+        store.moveTodayFlagsToDates()
+        Reminders.shared.refresh()
+    }
+
+    private func startReminders() {
+        let reminders = Reminders.shared
+        reminders.tasks = { [weak self] in
+            guard let container = self?.container else { return [] }
+            return TaskStore(context: container.mainContext).allTasks()
+        }
+        reminders.onOpen = { [weak self] in
+            self?.notchController?.expand()
+        }
+        reminders.start()
+        for name in [ModelContext.didSave, NSPersistentCloudKitContainer.eventChangedNotification] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated {
+                    Reminders.shared.refresh()
+                }
+            })
+        }
+    }
+
     private func reloadStore() {
         notchController?.unloadStore()
         quickAdd?.unloadStore()
@@ -62,7 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             await Task.yield()
             guard let self else { return }
             let container = openStore()
-            TaskStore(context: container.mainContext).assignDistinctColors()
+            prepare(container)
             notchController?.loadStore(container)
             quickAdd?.loadStore(container)
         }

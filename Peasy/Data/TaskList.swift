@@ -25,10 +25,14 @@ enum TaskList: Hashable {
 }
 
 enum TaskQueries {
-    static func tasks(in list: TaskList, from tasks: [TaskItem]) -> [TaskItem] {
+    /// Today keeps only what was finished today, so it starts every morning fresh.
+    static func tasks(in list: TaskList, from tasks: [TaskItem], now: Date = .now) -> [TaskItem] {
+        let calendar = Calendar.current
         let matching = tasks.filter { task in
             switch list {
-            case .today: task.isToday
+            case .today:
+                task.isDue(on: now, calendar: calendar)
+                    && (!task.isDone || task.completedAt.map { calendar.isDate($0, inSameDayAs: now) } == true)
             case .inbox: task.project == nil
             case .project(let id): task.project?.id == id
             }
@@ -36,18 +40,18 @@ enum TaskQueries {
         return sorted(matching)
     }
 
-    static func openTasks(in list: TaskList, from tasks: [TaskItem]) -> [TaskItem] {
-        self.tasks(in: list, from: tasks).filter { !$0.isDone }
+    static func openTasks(in list: TaskList, from tasks: [TaskItem], now: Date = .now) -> [TaskItem] {
+        self.tasks(in: list, from: tasks, now: now).filter { !$0.isDone }
     }
 
-    static func completedTasks(in list: TaskList, from tasks: [TaskItem]) -> [TaskItem] {
-        self.tasks(in: list, from: tasks)
+    static func completedTasks(in list: TaskList, from tasks: [TaskItem], now: Date = .now) -> [TaskItem] {
+        self.tasks(in: list, from: tasks, now: now)
             .filter(\.isDone)
             .sorted { ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast) }
     }
 
-    static func todayProgress(from tasks: [TaskItem]) -> (done: Int, total: Int) {
-        let today = tasks.filter(\.isToday)
+    static func todayProgress(from tasks: [TaskItem], now: Date = .now) -> (done: Int, total: Int) {
+        let today = self.tasks(in: .today, from: tasks, now: now)
         return (today.filter(\.isDone).count, today.count)
     }
 

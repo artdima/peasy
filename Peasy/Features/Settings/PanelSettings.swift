@@ -67,7 +67,6 @@ enum PanelLayout: String, CaseIterable, Identifiable {
 
 enum PanelSettings {
     static let showsTodayIndicatorKey = "showsTodayIndicator"
-    static let showsBuddyKey = "showsBuddy"
     static let expandsOnHoverKey = "expandsOnHover"
     static let multilineTasksKey = "multilineTasks"
     static let hoverOpenDelay: Duration = .milliseconds(150)

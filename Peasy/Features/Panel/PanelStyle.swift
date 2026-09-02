@@ -12,6 +12,7 @@ enum PanelStyle {
     static let separator = Color.themed(white: 0.08, black: 0.08)
     static let hover = Color.themed(white: 0.06, black: 0.045, gray: "#2C2B2C")
     static let strongHover = Color.themed(white: 0.1, black: 0.07, gray: "#333233")
+    static let pressed = Color.themed(white: 0.21, black: 0.1, gray: "#403F40")
     static let selection = Color.themed(white: 0.12, black: 0.075, gray: "#2458CA")
     static let pillSelection = Color.themed(white: 0.13, black: 0.075, gray: "#2458CA")
     static let selectedPrimary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F", gray: "#FFFFFF")

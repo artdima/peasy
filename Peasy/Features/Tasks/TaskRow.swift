@@ -9,16 +9,18 @@ struct TaskRow: View {
     @AppStorage(PanelSettings.multilineTasksKey) private var isMultiline = false
     @State private var isHovered = false
     @State private var isChecking = false
+    @State private var dateButtonFrame: CGRect = .zero
     @FocusState private var isEditorFocused: Bool
 
     private var isEditing: Bool { model.editingTaskID == task.id }
     private var isSelected: Bool { model.selectedTaskID == task.id }
-    private var isFocused: Bool { model.focusedTaskID == task.id && !task.isDone }
+    private var isScheduling: Bool { model.schedulingTaskID == task.id }
+    private var showsDateButton: Bool { isHovered || isScheduling }
 
     var body: some View {
         let wraps = isMultiline && !isEditing
         HStack(alignment: wraps ? .top : .center, spacing: 8) {
-            CheckRing(color: accent, isOn: task.isDone || isChecking, isFocused: isFocused, action: toggle)
+            CheckRing(color: accent, isOn: task.isDone || isChecking, action: toggle)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
                 .padding(.top, wraps ? 4 : 0)
 
@@ -51,32 +53,24 @@ struct TaskRow: View {
             }
 
             if !task.isDone {
-                ZStack(alignment: .trailing) {
-                    Group {
-                        if isFocused {
-                            Text("In focus")
-                                .foregroundStyle(PanelStyle.primary)
-                        } else if let meta {
-                            meta
-                                .foregroundStyle(PanelStyle.tertiary)
-                        }
+                HStack(spacing: 6) {
+                    if let meta {
+                        meta
+                            .font(.system(size: 12))
+                            .foregroundStyle(PanelStyle.tertiary)
+                            .lineLimit(1)
+                            .padding(.trailing, showsDateButton ? 0 : 2)
                     }
-                    .font(.system(size: 12))
-                    .lineLimit(1)
-                    .padding(.trailing, 2)
-                    .opacity(isHovered ? 0 : 1)
-
-                    RowActionButton(
-                        glyph: isFocused ? .stop : .play,
-                        label: isFocused ? "Stop focus" : "Focus on task"
-                    ) {
-                        if isFocused {
-                            model.stopFocus()
-                        } else {
-                            model.startFocus(on: task)
-                        }
+                    if showsDateButton {
+                        RowActionButton(glyph: .calendar, label: "Date and Time", isActive: isScheduling, action: openSchedule)
                     }
-                    .opacity(isHovered ? 1 : 0)
+                }
+                .background(alignment: .trailing) {
+                    Color.clear
+                        .frame(width: 24, height: 24)
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                            dateButtonFrame = frame
+                        }
                 }
                 .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
                 .padding(.top, wraps ? 7 : 0)
@@ -86,20 +80,28 @@ struct TaskRow: View {
         .padding(.trailing, 8)
         .frame(minHeight: 38)
         .background(
-            isSelected || isFocused ? PanelStyle.strongHover : isHovered ? PanelStyle.hover : .clear,
+            isSelected || isScheduling ? PanelStyle.strongHover : isHovered ? PanelStyle.hover : .clear,
             in: RoundedRectangle(cornerRadius: 9, style: .continuous)
         )
         .contentShape(Rectangle())
         .simultaneousGesture(TapGesture().onEnded { model.selectedTaskID = task.id })
         .onHover { isHovered = $0 }
+        .onDisappear {
+            if isScheduling {
+                model.schedulingTaskID = nil
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .contextMenu {
             Button(task.isDone ? LocalizedStringKey("Mark as Not Done") : "Mark as Done", action: toggle)
-            Button(task.isToday ? LocalizedStringKey("Remove from Today") : "Add to Today") {
+            Button(task.isDue(on: .now) ? LocalizedStringKey("Remove from Today") : "Add to Today") {
                 withAnimation(.snappy) {
-                    store.setToday(task, !task.isToday)
+                    store.setToday(task, !task.isDue(on: .now))
                 }
+            }
+            if !task.isDone {
+                Button("Date and Time…", action: openSchedule)
             }
             Button("Edit", action: startEditing)
             Divider()
@@ -112,12 +114,27 @@ struct TaskRow: View {
     }
 
     private var meta: Text? {
+        let now = DayClock.shared.today
+        let date = isScheduling ? model.scheduleDraft.date : task.date
+        let hasTime = isScheduling ? model.scheduleDraft.hasTime : task.hasTime
+        let when = TaskScheduleLabel.text(date: date, hasTime: hasTime, isDone: task.isDone, inToday: list == .today, now: now)
+            .map { label in
+                if isScheduling {
+                    return label.foregroundStyle(PanelStyle.green)
+                }
+                return task.isOverdue(now: now) ? label.foregroundStyle(Color(nsColor: .systemRed)) : label
+            }
         switch list {
         case .today:
-            task.project.map { Text(verbatim: $0.name) } ?? Text("Inbox")
+            let place = task.project.map { Text(verbatim: $0.name) } ?? Text("Inbox")
+            return when.map { place + Text(verbatim: " · ") + $0 } ?? place
         case .inbox, .project:
-            task.isToday ? Text("Today") : nil
+            return when
         }
+    }
+
+    private func openSchedule() {
+        model.openSchedule(for: task, anchor: dateButtonFrame)
     }
 
     private func toggle() {
@@ -134,7 +151,6 @@ struct TaskRow: View {
             withAnimation(.snappy) {
                 store.toggle(task)
             }
-            model.taskCompleted(task)
             isChecking = false
         }
     }
@@ -156,7 +172,6 @@ struct TaskRow: View {
 struct CheckRing: View {
     let color: Color
     let isOn: Bool
-    var isFocused = false
     let action: () -> Void
 
     @State private var isHovered = false
@@ -174,11 +189,6 @@ struct CheckRing: View {
                     .scaleEffect(isOn ? 1 : 0.6)
             }
             .frame(width: 18, height: 18)
-            .background {
-                Circle()
-                    .fill(color.opacity(isFocused ? 0.28 : 0))
-                    .frame(width: 24, height: 24)
-            }
             .frame(width: 30, height: 30)
             .contentShape(Rectangle())
         }
@@ -191,16 +201,17 @@ struct CheckRing: View {
 struct RowActionButton: View {
     let glyph: Glyph.Kind
     let label: LocalizedStringKey
+    var isActive = false
     let action: () -> Void
 
     @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
-            Glyph(kind: glyph, size: 10)
-                .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.secondary)
+            Glyph(kind: glyph, size: 12)
+                .foregroundStyle(isHovered || isActive ? PanelStyle.primary : PanelStyle.secondary)
                 .frame(width: 24, height: 24)
-                .background(isHovered ? PanelStyle.strongHover : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .background(isActive ? PanelStyle.pressed : isHovered ? PanelStyle.strongHover : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import SwiftData
@@ -117,5 +118,36 @@ struct NotchControllerTests {
         #expect(store.addTask("After reload", to: .inbox) != nil)
         try await Task.sleep(for: .milliseconds(300))
         #expect(controller.isExpanded)
+    }
+
+    @Test func switchingToAnotherAppFoldsThePanel() async throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let model = NotchViewModel()
+        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        defer { controller.shutdown() }
+        let ownPID = NSRunningApplication.current.processIdentifier
+        let other = try #require(NSWorkspace.shared.runningApplications.first { $0.processIdentifier != ownPID })
+        func activate(_ app: NSRunningApplication) async throws {
+            NSWorkspace.shared.notificationCenter.post(
+                name: NSWorkspace.didActivateApplicationNotification,
+                object: NSWorkspace.shared,
+                userInfo: [NSWorkspace.applicationUserInfoKey: app]
+            )
+            try await Task.sleep(for: .milliseconds(150))
+        }
+
+        controller.expand()
+        try await Task.sleep(for: .milliseconds(300))
+        try await activate(.current)
+        #expect(controller.isExpanded)
+
+        model.isPinned = true
+        try await activate(other)
+        #expect(controller.isExpanded)
+
+        model.isPinned = false
+        try await activate(other)
+        #expect(!controller.isExpanded)
     }
 }

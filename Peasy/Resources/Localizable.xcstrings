@@ -133,16 +133,6 @@
         }
       }
     },
-    "Appears in the notch while a task is in focus" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Появляется в вырезе, когда задача в фокусе"
-          }
-        }
-      }
-    },
     "Blue" : {
       "localizations" : {
         "ru" : {
@@ -223,6 +213,26 @@
         }
       }
     },
+    "Date and Time" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата и время"
+          }
+        }
+      }
+    },
+    "Date and Time…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата и время…"
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "ru" : {
@@ -273,16 +283,6 @@
         }
       }
     },
-    "Done" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Готово"
-          }
-        }
-      }
-    },
     "Edit" : {
       "localizations" : {
         "ru" : {
@@ -299,16 +299,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Раскрывать при наведении"
-          }
-        }
-      }
-    },
-    "Focus on task" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Взять в фокус"
           }
         }
       }
@@ -353,6 +343,16 @@
         }
       }
     },
+    "Yesterday" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вчера"
+          }
+        }
+      }
+    },
     "iCloud" : {
       "localizations" : {
         "ru" : {
@@ -369,16 +369,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Синхронизация через iCloud"
-          }
-        }
-      }
-    },
-    "In focus" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "В фокусе"
           }
         }
       }
@@ -516,6 +506,36 @@
         }
       }
     },
+    "Next Month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующий месяц"
+          }
+        }
+      }
+    },
+    "Next Week" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующая неделя"
+          }
+        }
+      }
+    },
+    "No Date" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без даты"
+          }
+        }
+      }
+    },
     "No connection" : {
       "localizations" : {
         "ru" : {
@@ -542,6 +562,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вырез"
+          }
+        }
+      }
+    },
+    "Notifications are off" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомления выключены"
           }
         }
       }
@@ -626,6 +656,16 @@
         }
       }
     },
+    "Previous Month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предыдущий месяц"
+          }
+        }
+      }
+    },
     "Project name" : {
       "localizations" : {
         "ru" : {
@@ -692,6 +732,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Завершить Peasy"
+          }
+        }
+      }
+    },
+    "Remove Date" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать дату"
           }
         }
       }
@@ -776,32 +826,12 @@
         }
       }
     },
-    "Sprout" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Росток"
-          }
-        }
-      }
-    },
     "Status" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Статус"
-          }
-        }
-      }
-    },
-    "Stop focus" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Снять с фокуса"
           }
         }
       }
@@ -926,12 +956,42 @@
         }
       }
     },
+    "This Month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текущий месяц"
+          }
+        }
+      }
+    },
+    "This Weekend" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На выходных"
+          }
+        }
+      }
+    },
     "This build of Peasy is signed without iCloud, so tasks are stored only on this Mac." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Эта сборка Peasy подписана без iCloud, поэтому задачи хранятся только на этом Mac."
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время"
           }
         }
       }
@@ -952,6 +1012,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Индикатор задач на сегодня"
+          }
+        }
+      }
+    },
+    "Tomorrow" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завтра"
           }
         }
       }

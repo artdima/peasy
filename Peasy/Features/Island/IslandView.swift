@@ -8,7 +8,6 @@ struct IslandView: View {
 
     @Query private var tasks: [TaskItem]
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
-    @AppStorage(PanelSettings.showsBuddyKey) private var showsBuddy = true
 
     var body: some View {
         let mode = currentMode
@@ -32,21 +31,10 @@ struct IslandView: View {
     }
 
     private var currentMode: IslandMode {
-        let progress = TaskQueries.todayProgress(from: tasks)
+        let progress = TaskQueries.todayProgress(from: tasks, now: DayClock.shared.today)
         let stage = PeaStage(done: progress.done, total: progress.total)
         if let added = model.addedConfirmation {
             return .added(colorHex: added)
-        }
-        if showsBuddy, let celebration = model.celebration {
-            return .celebrating(colorHex: celebration.colorHex, stage: stage)
-        }
-        if showsBuddy, let id = model.focusedTaskID,
-           let task = tasks.first(where: { $0.id == id && !$0.isDone }) {
-            return .focus(
-                title: task.title,
-                colorHex: task.project?.colorHex ?? ProjectPalette.inbox,
-                stage: stage
-            )
         }
         if showsIndicator {
             return .indicator(stage: stage)
@@ -56,15 +44,14 @@ struct IslandView: View {
 
     @ViewBuilder
     private func leading(for mode: IslandMode) -> some View {
-        if case .added(let colorHex) = mode {
+        switch mode {
+        case .plain:
+            EmptyView()
+        case .indicator(let stage):
+            BuddyView(stage: stage, scale: min(1, presenter.geometry.collapsedHeight / BuddyLayerView.size.height))
+                .offset(x: -2)
+        case .added(let colorHex):
             CheckBadge(colorHex: colorHex, size: 16)
-        } else if let pea = mode.pea {
-            BuddyView(
-                mood: pea.mood,
-                stage: pea.stage,
-                scale: min(1, presenter.geometry.collapsedHeight / BuddyLayerView.size.height)
-            )
-            .offset(x: -2)
         }
     }
 
@@ -73,11 +60,8 @@ struct IslandView: View {
         switch mode {
         case .plain:
             EmptyView()
-        case .indicator, .focus:
+        case .indicator:
             Color.clear
-        case .celebrating(let colorHex, _):
-            CheckBadge(colorHex: colorHex, size: 14)
-                .transition(.scale.combined(with: .opacity))
         case .added:
             Text("Added")
                 .font(.system(size: 12, weight: .semibold))

@@ -23,14 +23,6 @@ final class NotchViewModel {
         let command: Command
     }
 
-    struct Celebration: Equatable {
-        let id = UUID()
-        let title: String
-        let colorHex: String
-    }
-
-    static let focusKey = "focusedTaskID"
-
     var draft = ""
     var isPinned = false
     var headerHeight: CGFloat = 34
@@ -41,14 +33,12 @@ final class NotchViewModel {
     var projectEditor: ProjectEditor?
     var projectPendingDeletion: UUID?
     private(set) var lastCommand: CommandEvent?
-    private(set) var focusedTaskID: UUID? = UserDefaults.standard.string(forKey: NotchViewModel.focusKey)
-        .flatMap(UUID.init(uuidString:))
-    private(set) var celebration: Celebration?
+    var schedulingTaskID: UUID?
+    var scheduleDraft = ScheduleDraft()
+    var scheduleAnchor: CGRect = .zero
     var addedConfirmation: String?
     var island: IslandMode = .plain
 
-    @ObservationIgnored var onFocusStarted: () -> Void = {}
-    @ObservationIgnored var onCelebration: () -> Void = {}
     @ObservationIgnored var onResize: (CGSize, Bool) -> Void = { _, _ in }
     @ObservationIgnored var onResetSize: () -> Void = {}
     var panelSize = PanelLayout.current.panelSize
@@ -67,6 +57,13 @@ final class NotchViewModel {
 
     func focusNewTask() {
         newTaskFocusRequest += 1
+    }
+
+    /// The anchor is the calendar button's frame in the panel's SwiftUI space.
+    func openSchedule(for task: TaskItem, anchor: CGRect) {
+        scheduleAnchor = anchor
+        scheduleDraft = ScheduleDraft(date: task.date, hasTime: task.hasTime)
+        schedulingTaskID = task.id
     }
 
     func startEditing(_ task: TaskItem) {
@@ -88,39 +85,17 @@ final class NotchViewModel {
         editingTaskID = nil
     }
 
-    func startFocus(on task: TaskItem) {
-        celebration = nil
-        setFocus(task.id)
-        onFocusStarted()
-    }
-
-    func stopFocus() {
-        setFocus(nil)
-    }
-
-    func taskCompleted(_ task: TaskItem) {
-        guard task.isDone, task.id == focusedTaskID else { return }
-        setFocus(nil)
-        celebration = Celebration(title: task.title, colorHex: task.project?.colorHex ?? ProjectPalette.inbox)
-        onCelebration()
-    }
-
-    func endCelebration(_ id: UUID) {
-        if celebration?.id == id {
-            celebration = nil
-        }
-    }
-
-    private func setFocus(_ id: UUID?) {
-        focusedTaskID = id
-        UserDefaults.standard.set(id?.uuidString, forKey: Self.focusKey)
-    }
-
     func resetInteraction() {
         commitEditing()
         isPinned = false
+        schedulingTaskID = nil
         selectedTaskID = nil
         projectEditor = nil
         projectPendingDeletion = nil
     }
+}
+
+struct ScheduleDraft: Equatable {
+    var date: Date?
+    var hasTime = false
 }

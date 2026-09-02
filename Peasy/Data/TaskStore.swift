@@ -99,7 +99,7 @@ struct TaskStore {
     func addTask(_ title: String, project: Project?, isToday: Bool) -> TaskItem? {
         guard let title = Self.clean(title) else { return nil }
         let lastOrder = allTasks().map(\.order).max() ?? -1
-        let task = TaskItem(title: title, order: lastOrder + 1, isToday: isToday)
+        let task = TaskItem(title: title, order: lastOrder + 1, date: isToday ? Calendar.current.startOfDay(for: .now) : nil)
         context.insert(task)
         task.project = project
         save()
@@ -112,9 +112,43 @@ struct TaskStore {
         save()
     }
 
-    func setToday(_ task: TaskItem, _ isToday: Bool) {
-        guard task.isToday != isToday else { return }
-        task.isToday = isToday
+    func setToday(_ task: TaskItem, _ isToday: Bool, now: Date = .now) {
+        if isToday {
+            moveToToday(task, now: now)
+        } else {
+            schedule(task, on: nil, hasTime: false)
+        }
+    }
+
+    func moveToToday(_ task: TaskItem, now: Date = .now) {
+        let calendar = Calendar.current
+        var day = calendar.startOfDay(for: now)
+        if task.hasTime, let date = task.date {
+            let time = calendar.dateComponents([.hour, .minute], from: date)
+            day = calendar.date(bySettingHour: time.hour ?? 0, minute: time.minute ?? 0, second: 0, of: day) ?? day
+        }
+        schedule(task, on: day, hasTime: task.hasTime)
+    }
+
+    func schedule(_ task: TaskItem, on date: Date?, hasTime: Bool) {
+        let hasTime = date != nil && hasTime
+        guard task.date != date || task.hasTime != hasTime else { return }
+        task.date = date
+        task.hasTime = hasTime
+        save()
+    }
+
+    /// Today used to be a flag. Flagged tasks get today's date, or the day they were finished.
+    func moveTodayFlagsToDates(now: Date = .now) {
+        let calendar = Calendar.current
+        let flagged = allTasks().filter(\.isToday)
+        guard !flagged.isEmpty else { return }
+        for task in flagged {
+            if task.date == nil {
+                task.date = calendar.startOfDay(for: task.isDone ? task.completedAt ?? now : now)
+            }
+            task.isToday = false
+        }
         save()
     }
 
