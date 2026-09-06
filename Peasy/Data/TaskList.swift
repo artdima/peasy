@@ -2,7 +2,7 @@ import Foundation
 
 enum TaskList: Hashable {
     case today
-    case inbox
+    case all
     case project(UUID)
 
     static let storageKey = "selectedList"
@@ -10,7 +10,7 @@ enum TaskList: Hashable {
     init(storageValue: String) {
         switch storageValue {
         case "today": self = .today
-        case "inbox": self = .inbox
+        case "all", "inbox": self = .all
         default: self = UUID(uuidString: storageValue).map(TaskList.project) ?? .today
         }
     }
@@ -18,7 +18,7 @@ enum TaskList: Hashable {
     var storageValue: String {
         switch self {
         case .today: "today"
-        case .inbox: "inbox"
+        case .all: "all"
         case .project(let id): id.uuidString
         }
     }
@@ -33,7 +33,7 @@ enum TaskQueries {
             case .today:
                 task.isDue(on: now, calendar: calendar)
                     && (!task.isDone || task.completedAt.map { calendar.isDate($0, inSameDayAs: now) } == true)
-            case .inbox: task.project == nil
+            case .all: true
             case .project(let id): task.project?.id == id
             }
         }

@@ -149,15 +149,15 @@ struct NotchContentView: View {
     }
 
     private var lists: [TaskList] {
-        [.today, .inbox] + projects.map { .project($0.id) }
+        [.today, .all] + projects.map { .project($0.id) }
     }
 
     private func title(for list: TaskList) -> Text {
         switch list {
         case .today:
             Text("Today")
-        case .inbox:
-            Text("Inbox")
+        case .all:
+            Text("All")
         case .project(let id):
             Text(verbatim: projects.first { $0.id == id }?.name ?? "")
         }

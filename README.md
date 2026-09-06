@@ -19,7 +19,7 @@
 | Feature | What it does |
 | --- | --- |
 | **Notch panel** | Hover over the notch and the panel unfolds from it; move away to fold it back. Click into the panel to type: then it stays open until you click elsewhere, switch to another app (⌘Tab, Dock) or press Esc. The pin in the header keeps it open on clicks and app switches. |
-| **Today, Inbox, projects** | Today collects the tasks planned for today or earlier from every list, and each morning starts without yesterday's finished ones. Inbox holds tasks without a project. Projects get a color each; rename, reorder and delete them from the list. |
+| **Today, All, projects** | Today collects the tasks planned for today or earlier from every list, and each morning starts without yesterday's finished ones. All shows every task, with or without a project. Projects get a color each; rename, reorder and delete them from the list. |
 | **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top, wrapping onto new rows when they run out of room. Switch in Settings. |
 | **Resizable** | Drag the bottom-right corner to resize the panel; each layout remembers its size. Reset from the context menu. |
 | **Date and time** | The calendar button on a task opens a picker beside it: Today, Tomorrow, This Weekend, Next Week, any day in the calendar, and an optional time. The choice is saved when the picker closes. Late tasks stay in Today marked in red; a task with a time sends a notification. |
@@ -76,9 +76,9 @@ PeasyTests/         Swift Testing suites
 - **Sync turns itself on.** At launch Peasy reads its own entitlements: a build signed with the iCloud container syncs, an unsigned one stays local. The project builds and tests without a team, and nothing crashes on a missing entitlement.
 - **Sync now reopens the store.** SwiftData has no call to force a sync. Reopening the store makes CloudKit set up, import and export again, which is what the button promises.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
-- **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so Inbox is virtual and the first project is the user's.
+- **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so All is virtual and the first project is the user's.
 - **Own key handling.** An agent app has no Edit menu, so the panel routes ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z itself, and a local key monitor handles navigation.
-- **Today is a date, Inbox is a query.** A task belongs to at most one project and can also have a planned date, so Today never duplicates data. Older versions kept a Today flag; it is turned into today's date on launch. Inbox is simply the tasks without a project; there is no Inbox record to duplicate across Macs.
+- **Today is a date, All is a query.** A task belongs to at most one project and can also have a planned date, so Today never duplicates data. Older versions kept a Today flag; it is turned into today's date on launch. All is simply every task; there is no list record to duplicate across Macs.
 - **The pea runs in the render server.** It is drawn with Core Animation shape layers, so growing into the next stage costs nothing on the main thread. Reduce Motion stops the animation.
 - **Carbon for the global shortcut.** `RegisterEventHotKey` works without Accessibility permission, unlike a global key monitor.
 

@@ -27,10 +27,10 @@ struct ProjectSidebar: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
 
-                SidebarRow(title: Text("Inbox"), count: count(in: .inbox), isSelected: selection == .inbox) {
-                    ColorDot(hex: ProjectPalette.inbox)
+                SidebarRow(title: Text("All"), count: count(in: .all), isSelected: selection == .all) {
+                    ColorDot(hex: ProjectPalette.noProject)
                 } action: {
-                    onSelect(.inbox)
+                    onSelect(.all)
                 }
 
                 ForEach(projects) { project in

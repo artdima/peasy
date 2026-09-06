@@ -103,6 +103,16 @@
         }
       }
     },
+    "All" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все"
+          }
+        }
+      }
+    },
     "All done" : {
       "localizations" : {
         "ru" : {
@@ -373,16 +383,6 @@
         }
       }
     },
-    "Inbox" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Входящие"
-          }
-        }
-      }
-    },
     "Light" : {
       "localizations" : {
         "ru" : {
@@ -532,6 +532,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Без даты"
+          }
+        }
+      }
+    },
+    "No Project" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без проекта"
           }
         }
       }

@@ -110,7 +110,7 @@ struct TaskRow: View {
     }
 
     private var accent: Color {
-        Color(hex: task.project?.colorHex ?? ProjectPalette.inbox)
+        Color(hex: task.project?.colorHex ?? ProjectPalette.noProject)
     }
 
     private var meta: Text? {
@@ -125,10 +125,10 @@ struct TaskRow: View {
                 return task.isOverdue(now: now) ? label.foregroundStyle(Color(nsColor: .systemRed)) : label
             }
         switch list {
-        case .today:
-            let place = task.project.map { Text(verbatim: $0.name) } ?? Text("Inbox")
+        case .today, .all:
+            guard let place = task.project.map({ Text(verbatim: $0.name) }) else { return when }
             return when.map { place + Text(verbatim: " · ") + $0 } ?? place
-        case .inbox, .project:
+        case .project:
             return when
         }
     }

@@ -20,10 +20,10 @@ struct ProjectTabs: View {
                 onSelect(.today)
             }
 
-            TabPill(title: String(localized: "Inbox"), count: count(in: .inbox), isSelected: selection == .inbox) {
-                ColorDot(hex: ProjectPalette.inbox, size: 6)
+            TabPill(title: String(localized: "All"), count: count(in: .all), isSelected: selection == .all) {
+                ColorDot(hex: ProjectPalette.noProject, size: 6)
             } action: {
-                onSelect(.inbox)
+                onSelect(.all)
             }
 
             ForEach(projects) { project in

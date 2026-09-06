@@ -18,8 +18,8 @@ struct TaskScheduleTests {
     @Test func todayHoldsOverdueTasksButNotLaterOnes() throws {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
-        let late = try #require(store.addTask("Late", to: .inbox))
-        let later = try #require(store.addTask("Later", to: .inbox))
+        let late = try #require(store.addTask("Late", to: .all))
+        let later = try #require(store.addTask("Later", to: .all))
         store.schedule(late, on: calendar.date(byAdding: .day, value: -2, to: today), hasTime: false)
         store.schedule(later, on: calendar.date(byAdding: .day, value: 1, to: today), hasTime: false)
 
@@ -42,7 +42,7 @@ struct TaskScheduleTests {
 
     @Test func movingToTodayKeepsTheTime() throws {
         let calendar = Calendar.current
-        let task = try #require(store.addTask("Call", to: .inbox))
+        let task = try #require(store.addTask("Call", to: .all))
         let nextWeek = try #require(calendar.date(byAdding: .day, value: 7, to: calendar.startOfDay(for: .now)))
         store.schedule(task, on: calendar.date(bySettingHour: 14, minute: 30, second: 0, of: nextWeek), hasTime: true)
         store.moveToToday(task)
@@ -55,7 +55,7 @@ struct TaskScheduleTests {
     }
 
     @Test func removingTheDateDropsTheTime() throws {
-        let task = try #require(store.addTask("Call", to: .inbox))
+        let task = try #require(store.addTask("Call", to: .all))
         store.schedule(task, on: .now, hasTime: true)
         store.setToday(task, false)
 
@@ -65,9 +65,9 @@ struct TaskScheduleTests {
 
     @Test func todayFlagsBecomeDates() throws {
         let calendar = Calendar.current
-        let open = try #require(store.addTask("Open", to: .inbox))
+        let open = try #require(store.addTask("Open", to: .all))
         open.isToday = true
-        let done = try #require(store.addTask("Done", to: .inbox))
+        let done = try #require(store.addTask("Done", to: .all))
         let finished = try #require(calendar.date(byAdding: .day, value: -3, to: .now))
         done.isToday = true
         done.isDone = true

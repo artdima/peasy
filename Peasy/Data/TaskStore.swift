@@ -90,7 +90,7 @@ struct TaskStore {
     func addTask(_ title: String, to list: TaskList) -> TaskItem? {
         switch list {
         case .today: addTask(title, project: nil, isToday: true)
-        case .inbox: addTask(title, project: nil, isToday: false)
+        case .all: addTask(title, project: nil, isToday: false)
         case .project(let id): addTask(title, project: project(id: id), isToday: false)
         }
     }

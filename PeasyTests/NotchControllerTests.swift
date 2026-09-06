@@ -82,7 +82,7 @@ struct NotchControllerTests {
         let controller = NotchController(model: model, actions: actions, modelContainer: container)
         defer { controller.shutdown() }
         let store = TaskStore(context: container.mainContext)
-        let task = try #require(store.addTask("Draft", to: .inbox))
+        let task = try #require(store.addTask("Draft", to: .all))
 
         model.startEditing(task)
         model.editingDraft = "Draft, edited"
@@ -115,7 +115,7 @@ struct NotchControllerTests {
         #expect(controller.isExpanded)
 
         let store = TaskStore(context: second.mainContext)
-        #expect(store.addTask("After reload", to: .inbox) != nil)
+        #expect(store.addTask("After reload", to: .all) != nil)
         try await Task.sleep(for: .milliseconds(300))
         #expect(controller.isExpanded)
     }

@@ -23,7 +23,7 @@ struct TaskStoreTests {
 
     @Test func emptyNamesAreIgnored() throws {
         #expect(store.createProject(named: "   ") == nil)
-        #expect(store.addTask("\n", to: .inbox) == nil)
+        #expect(store.addTask("\n", to: .all) == nil)
         #expect(store.allTasks().isEmpty)
     }
 
@@ -43,14 +43,14 @@ struct TaskStoreTests {
         store.setToday(release, true)
 
         #expect(store.openTasks(in: .today).map(\.title) == ["Release", "Mail"])
-        #expect(store.openTasks(in: .inbox).map(\.title) == ["Mail"])
+        #expect(store.openTasks(in: .all).map(\.title) == ["Release", "Backlog", "Mail"])
         #expect(store.openTasks(in: .project(work.id)).map(\.title) == ["Release", "Backlog"])
     }
 
     @Test func todayProgressCountsOnlyTodayTasks() throws {
         let done = try #require(store.addTask("Done", to: .today))
         store.addTask("Open", to: .today)
-        store.addTask("Someday", to: .inbox)
+        store.addTask("Someday", to: .all)
         store.toggle(done)
 
         let progress = TaskQueries.todayProgress(from: store.allTasks())
@@ -59,11 +59,11 @@ struct TaskStoreTests {
     }
 
     @Test func toggleMovesTaskToCompleted() throws {
-        let task = try #require(store.addTask("One", to: .inbox))
+        let task = try #require(store.addTask("One", to: .all))
         store.toggle(task)
         #expect(task.completedAt != nil)
-        #expect(store.openTasks(in: .inbox).isEmpty)
-        #expect(store.completedTasks(in: .inbox).map(\.title) == ["One"])
+        #expect(store.openTasks(in: .all).isEmpty)
+        #expect(store.completedTasks(in: .all).map(\.title) == ["One"])
 
         store.toggle(task)
         #expect(task.completedAt == nil)
@@ -71,37 +71,37 @@ struct TaskStoreTests {
 
     @Test func movingTaskChangesOnlyItsOrder() throws {
         for title in ["A", "B", "C"] {
-            store.addTask(title, to: .inbox)
+            store.addTask(title, to: .all)
         }
-        store.moveOpenTasks(in: .inbox, from: IndexSet(integer: 2), to: 0)
-        #expect(store.openTasks(in: .inbox).map(\.title) == ["C", "A", "B"])
+        store.moveOpenTasks(in: .all, from: IndexSet(integer: 2), to: 0)
+        #expect(store.openTasks(in: .all).map(\.title) == ["C", "A", "B"])
 
-        store.moveOpenTasks(in: .inbox, from: IndexSet(integer: 0), to: 2)
-        #expect(store.openTasks(in: .inbox).map(\.title) == ["A", "C", "B"])
+        store.moveOpenTasks(in: .all, from: IndexSet(integer: 0), to: 2)
+        #expect(store.openTasks(in: .all).map(\.title) == ["A", "C", "B"])
     }
 
     @Test func repeatedMovesRenumberWithoutBreakingOtherLists() throws {
         let work = try #require(store.createProject(named: "Work"))
         for title in ["A", "B", "C"] {
-            store.addTask(title, to: .inbox)
+            store.addTask(title, to: .all)
         }
         store.addTask("W", to: .project(work.id))
         for _ in 0..<80 {
-            store.moveOpenTasks(in: .inbox, from: IndexSet(integer: 2), to: 1)
+            store.moveOpenTasks(in: .all, from: IndexSet(integer: 2), to: 1)
         }
-        let orders = store.openTasks(in: .inbox).map(\.order)
+        let orders = store.openTasks(in: .all).map(\.order)
         #expect(orders == orders.sorted())
         #expect(Set(store.allTasks().map(\.order)).count == 4)
         #expect(store.openTasks(in: .project(work.id)).map(\.title) == ["W"])
     }
 
     @Test func clearCompletedKeepsOpenTasks() throws {
-        let done = try #require(store.addTask("Done", to: .inbox))
-        store.addTask("Open", to: .inbox)
+        let done = try #require(store.addTask("Done", to: .all))
+        store.addTask("Open", to: .all)
         store.toggle(done)
-        store.clearCompleted(in: .inbox)
-        #expect(store.openTasks(in: .inbox).map(\.title) == ["Open"])
-        #expect(store.completedTasks(in: .inbox).isEmpty)
+        store.clearCompleted(in: .all)
+        #expect(store.openTasks(in: .all).map(\.title) == ["Open"])
+        #expect(store.completedTasks(in: .all).isEmpty)
     }
 
     @Test func deletingProjectRemovesTasks() throws {
@@ -114,9 +114,10 @@ struct TaskStoreTests {
 
     @Test func listsSurviveStorage() {
         let id = UUID()
-        for list in [TaskList.today, .inbox, .project(id)] {
+        for list in [TaskList.today, .all, .project(id)] {
             #expect(TaskList(storageValue: list.storageValue) == list)
         }
+        #expect(TaskList(storageValue: "inbox") == .all)
         #expect(TaskList(storageValue: "garbage") == .today)
     }
 

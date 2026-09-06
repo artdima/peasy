@@ -130,7 +130,7 @@ final class QuickAddController {
         let store = TaskStore(context: modelContainer.mainContext)
         let project = state.projectID.flatMap { store.project(id: $0) }
         guard let task = store.addTask(state.title, project: project, isToday: state.isToday) else { return }
-        let colorHex = task.project?.colorHex ?? ProjectPalette.inbox
+        let colorHex = task.project?.colorHex ?? ProjectPalette.noProject
         hide()
         notchModel.addedConfirmation = colorHex
         confirmationTask?.cancel()

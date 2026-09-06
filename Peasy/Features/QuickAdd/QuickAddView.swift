@@ -40,7 +40,7 @@ struct QuickAddView: View {
     private static let shadow = Color(red: 10 / 255, green: 12 / 255, blue: 18 / 255)
 
     var body: some View {
-        let colorHex = projects.first { $0.id == state.projectID }?.colorHex ?? ProjectPalette.inbox
+        let colorHex = projects.first { $0.id == state.projectID }?.colorHex ?? ProjectPalette.noProject
         let color = Color(hex: colorHex)
         let isReady = !state.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         VStack(alignment: .leading, spacing: 12) {
@@ -88,7 +88,7 @@ struct QuickAddView: View {
                 .padding(.horizontal, -14)
 
             FlowLayout(spacing: 4, rowSpacing: 4) {
-                QuickAddChip(title: String(localized: "Inbox"), colorHex: ProjectPalette.inbox, isOn: state.projectID == nil) {
+                QuickAddChip(title: String(localized: "No Project"), colorHex: ProjectPalette.noProject, isOn: state.projectID == nil) {
                     state.projectID = nil
                 }
                 ForEach(projects) { project in
