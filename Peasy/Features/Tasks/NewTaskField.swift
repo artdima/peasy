@@ -8,16 +8,25 @@ struct NewTaskField: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        HStack(spacing: 8) {
-            Glyph(kind: .plus, size: 12)
+        HStack(spacing: 14) {
+            Glyph(kind: .plus, size: 14)
                 .foregroundStyle(PanelStyle.tertiary)
                 .frame(width: 30)
-                .offset(y: 0.5)
-            TextField(placeholder, text: $model.draft)
+            TextField(text: $model.draft, prompt: Text(verbatim: "")) {
+                Text(placeholder)
+            }
                 .textFieldStyle(.plain)
-                .font(.system(size: 14))
+                .font(.system(size: 16))
                 .focused($isFocused)
-                .offset(y: 1)
+                .overlay(alignment: .leading) {
+                    if model.draft.isEmpty {
+                        Text(placeholder)
+                            .font(.system(size: 16))
+                            .foregroundStyle(PanelStyle.tertiary)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                    }
+                }
                 .onSubmit {
                     onSubmit(model.draft)
                     model.draft = ""
@@ -35,7 +44,7 @@ struct NewTaskField: View {
         }
         .padding(.leading, 4)
         .padding(.trailing, 10)
-        .frame(height: 42)
+        .frame(height: 46)
         .overlay(alignment: .top) {
             Rectangle()
                 .fill(PanelStyle.separator)

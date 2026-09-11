@@ -1,32 +1,33 @@
 import AppKit
-import NotchKit
 import SwiftUI
 
 /// Colors of the panel and the windows around it. Each one resolves against the
 /// appearance it is drawn in, so the theme is chosen by setting a window's appearance.
-/// Gray is a dark appearance with its own values, so dark ↔ gray needs a rebuild.
 enum PanelStyle {
-    static let primary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F", gray: "#E9E9E9")
-    static let secondary = Color.themed(dark: "#98989F", light: "#6E6E73", gray: "#A8A7A8")
-    static let tertiary = Color.themed(dark: "#8E8E93", light: "#6E6E73", gray: "#9B9C9E")
-    static let separator = Color.themed(white: 0.08, black: 0.08)
-    static let hover = Color.themed(white: 0.06, black: 0.045, gray: "#2C2B2C")
-    static let strongHover = Color.themed(white: 0.1, black: 0.07, gray: "#333233")
-    static let pressed = Color.themed(white: 0.21, black: 0.1, gray: "#403F40")
-    static let selection = Color.themed(white: 0.12, black: 0.075, gray: "#2458CA")
-    static let pillSelection = Color.themed(white: 0.13, black: 0.075, gray: "#2458CA")
-    static let selectedPrimary = Color.themed(dark: "#F5F5F7", light: "#1D1D1F", gray: "#FFFFFF")
-    static let selectedTertiary = Color.themed(dark: "#8E8E93", light: "#6E6E73", gray: "#BDCDEF")
-    static let nameField = Color.themed(white: 0.12, black: 0.075, gray: "#333233")
-    static let pillNameField = Color.themed(white: 0.13, black: 0.075, gray: "#333233")
+    /// The dark panel surface, also the ink of the morphing shape.
+    static let ink = Color(hex: "#1C1C1E")
+    static let primary = Color.themed(dark: "#E8E8ED", light: "#1D1D1F")
+    static let title = Color.themed(dark: "#F2F2F7", light: "#1D1D1F")
+    static let heading = Color.themed(dark: "#C9C9CE", light: "#6E6E73")
+    static let secondary = Color.themed(dark: "#9A9AA0", light: "#6E6E73")
+    static let tertiary = Color.themed(dark: "#9A9AA0", light: "#6E6E73")
+    static let separator = Color.themed(white: 0.09, black: 0.08)
+    static let hover = Color.themed(white: 0.06, black: 0.045)
+    static let strongHover = Color.themed(white: 0.1, black: 0.07)
+    static let pressed = Color.themed(white: 0.21, black: 0.1)
+    static let selection = Color.themed(dark: NSColor(hex: "#3D5CCC"), light: NSColor.black.withAlphaComponent(0.075))
+    static let pillSelection = selection
+    static let selectedPrimary = Color.themed(dark: "#FFFFFF", light: "#1D1D1F")
+    static let selectedTertiary = Color.themed(dark: NSColor.white.withAlphaComponent(0.85), light: NSColor(hex: "#6E6E73"))
+    static let nameField = Color.themed(white: 0.12, black: 0.075)
+    static let pillNameField = Color.themed(white: 0.13, black: 0.075)
     static let keyBorder = Color.themed(white: 0.18, black: 0.16)
-    static let green = Color(hex: "#30D158")
+    static let overdue = Color.themed(dark: "#FF5D4F", light: "#FF3B30")
+    static let green = Color(hex: "#34C759")
 
     /// The collapsed notch and its cloud stay black in every theme.
     static let onBlack = Color(hex: "#F5F5F7")
     static let lightInk = Color(red: 0.965, green: 0.965, blue: 0.975)
-    static let grayInk = Color(hex: "#212121")
-    static let grayEdge = Color(hex: "#4D4D4D")
 }
 
 extension Color {
@@ -34,28 +35,18 @@ extension Color {
         self.init(nsColor: NSColor(hex: hex))
     }
 
-    static func themed(dark: String, light: String, gray: String? = nil) -> Color {
-        themed(dark: NSColor(hex: dark), light: NSColor(hex: light), gray: gray.map { NSColor(hex: $0) })
+    static func themed(dark: String, light: String) -> Color {
+        themed(dark: NSColor(hex: dark), light: NSColor(hex: light))
     }
 
     /// A white overlay in dark mode, a black one in light mode.
-    static func themed(white: CGFloat, black: CGFloat, gray: String? = nil) -> Color {
-        themed(
-            dark: NSColor.white.withAlphaComponent(white),
-            light: NSColor.black.withAlphaComponent(black),
-            gray: gray.map { NSColor(hex: $0) }
-        )
+    static func themed(white: CGFloat, black: CGFloat) -> Color {
+        themed(dark: NSColor.white.withAlphaComponent(white), light: NSColor.black.withAlphaComponent(black))
     }
 
-    static func themed(dark: NSColor, light: NSColor, gray: NSColor? = nil) -> Color {
+    static func themed(dark: NSColor, light: NSColor) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua {
-                return light
-            }
-            if let gray, AppTheme.isGray {
-                return gray
-            }
-            return dark
+            appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? light : dark
         })
     }
 }
@@ -97,7 +88,7 @@ struct IconButton<Icon: View>: View {
             icon()
                 .foregroundStyle(isOn || isHovered ? PanelStyle.primary : color)
                 .frame(width: 28, height: 28)
-                .background(isHovered ? PanelStyle.strongHover : .clear, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background(isHovered ? PanelStyle.strongHover : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -112,37 +103,33 @@ struct SproutIcon: View {
 
     var body: some View {
         Canvas { context, size in
-            let scale = CGAffineTransform(scaleX: size.width / 12, y: size.height / 12)
+            let unit = size.width / 24
+            let scale = CGAffineTransform(scaleX: unit, y: size.height / 24)
             var stem = Path()
-            stem.move(to: CGPoint(x: 6, y: 11))
-            stem.addLine(to: CGPoint(x: 6, y: 6.2))
+            stem.move(to: CGPoint(x: 12, y: 22))
+            stem.addLine(to: CGPoint(x: 12, y: 10))
             context.stroke(
                 stem.applying(scale),
                 with: .color(color),
-                style: StrokeStyle(lineWidth: 1.4 * size.width / 12, lineCap: .round)
+                style: StrokeStyle(lineWidth: 2 * unit, lineCap: .round)
             )
             var leaves = Path()
-            leaves.move(to: CGPoint(x: 6, y: 6.4))
-            leaves.addCurve(to: CGPoint(x: 10.2, y: 2.7), control1: CGPoint(x: 6.1, y: 4.1), control2: CGPoint(x: 7.7, y: 2.6))
-            leaves.addCurve(to: CGPoint(x: 6, y: 6.4), control1: CGPoint(x: 10.1, y: 5), control2: CGPoint(x: 8.4, y: 6.5))
+            leaves.move(to: CGPoint(x: 12, y: 13))
+            leaves.addCurve(to: CGPoint(x: 20, y: 5.5), control1: CGPoint(x: 12, y: 8.6), control2: CGPoint(x: 15.1, y: 5.5))
+            leaves.addCurve(to: CGPoint(x: 12, y: 13), control1: CGPoint(x: 19.7, y: 10.1), control2: CGPoint(x: 16.7, y: 13))
             leaves.closeSubpath()
-            leaves.move(to: CGPoint(x: 6, y: 7.4))
-            leaves.addCurve(to: CGPoint(x: 2.6, y: 4.5), control1: CGPoint(x: 5.9, y: 5.6), control2: CGPoint(x: 4.6, y: 4.4))
-            leaves.addCurve(to: CGPoint(x: 6, y: 7.4), control1: CGPoint(x: 2.7, y: 6.3), control2: CGPoint(x: 4, y: 7.5))
+            leaves.move(to: CGPoint(x: 12, y: 10))
+            leaves.addCurve(to: CGPoint(x: 4, y: 2.5), control1: CGPoint(x: 12, y: 5.6), control2: CGPoint(x: 8.9, y: 2.5))
+            leaves.addCurve(to: CGPoint(x: 12, y: 10), control1: CGPoint(x: 4.3, y: 7.1), control2: CGPoint(x: 7.3, y: 10))
             leaves.closeSubpath()
-            context.fill(leaves.applying(scale), with: .color(color))
+            let scaled = leaves.applying(scale)
+            context.fill(scaled, with: .color(color))
+            context.stroke(
+                scaled,
+                with: .color(color),
+                style: StrokeStyle(lineWidth: 1.5 * unit, lineCap: .round, lineJoin: .round)
+            )
         }
         .accessibilityHidden(true)
-    }
-}
-
-struct PanelEdge: View {
-    let bottomRadius: CGFloat
-
-    var body: some View {
-        NotchShape(topCornerRadius: 0, bottomCornerRadius: bottomRadius)
-            .stroke(PanelStyle.grayEdge, lineWidth: 2)
-            .padding(.top, -2)
-            .allowsHitTesting(false)
     }
 }

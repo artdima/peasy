@@ -25,18 +25,18 @@ struct TaskSection: View {
 
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 title
-                    .font(.system(size: 17, weight: .semibold))
-                    .tracking(-0.17)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(PanelStyle.title)
                     .lineLimit(1)
                 Spacer(minLength: 0)
                 if !openTasks.isEmpty {
                     Text("\(openTasks.count) tasks")
-                        .font(.system(size: 12))
+                        .font(.system(size: 15))
                         .foregroundStyle(PanelStyle.tertiary)
                 }
             }
-            .frame(height: 24)
-            .padding(EdgeInsets(top: 4.5, leading: 10, bottom: 9.5, trailing: 10))
+            .frame(height: 28)
+            .padding(EdgeInsets(top: 4, leading: 8, bottom: 6, trailing: 8))
 
             TaskListView(
                 list: list,

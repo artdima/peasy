@@ -16,7 +16,7 @@ struct ProjectSidebar: View {
             VStack(alignment: .leading, spacing: 2) {
                 SidebarRow(title: Text("Today"), count: count(in: .today), isSelected: selection == .today) {
                     SproutIcon()
-                        .frame(width: 12, height: 12)
+                        .frame(width: 16, height: 16)
                 } action: {
                     onSelect(.today)
                 }
@@ -24,8 +24,9 @@ struct ProjectSidebar: View {
                 Rectangle()
                     .fill(PanelStyle.separator)
                     .frame(height: 1)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 6)
+                    .padding(.bottom, 8)
 
                 SidebarRow(title: Text("All"), count: count(in: .all), isSelected: selection == .all) {
                     ColorDot(hex: ProjectPalette.noProject)
@@ -143,22 +144,22 @@ struct SidebarRow<Icon: View>: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 icon()
-                    .frame(width: 8, height: 12)
+                    .frame(width: 16, height: 16)
                 title
-                    .font(.system(size: 13))
+                    .font(.system(size: 15))
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if count > 0 {
                     Text(count, format: .number)
-                        .font(.system(size: 12))
+                        .font(.system(size: 14))
                         .monospacedDigit()
                         .foregroundStyle(isSelected ? PanelStyle.selectedTertiary : PanelStyle.tertiary)
                 }
             }
             .foregroundStyle(isSelected ? PanelStyle.selectedPrimary : PanelStyle.primary)
-            .padding(.horizontal, 10)
-            .frame(height: 32)
+            .padding(.horizontal, 12)
+            .frame(height: 34)
             .background(
                 isSelected ? PanelStyle.selection : isHovered ? PanelStyle.hover : .clear,
                 in: RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -179,16 +180,15 @@ struct NewProjectRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Glyph(kind: .plus, size: 10)
-                    .frame(width: 8)
-                    .offset(x: 1)
+                Glyph(kind: .plus, size: 11)
+                    .frame(width: 16, height: 16)
                 Text("New project")
-                    .font(.system(size: 13))
+                    .font(.system(size: 15))
                 Spacer(minLength: 0)
             }
             .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.tertiary)
-            .padding(.horizontal, 10)
-            .frame(height: 32)
+            .padding(.horizontal, 12)
+            .frame(height: 34)
             .background(isHovered ? PanelStyle.hover : .clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .contentShape(Rectangle())
         }
@@ -210,9 +210,10 @@ struct ProjectNameField: View {
     var body: some View {
         HStack(spacing: 10) {
             ColorDot(hex: colorHex)
+                .frame(width: 16, height: 16)
             TextField("Project name", text: $name)
                 .textFieldStyle(.plain)
-                .font(.system(size: 13))
+                .font(.system(size: 15))
                 .focused($isFocused)
                 .onSubmit(finish)
                 .onExitCommand {
@@ -221,8 +222,8 @@ struct ProjectNameField: View {
                     onCancel()
                 }
         }
-        .padding(.horizontal, 10)
-        .frame(height: 32)
+        .padding(.horizontal, 12)
+        .frame(height: 34)
         .background(PanelStyle.nameField, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .onAppear {
             name = initialName

@@ -164,12 +164,12 @@ struct TaskSchedulePicker: View {
 }
 
 enum PickerStyle {
-    static let background = Color.themed(dark: "#232325", light: "#FCFCFD", gray: "#2C2B2C")
-    static let border = Color.themed(dark: NSColor(hex: "#39393B"), light: NSColor.black.withAlphaComponent(0.12), gray: NSColor(hex: "#4D4D4D"))
-    static let divider = Color.themed(dark: NSColor(hex: "#343436"), light: NSColor.black.withAlphaComponent(0.08), gray: NSColor(hex: "#3A393A"))
-    static let hover = Color.themed(dark: NSColor(hex: "#3E3E40"), light: NSColor.black.withAlphaComponent(0.06), gray: NSColor(hex: "#3C3B3C"))
-    static let pastDay = Color.themed(dark: "#58585A", light: "#B4B4B8", gray: "#5E5D5E")
-    static let otherMonthDay = Color.themed(dark: "#3D3D3F", light: "#D6D6DA", gray: "#444344")
+    static let background = Color.themed(dark: "#232325", light: "#FCFCFD")
+    static let border = Color.themed(dark: NSColor(hex: "#39393B"), light: NSColor.black.withAlphaComponent(0.12))
+    static let divider = Color.themed(dark: NSColor(hex: "#343436"), light: NSColor.black.withAlphaComponent(0.08))
+    static let hover = Color.themed(dark: NSColor(hex: "#3E3E40"), light: NSColor.black.withAlphaComponent(0.06))
+    static let pastDay = Color.themed(dark: "#58585A", light: "#B4B4B8")
+    static let otherMonthDay = Color.themed(dark: "#3D3D3F", light: "#D6D6DA")
 }
 
 private struct PickerDivider: View {

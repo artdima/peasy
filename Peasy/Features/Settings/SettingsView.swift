@@ -263,7 +263,7 @@ struct LayoutThumbnail: View {
             )
             context.fill(
                 Path(roundedRect: CGRect(x: 24, y: -14, width: 152, height: 110), cornerRadius: 14),
-                with: .color(isLight ? PanelStyle.lightInk : AppTheme.isGray ? PanelStyle.grayInk : .black)
+                with: .color(isLight ? PanelStyle.lightInk : PanelStyle.ink)
             )
             switch layout {
             case .vertical: drawVertical(in: context)
@@ -359,17 +359,13 @@ struct PeasySwitchStyle: ToggleStyle {
 }
 
 enum SettingsStyle {
-    static let window = Color.themed(dark: "#1E1E20", light: "#ECECEE", gray: "#212121")
+    static let window = Color.themed(dark: "#1C1C1E", light: "#ECECEE")
     static let windowNS = NSColor(name: nil) { appearance in
-        if appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua {
-            return NSColor(hex: "#ECECEE")
-        }
-        return NSColor(hex: AppTheme.isGray ? "#212121" : "#1E1E20")
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? NSColor(hex: "#ECECEE") : NSColor(hex: "#1C1C1E")
     }
     static let card = Color.themed(
         dark: NSColor.white.withAlphaComponent(0.05),
-        light: NSColor.white.withAlphaComponent(0.75),
-        gray: NSColor(hex: "#282828")
+        light: NSColor.white.withAlphaComponent(0.75)
     )
     static let cardStroke = Color.themed(white: 0.04, black: 0.05)
     static let rowDivider = Color.themed(white: 0.07, black: 0.07)
@@ -384,5 +380,5 @@ enum SettingsStyle {
     static let chevron = Color.themed(dark: "#C7C7CC", light: "#6E6E73")
     static let keyCapEdge = Color.themed(dark: NSColor.white.withAlphaComponent(0.06), light: NSColor.black.withAlphaComponent(0.06))
     static let iconTile = Color.themed(dark: NSColor(hex: "#2C2C2E"), light: NSColor.black.withAlphaComponent(0.05))
-    static let thumbnailFrame = Color.themed(dark: "#2C2C2F", light: "#DCDCE0", gray: "#2C2B2C")
+    static let thumbnailFrame = Color.themed(dark: "#2C2C2F", light: "#DCDCE0")
 }

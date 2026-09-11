@@ -14,7 +14,7 @@ enum PanelLayout: String, CaseIterable, Identifiable {
 
     var defaultSize: CGSize {
         switch self {
-        case .vertical: CGSize(width: 680, height: 452)
+        case .vertical: CGSize(width: 760, height: 540)
         case .horizontal: CGSize(width: 560, height: 372)
         }
     }
@@ -57,12 +57,7 @@ enum PanelLayout: String, CaseIterable, Identifiable {
         )
     }
 
-    var bottomCornerRadius: CGFloat {
-        switch self {
-        case .vertical: 30
-        case .horizontal: 28
-        }
-    }
+    var bottomCornerRadius: CGFloat { 20 }
 }
 
 enum PanelSettings {

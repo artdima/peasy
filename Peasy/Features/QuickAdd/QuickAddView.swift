@@ -31,7 +31,7 @@ struct QuickAddView: View {
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
 
-    private static let card = Color.themed(dark: "#151517", light: "#F7F7F9", gray: "#212121")
+    private static let card = Color.themed(dark: "#1C1C1E", light: "#F7F7F9")
     private static let stroke = Color.themed(white: 0.09, black: 0.08)
     private static let divider = Color.themed(white: 0.07, black: 0.07)
     private static let groupSeparator = Color.themed(white: 0.14, black: 0.12)

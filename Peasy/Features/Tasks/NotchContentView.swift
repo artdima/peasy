@@ -55,7 +55,7 @@ struct NotchContentView: View {
     }
 
     private func verticalBody(list: TaskList, openTasks: [TaskItem], store: TaskStore) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 0) {
             ProjectSidebar(
                 projects: projects,
                 tasks: tasks,
@@ -66,6 +66,7 @@ struct NotchContentView: View {
                 onDelete: { delete($0, store: store) }
             )
             .frame(width: 172)
+            .padding(.trailing, 12)
 
             Rectangle()
                 .fill(PanelStyle.separator)
@@ -81,9 +82,10 @@ struct NotchContentView: View {
                 model: model,
                 onDeleteProject: { delete($0, store: store) }
             )
+            .padding(.leading, 24)
             .background(deleteShortcut(store: store))
         }
-        .padding(EdgeInsets(top: 10, leading: 14, bottom: 14, trailing: 14))
+        .padding(EdgeInsets(top: 2, leading: 12, bottom: 8, trailing: 24))
     }
 
     private func horizontalBody(list: TaskList, openTasks: [TaskItem], store: TaskStore) -> some View {

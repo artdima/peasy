@@ -36,9 +36,9 @@ struct TaskListView: View {
 
                     if openTasks.isEmpty {
                         Text("All done")
-                            .font(.system(size: 13))
+                            .font(.system(size: 15))
                             .foregroundStyle(PanelStyle.tertiary)
-                            .padding(.horizontal, 14)
+                            .padding(.horizontal, 8)
                             .padding(.vertical, 10)
                     } else {
                         Color.clear
@@ -102,14 +102,14 @@ struct CompletedDisclosure: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Glyph(kind: .chevron, size: 10)
+                Glyph(kind: .chevron, size: 12)
                     .rotationEffect(.degrees(isExpanded ? 90 : 0))
                 Text("Completed · \(count)")
             }
-            .font(.system(size: 12, weight: .medium))
+            .font(.system(size: 15))
             .foregroundStyle(isHovered ? PanelStyle.primary : PanelStyle.tertiary)
-            .padding(.horizontal, 10)
-            .frame(height: 32)
+            .padding(.horizontal, 8)
+            .frame(height: 40)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

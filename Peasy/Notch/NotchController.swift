@@ -33,8 +33,7 @@ final class NotchController {
                 size: model.panelSize,
                 reserve: model.island.reserve,
                 pinned: false,
-                notchHeight: 0,
-                flat: Surface(theme: AppTheme.current) != .black
+                notchHeight: 0
             ),
             style: Self.style(for: Surface(theme: AppTheme.current))
         )
@@ -90,13 +89,10 @@ final class NotchController {
         presenter.phase == .expanded
     }
 
-    /// Size of the opaque panel body below the ears, including the notch row.
+    /// Size of the opaque panel body, including the notch row.
     var expandedPanelSize: CGSize {
         let size = presenter.configuration.expandedSize
-        return CGSize(
-            width: size.width - presenter.configuration.expandedTopCornerRadius * 2,
-            height: size.height + presenter.geometry.collapsedHeight
-        )
+        return CGSize(width: size.width, height: size.height + presenter.geometry.collapsedHeight)
     }
 
     func expand() {
@@ -129,45 +125,35 @@ final class NotchController {
         presenter.uninstall()
     }
 
-    private static let earRadius: CGFloat = 16
-
     private func makeConfiguration(pinned: Bool) -> NotchConfiguration {
         Self.configuration(
             layout: layout,
             size: model.panelSize,
             reserve: model.island.reserve,
             pinned: pinned,
-            notchHeight: presenter.geometry.collapsedHeight,
-            flat: surface != .black
+            notchHeight: presenter.geometry.collapsedHeight
         )
     }
 
     private enum Surface {
-        case black
-        case gray
+        case dark
         case glass
 
         init(theme: AppTheme) {
-            if theme.isLight {
-                self = .glass
-            } else {
-                self = theme == .gray ? .gray : .black
-            }
+            self = theme.isLight ? .glass : .dark
         }
-    }
-
-    /// Only a black panel can merge with the notch. The light and gray ones hang
-    /// flat from the top edge (no concave ears), with rounder bottom corners.
-    private static func bottomRadius(layout: PanelLayout, flat: Bool) -> CGFloat {
-        layout.bottomCornerRadius + (flat ? 4 : 0)
     }
 
     private static func style(for surface: Surface) -> NotchStyle {
         switch surface {
-        case .black:
-            .standard
-        case .gray:
-            NotchStyle(ink: PanelStyle.grayInk, foreground: Color(hex: "#E9E9E9"))
+        case .dark:
+            NotchStyle(
+                ink: PanelStyle.ink,
+                shadowColor: .black.opacity(0.45),
+                shadowRadius: 30,
+                shadowOffsetY: 24,
+                foreground: Color(hex: "#E8E8ED")
+            )
         case .glass:
             NotchStyle(
                 ink: PanelStyle.lightInk,
@@ -178,26 +164,24 @@ final class NotchController {
         }
     }
 
-    // NotchKit's expandedSize spans the concave ears and excludes the notch row;
-    // the mockups measure the panel body below the ears, including that row.
+    // The panel hangs flat from the top edge (no concave ears). NotchKit's expandedSize
+    // excludes the notch row; the mockups measure the panel body including that row.
     private static func configuration(
         layout: PanelLayout,
         size: CGSize,
         reserve: CGFloat,
         pinned: Bool,
-        notchHeight: CGFloat,
-        flat: Bool
+        notchHeight: CGFloat
     ) -> NotchConfiguration {
-        let ear = flat ? 0 : earRadius
-        return NotchConfiguration(
+        NotchConfiguration(
             expandedSize: CGSize(
-                width: size.width + ear * 2,
+                width: size.width,
                 height: max(size.height - notchHeight, 0)
             ),
             collapsedWidth: .wrapCutout(reserve: reserve),
-            expandedTopCornerRadius: ear,
-            expandedBottomCornerRadius: bottomRadius(layout: layout, flat: flat),
-            expandedContentInsetsOverride: EdgeInsets(top: 0, leading: ear, bottom: 0, trailing: ear),
+            expandedTopCornerRadius: 0,
+            expandedBottomCornerRadius: layout.bottomCornerRadius,
+            expandedContentInsetsOverride: EdgeInsets(),
             expandedTopReserve: .none,
             expandsOnHover: false,
             collapsesOnPointerExit: !pinned,
@@ -215,7 +199,7 @@ final class NotchController {
         let actions = actions
         let presenter = presenter
         let surface = surface
-        let radius = Self.bottomRadius(layout: layout, flat: surface != .black)
+        let radius = layout.bottomCornerRadius
         presenter.install {
             IslandView(presenter: presenter, model: model)
                 .modelContainer(modelContainer)
@@ -225,11 +209,6 @@ final class NotchController {
                 .background {
                     if surface == .glass {
                         PanelGlass(bottomRadius: radius, isVisible: model.isPanelOpen)
-                    }
-                }
-                .overlay {
-                    if surface == .gray {
-                        PanelEdge(bottomRadius: radius)
                     }
                 }
         }

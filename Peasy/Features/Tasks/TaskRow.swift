@@ -19,15 +19,15 @@ struct TaskRow: View {
 
     var body: some View {
         let wraps = isMultiline && !isEditing
-        HStack(alignment: wraps ? .top : .center, spacing: 8) {
+        HStack(alignment: wraps ? .top : .center, spacing: 14) {
             CheckRing(color: accent, isOn: task.isDone || isChecking, action: toggle)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
-                .padding(.top, wraps ? 4 : 0)
+                .padding(.top, wraps ? 7 : 0)
 
             if isEditing {
                 TextField("Task", text: $model.editingDraft)
                     .textFieldStyle(.plain)
-                    .font(.system(size: 14))
+                    .font(.system(size: 15))
                     .focused($isEditorFocused)
                     .onSubmit(model.commitEditing)
                     .onExitCommand(perform: model.cancelEditing)
@@ -41,13 +41,13 @@ struct TaskRow: View {
                     }
             } else {
                 Text(task.title)
-                    .font(.system(size: 14))
+                    .font(.system(size: 15))
                     .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
                     .lineLimit(wraps ? nil : 1)
                     .lineSpacing(wraps ? 3 : 0)
                     .truncationMode(.tail)
                     .fixedSize(horizontal: false, vertical: wraps)
-                    .padding(.vertical, wraps ? 10.5 : 0)
+                    .padding(.vertical, wraps ? 10 : 0)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture(count: 2, perform: startEditing)
             }
@@ -56,7 +56,7 @@ struct TaskRow: View {
                 HStack(spacing: 6) {
                     if let meta {
                         meta
-                            .font(.system(size: 12))
+                            .font(.system(size: 14))
                             .foregroundStyle(PanelStyle.tertiary)
                             .lineLimit(1)
                             .padding(.trailing, showsDateButton ? 0 : 2)
@@ -73,12 +73,12 @@ struct TaskRow: View {
                         }
                 }
                 .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
-                .padding(.top, wraps ? 7 : 0)
+                .padding(.top, wraps ? 8 : 0)
             }
         }
         .padding(.leading, 4)
         .padding(.trailing, 8)
-        .frame(minHeight: 38)
+        .frame(minHeight: 42)
         .background(
             isSelected || isScheduling ? PanelStyle.strongHover : isHovered ? PanelStyle.hover : .clear,
             in: RoundedRectangle(cornerRadius: 9, style: .continuous)
@@ -122,7 +122,7 @@ struct TaskRow: View {
                 if isScheduling {
                     return label.foregroundStyle(PanelStyle.green)
                 }
-                return task.isOverdue(now: now) ? label.foregroundStyle(Color(nsColor: .systemRed)) : label
+                return task.isOverdue(now: now) ? label.foregroundStyle(PanelStyle.overdue) : label
             }
         switch list {
         case .today, .all:
@@ -182,13 +182,13 @@ struct CheckRing: View {
                 Circle()
                     .fill(color.opacity(isOn ? 1 : isHovered ? 0.24 : 0))
                 Circle()
-                    .strokeBorder(color, lineWidth: 1.5)
-                Glyph(kind: .check, size: 10)
+                    .strokeBorder(color, lineWidth: 2)
+                Glyph(kind: .check, size: 12)
                     .foregroundStyle(.black)
                     .opacity(isOn ? 1 : 0)
                     .scaleEffect(isOn ? 1 : 0.6)
             }
-            .frame(width: 18, height: 18)
+            .frame(width: 22, height: 22)
             .frame(width: 30, height: 30)
             .contentShape(Rectangle())
         }
