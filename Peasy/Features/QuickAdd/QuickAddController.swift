@@ -20,13 +20,13 @@ final class QuickAddController {
     private let hostingView: NSHostingView<AnyView>
     private let state = QuickAddState()
     private var modelContainer: ModelContainer?
-    private let notchModel: NotchViewModel
+    private let panelModel: PanelViewModel
     private var observers: [NSObjectProtocol] = []
     private var confirmationTask: Task<Void, Never>?
     private var isShown = false
 
-    init(modelContainer: ModelContainer, notchModel: NotchViewModel) {
-        self.notchModel = notchModel
+    init(modelContainer: ModelContainer, panelModel: PanelViewModel) {
+        self.panelModel = panelModel
         panel = QuickAddPanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel],
@@ -132,12 +132,12 @@ final class QuickAddController {
         guard let task = store.addTask(state.title, project: project, isToday: state.isToday) else { return }
         let colorHex = task.project?.colorHex ?? ProjectPalette.noProject
         hide()
-        notchModel.addedConfirmation = colorHex
+        panelModel.addedConfirmation = colorHex
         confirmationTask?.cancel()
         confirmationTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1.8))
             guard !Task.isCancelled, let self else { return }
-            notchModel.addedConfirmation = nil
+            panelModel.addedConfirmation = nil
         }
     }
 }

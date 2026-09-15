@@ -3,11 +3,11 @@ import CoreData
 import SwiftData
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private let notchModel = NotchViewModel()
+    private let panelModel = PanelViewModel()
     private let sync = SyncMonitor()
     private lazy var settingsWindow = SettingsWindowController(sync: sync)
     private var container: ModelContainer?
-    private var notchController: NotchController?
+    private var menuBarController: MenuBarController?
     private var quickAdd: QuickAddController?
     private let hotKey = GlobalHotKey()
     private var observers: [NSObjectProtocol] = []
@@ -19,13 +19,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sync.start()
         let container = openStore()
         prepare(container)
-        let actions = NotchActions(
+        let actions = PanelActions(
             showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
             quit: { NSApp.terminate(nil) }
         )
-        notchController = NotchController(model: notchModel, actions: actions, modelContainer: container)
-        let quickAdd = QuickAddController(modelContainer: container, notchModel: notchModel)
+        menuBarController = MenuBarController(model: panelModel, actions: actions, modelContainer: container)
+        let quickAdd = QuickAddController(modelContainer: container, panelModel: panelModel)
         self.quickAdd = quickAdd
         hotKey.action = { quickAdd.toggle() }
         hotKey.register(Shortcut.current)
@@ -73,7 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return TaskStore(context: container.mainContext).allTasks()
         }
         reminders.onOpen = { [weak self] in
-            self?.notchController?.expand()
+            self?.menuBarController?.expand()
         }
         reminders.start()
         for name in [ModelContext.didSave, NSPersistentCloudKitContainer.eventChangedNotification] {
@@ -86,14 +86,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func reloadStore() {
-        notchController?.unloadStore()
+        menuBarController?.unloadStore()
         quickAdd?.unloadStore()
         Task { [weak self] in
             await Task.yield()
             guard let self else { return }
             let container = openStore()
             prepare(container)
-            notchController?.loadStore(container)
+            menuBarController?.loadStore(container)
             quickAdd?.loadStore(container)
         }
     }

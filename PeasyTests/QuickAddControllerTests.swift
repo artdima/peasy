@@ -8,8 +8,8 @@ import Testing
 struct QuickAddControllerTests {
     @Test func toggleShowsAndHidesThePanel() async throws {
         let container = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let controller = QuickAddController(modelContainer: container, notchModel: model)
+        let model = PanelViewModel()
+        let controller = QuickAddController(modelContainer: container, panelModel: model)
 
         controller.toggle()
         try await Task.sleep(for: .milliseconds(400))

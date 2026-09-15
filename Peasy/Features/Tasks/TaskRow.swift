@@ -4,7 +4,7 @@ struct TaskRow: View {
     let task: TaskItem
     let list: TaskList
     let store: TaskStore
-    @Bindable var model: NotchViewModel
+    @Bindable var model: PanelViewModel
 
     @AppStorage(PanelSettings.multilineTasksKey) private var isMultiline = false
     @State private var isHovered = false

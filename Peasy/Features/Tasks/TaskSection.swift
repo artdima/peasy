@@ -7,7 +7,7 @@ struct TaskSection: View {
     let completedTasks: [TaskItem]
     let projects: [Project]
     let store: TaskStore
-    @Bindable var model: NotchViewModel
+    @Bindable var model: PanelViewModel
     let onDeleteProject: (Project) -> Void
 
     var body: some View {

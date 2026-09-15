@@ -1,9 +1,9 @@
 import SwiftData
 import SwiftUI
 
-struct NotchContentView: View {
-    let model: NotchViewModel
-    let actions: NotchActions
+struct PanelContentView: View {
+    let model: PanelViewModel
+    let actions: PanelActions
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Project.order), SortDescriptor(\Project.createdAt)])
@@ -29,7 +29,7 @@ struct NotchContentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .overlay(alignment: .bottomTrailing) {
+        .overlay(alignment: .bottomLeading) {
             ResizeGrip(model: model)
         }
         .foregroundStyle(PanelStyle.primary)
@@ -165,7 +165,7 @@ struct NotchContentView: View {
         }
     }
 
-    private func perform(_ command: NotchViewModel.Command, store: TaskStore) {
+    private func perform(_ command: PanelViewModel.Command, store: TaskStore) {
         switch command {
         case .selectList(let index):
             if lists.indices.contains(index) {

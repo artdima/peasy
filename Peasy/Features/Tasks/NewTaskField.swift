@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NewTaskField: View {
-    @Bindable var model: NotchViewModel
+    @Bindable var model: PanelViewModel
     let placeholder: LocalizedStringKey
     let onSubmit: (String) -> Void
 

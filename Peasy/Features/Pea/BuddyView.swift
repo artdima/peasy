@@ -5,13 +5,15 @@ import SwiftUI
 struct BuddyView: NSViewRepresentable {
     var stage: PeaStage
     var scale: CGFloat = 1
+    /// Light body with dark eyes by default; flipped for a light menu bar.
+    var isInverted = false
 
     func makeNSView(context: Context) -> BuddyLayerView {
         BuddyLayerView()
     }
 
     func updateNSView(_ view: BuddyLayerView, context: Context) {
-        view.update(stage: stage, scale: scale)
+        view.update(stage: stage, scale: scale, isInverted: isInverted)
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, nsView: BuddyLayerView, context: Context) -> CGSize? {
@@ -35,8 +37,11 @@ final class BuddyLayerView: NSView {
     private let bodyGroup = BuddyLayerView.group(anchor: CGPoint(x: 12, y: 20.6))
     private let plantLayer = BuddyLayerView.group(anchor: CGPoint(x: 12, y: 8.4))
     private let cheeks = CAShapeLayer()
+    private var body: CAShapeLayer?
+    private var eyes: CAShapeLayer?
     private var stage: PeaStage?
     private var scale: CGFloat = 1
+    private var isInverted = false
 
     override init(frame frameRect: NSRect) {
         super.init(frame: NSRect(origin: .zero, size: Self.size))
@@ -61,11 +66,19 @@ final class BuddyLayerView: NSView {
         CATransaction.commit()
     }
 
-    func update(stage: PeaStage, scale: CGFloat) {
+    func update(stage: PeaStage, scale: CGFloat, isInverted: Bool = false) {
         if scale != self.scale {
             self.scale = scale
             invalidateIntrinsicContentSize()
             needsLayout = true
+        }
+        if isInverted != self.isInverted {
+            self.isInverted = isInverted
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            body?.fillColor = isInverted ? NSColor.black.cgColor : Self.white
+            eyes?.fillColor = isInverted ? Self.white : NSColor.black.cgColor
+            CATransaction.commit()
         }
         if stage != self.stage {
             let isFirst = self.stage == nil
@@ -93,6 +106,7 @@ final class BuddyLayerView: NSView {
         bodyPath.closeSubpath()
         let body = Self.shape(fill: Self.white, path: bodyPath)
         bodyGroup.addSublayer(body)
+        self.body = body
 
         let cheeksPath = CGMutablePath()
         cheeksPath.addEllipse(in: CGRect(x: 7.7 - 0.95, y: 16.62 - 0.52, width: 1.9, height: 1.04))
@@ -106,7 +120,9 @@ final class BuddyLayerView: NSView {
         let eyesPath = CGMutablePath()
         eyesPath.addEllipse(in: CGRect(x: 9.5 - 1.05, y: 14.7 - 1.45, width: 2.1, height: 2.9))
         eyesPath.addEllipse(in: CGRect(x: 14.5 - 1.05, y: 14.7 - 1.45, width: 2.1, height: 2.9))
-        bodyGroup.addSublayer(Self.shape(fill: NSColor.black.cgColor, path: eyesPath))
+        let eyes = Self.shape(fill: NSColor.black.cgColor, path: eyesPath)
+        bodyGroup.addSublayer(eyes)
+        self.eyes = eyes
     }
 
     private func showPlant(animated: Bool) {

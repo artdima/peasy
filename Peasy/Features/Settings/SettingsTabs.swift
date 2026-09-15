@@ -3,7 +3,7 @@ import SwiftUI
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general
     case panel
-    case notch
+    case menuBar
     case icloud
 
     static let storageKey = "settingsTab"
@@ -14,7 +14,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general: String(localized: "General")
         case .panel: String(localized: "Panel")
-        case .notch: String(localized: "Notch")
+        case .menuBar: String(localized: "Menu bar")
         case .icloud: String(localized: "iCloud")
         }
     }
@@ -26,11 +26,8 @@ enum SettingsTab: String, CaseIterable, Identifiable {
             Glyph(kind: .sliders, size: 20)
         case .panel:
             Glyph(kind: .sidebar, size: 20)
-        case .notch:
-            ZStack {
-                Glyph(kind: .notchFrame, size: 20)
-                Glyph(kind: .notchTab, size: 20)
-            }
+        case .menuBar:
+            Glyph(kind: .menuBarTab, size: 20)
         case .icloud:
             Glyph(kind: .cloudTab, size: 20)
         }

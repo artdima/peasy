@@ -25,8 +25,7 @@ enum PanelStyle {
     static let overdue = Color.themed(dark: "#FF5D4F", light: "#FF3B30")
     static let green = Color(hex: "#34C759")
 
-    /// The collapsed notch and its cloud stay black in every theme.
-    static let onBlack = Color(hex: "#F5F5F7")
+    /// The light panel surface.
     static let lightInk = Color(red: 0.965, green: 0.965, blue: 0.975)
 }
 

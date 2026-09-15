@@ -5,7 +5,7 @@ struct ProjectSidebar: View {
     let tasks: [TaskItem]
     let selection: TaskList
     let store: TaskStore
-    @Bindable var model: NotchViewModel
+    @Bindable var model: PanelViewModel
     let onSelect: (TaskList) -> Void
     let onDelete: (Project) -> Void
 

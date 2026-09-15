@@ -7,12 +7,12 @@ import Testing
 
 @MainActor
 @Suite(.serialized)
-struct NotchControllerTests {
+struct MenuBarControllerTests {
     @Test func panelSurvivesOpeningAndAddingTasks() async throws {
         let container = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
-        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
         defer { controller.shutdown() }
 
         controller.expand()
@@ -38,9 +38,9 @@ struct NotchControllerTests {
 
     @Test func panelBodyMatchesTheLayoutSize() throws {
         let container = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
-        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
         defer { controller.shutdown() }
 
         #expect(controller.expandedPanelSize == PanelLayout.current.panelSize)
@@ -55,9 +55,9 @@ struct NotchControllerTests {
             if let savedSize { layout.saveSize(savedSize) } else { layout.resetSize() }
         }
         let container = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
-        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
         defer { controller.shutdown() }
 
         model.onResize(CGSize(width: 760, height: 500), false)
@@ -77,9 +77,9 @@ struct NotchControllerTests {
 
     @Test func foldingThePanelSavesTheEdit() async throws {
         let container = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
-        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
         defer { controller.shutdown() }
         let store = TaskStore(context: container.mainContext)
         let task = try #require(store.addTask("Draft", to: .all))
@@ -99,9 +99,9 @@ struct NotchControllerTests {
 
     @Test func panelSurvivesReloadingTheStore() async throws {
         let first = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
-        let controller = NotchController(model: model, actions: actions, modelContainer: first)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: first)
         defer { controller.shutdown() }
 
         controller.unloadStore()
@@ -122,9 +122,9 @@ struct NotchControllerTests {
 
     @Test func switchingToAnotherAppFoldsThePanel() async throws {
         let container = try Persistence.makeContainer(inMemory: true)
-        let model = NotchViewModel()
-        let actions = NotchActions(showAbout: {}, openSettings: {}, quit: {})
-        let controller = NotchController(model: model, actions: actions, modelContainer: container)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
         defer { controller.shutdown() }
         let ownPID = NSRunningApplication.current.processIdentifier
         let other = try #require(NSWorkspace.shared.runningApplications.first { $0.processIdentifier != ownPID })

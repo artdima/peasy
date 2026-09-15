@@ -22,7 +22,7 @@ final class SchedulePickerWindow: NSObject, NSWindowDelegate {
         super.init()
         panel.delegate = self
         panel.isFloatingPanel = true
-        panel.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1)
+        panel.level = NSWindow.Level(rawValue: MenuBarPanel.level.rawValue + 1)
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = true

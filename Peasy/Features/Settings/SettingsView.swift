@@ -6,10 +6,8 @@ struct SettingsView: View {
     var onHeightChange: (CGFloat) -> Void = { _ in }
     @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general
     @AppStorage(PanelLayout.storageKey) private var layout = PanelLayout.vertical
-    @AppStorage(PanelSettings.expandsOnHoverKey) private var expandsOnHover = true
     @AppStorage(PanelSettings.multilineTasksKey) private var multilineTasks = false
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
-    @AppStorage(DisplayPreference.storageKey) private var display = DisplayPreference.builtIn
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
     @State private var launchAtLogin = LaunchAtLogin()
 
@@ -43,7 +41,7 @@ struct SettingsView: View {
             switch tab {
             case .general: generalPane
             case .panel: panelPane
-            case .notch: notchPane
+            case .menuBar: menuBarPane
             case .icloud: SyncSection(sync: sync)
             }
         }
@@ -92,28 +90,13 @@ struct SettingsView: View {
         }
     }
 
-    private var notchPane: some View {
+    private var menuBarPane: some View {
         SettingsCard {
             SettingsToggleRow(
-                title: "Expand on hover",
-                subtitle: expandsOnHover ? "The panel opens when the pointer is over the notch" : "The panel opens when you click the notch",
-                isOn: $expandsOnHover
-            )
-            SettingsToggleRow(
                 title: "Today indicator",
-                subtitle: "A pea in the collapsed notch that grows as you finish today's tasks",
-                isOn: $showsIndicator,
-                separated: true
+                subtitle: "The pea in the menu bar grows as you finish today's tasks and shows how many are left",
+                isOn: $showsIndicator
             )
-            SettingsRow(minHeight: 44, separated: true) {
-                Text("Show on")
-                    .settingsTitle()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                SettingsPopUp(
-                    options: DisplayPreference.allCases.map { ($0, $0.title) },
-                    selection: $display
-                )
-            }
         }
     }
 }

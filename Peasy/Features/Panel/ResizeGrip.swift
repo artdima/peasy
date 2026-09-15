@@ -1,10 +1,10 @@
 import AppKit
 import SwiftUI
 
-/// Invisible corner handle: dragging it resizes the panel. The panel is centered
-/// on the notch, so a horizontal drag grows both sides.
+/// Invisible corner handle: dragging it resizes the panel. The panel's right edge
+/// is anchored under the status item, so it grows to the left.
 struct ResizeGrip: View {
-    let model: NotchViewModel
+    let model: PanelViewModel
 
     @State private var dragStart: (mouse: CGPoint, size: CGSize)?
     @State private var isHovered = false
@@ -29,7 +29,7 @@ struct ResizeGrip: View {
                         dragStart = start
                         model.onResize(
                             CGSize(
-                                width: start.size.width + (mouse.x - start.mouse.x) * 2,
+                                width: start.size.width + (start.mouse.x - mouse.x),
                                 height: start.size.height + (start.mouse.y - mouse.y)
                             ),
                             false
@@ -48,7 +48,7 @@ struct ResizeGrip: View {
 
     private static var cursor: NSCursor {
         if #available(macOS 15, *) {
-            NSCursor.frameResize(position: .bottomRight, directions: .all)
+            NSCursor.frameResize(position: .bottomLeft, directions: .all)
         } else {
             NSCursor.crosshair
         }

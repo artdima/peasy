@@ -4,7 +4,7 @@ struct Glyph: View {
     enum Kind {
         case pin, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, spinner, gear
         case sun, sofa, nextWeek
-        case sliders, sidebar, notchFrame, notchTab, cloudTab
+        case sliders, sidebar, menuBarTab, cloudTab
     }
 
     let kind: Kind
@@ -14,7 +14,7 @@ struct Glyph: View {
     var body: some View {
         let unit = size / kind.viewBox
         ZStack {
-            if kind.fillsShape || filled {
+            if filled {
                 GlyphShape(kind: kind).fill()
             }
             if let width = kind.strokeWidth {
@@ -34,7 +34,7 @@ extension Glyph.Kind {
         case .chevron: 10
         case .returnKey, .refresh, .sun, .sofa, .nextWeek: 14
         case .cloud: 18
-        case .sliders, .sidebar, .notchFrame, .notchTab, .cloudTab: 20
+        case .sliders, .sidebar, .menuBarTab, .cloudTab: 20
         default: 12
         }
     }
@@ -50,13 +50,8 @@ extension Glyph.Kind {
         case .sun, .sofa, .nextWeek: 1.3
         case .returnKey: 1.8
         case .refresh, .cloud, .spinner: 1.5
-        case .sliders, .sidebar, .notchFrame, .cloudTab: 1.5
-        case .notchTab: nil
+        case .sliders, .sidebar, .menuBarTab, .cloudTab: 1.5
         }
-    }
-
-    var fillsShape: Bool {
-        self == .notchTab
     }
 }
 
@@ -180,16 +175,11 @@ struct GlyphShape: Shape {
             path.addRoundedRect(in: CGRect(x: 2.75, y: 4.25, width: 14.5, height: 11.5), cornerSize: CGSize(width: 2.5, height: 2.5))
             path.move(to: CGPoint(x: 7.75, y: 4.25))
             path.addLine(to: CGPoint(x: 7.75, y: 15.75))
-        case .notchFrame:
+        case .menuBarTab:
             path.addRoundedRect(in: CGRect(x: 2.75, y: 3.75, width: 14.5, height: 12.5), cornerSize: CGSize(width: 2.5, height: 2.5))
-        case .notchTab:
-            path.move(to: CGPoint(x: 7.5, y: 3.75))
-            path.addLine(to: CGPoint(x: 12.5, y: 3.75))
-            path.addLine(to: CGPoint(x: 12.5, y: 5.25))
-            path.addSVGArc(to: CGPoint(x: 11.25, y: 6.5), radius: 1.25, largeArc: false, sweep: true)
-            path.addLine(to: CGPoint(x: 8.75, y: 6.5))
-            path.addSVGArc(to: CGPoint(x: 7.5, y: 5.25), radius: 1.25, largeArc: false, sweep: true)
-            path.closeSubpath()
+            path.move(to: CGPoint(x: 2.75, y: 7.25))
+            path.addLine(to: CGPoint(x: 17.25, y: 7.25))
+            path.addRoundedRect(in: CGRect(x: 10.25, y: 7.25, width: 5, height: 4.25), cornerSize: CGSize(width: 1, height: 1))
         case .cloudTab:
             path.move(to: CGPoint(x: 5.8, y: 15.5))
             path.addLine(to: CGPoint(x: 14.2, y: 15.5))

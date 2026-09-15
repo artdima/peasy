@@ -5,7 +5,7 @@ struct TaskSchedulePicker: View {
     static let arrowDepth: CGFloat = 9
     static let windowSize = CGSize(width: bodySize.width + arrowDepth, height: bodySize.height)
 
-    @Bindable var model: NotchViewModel
+    @Bindable var model: PanelViewModel
     let arrowEdge: HorizontalEdge
     let arrowY: CGFloat
     let onClose: () -> Void
@@ -13,7 +13,7 @@ struct TaskSchedulePicker: View {
     @State private var month: Date
     @State private var remindersOff = false
 
-    init(model: NotchViewModel, arrowEdge: HorizontalEdge, arrowY: CGFloat, onClose: @escaping () -> Void) {
+    init(model: PanelViewModel, arrowEdge: HorizontalEdge, arrowY: CGFloat, onClose: @escaping () -> Void) {
         self.model = model
         self.arrowEdge = arrowEdge
         self.arrowY = arrowY

@@ -56,17 +56,9 @@ enum PanelLayout: String, CaseIterable, Identifiable {
             height: min(max(size.height.rounded(), minimumSize.height), max(limit.height, minimumSize.height))
         )
     }
-
-    var bottomCornerRadius: CGFloat { 20 }
 }
 
 enum PanelSettings {
     static let showsTodayIndicatorKey = "showsTodayIndicator"
-    static let expandsOnHoverKey = "expandsOnHover"
     static let multilineTasksKey = "multilineTasks"
-    static let hoverOpenDelay: Duration = .milliseconds(150)
-
-    static func flag(_ key: String) -> Bool {
-        UserDefaults.standard.object(forKey: key) as? Bool ?? true
-    }
 }

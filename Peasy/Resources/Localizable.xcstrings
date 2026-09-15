@@ -53,12 +53,12 @@
         }
       }
     },
-    "A pea in the collapsed notch that grows as you finish today's tasks" : {
+    "The pea in the menu bar grows as you finish today's tasks and shows how many are left" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Горошина в свёрнутом вырезе, которая растёт по мере выполнения задач на сегодня"
+            "value" : "Горошина в строке меню растёт по мере выполнения задач на сегодня и показывает, сколько их осталось"
           }
         }
       }
@@ -159,16 +159,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Коричневый"
-          }
-        }
-      }
-    },
-    "Built-in display" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Встроенный дисплей"
           }
         }
       }
@@ -283,32 +273,12 @@
         }
       }
     },
-    "Display with the pointer" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дисплей с курсором"
-          }
-        }
-      }
-    },
     "Edit" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изменить"
-          }
-        }
-      }
-    },
-    "Expand on hover" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Раскрывать при наведении"
           }
         }
       }
@@ -392,16 +362,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Длинные названия переносятся на новые строки"
-          }
-        }
-      }
-    },
-    "Main display" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Основной дисплей"
           }
         }
       }
@@ -556,12 +516,12 @@
         }
       }
     },
-    "Notch" : {
+    "Menu bar" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вырез"
+            "value" : "Строка меню"
           }
         }
       }
@@ -806,16 +766,6 @@
         }
       }
     },
-    "Show on" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показывать на"
-          }
-        }
-      }
-    },
     "Sign in to iCloud in System Settings to sync your tasks." : {
       "localizations" : {
         "ru" : {
@@ -932,26 +882,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Задачи и проекты на всех ваших Mac"
-          }
-        }
-      }
-    },
-    "The panel opens when the pointer is over the notch" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Панель открывается, когда курсор над вырезом"
-          }
-        }
-      }
-    },
-    "The panel opens when you click the notch" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Панель открывается по клику на вырез"
           }
         }
       }

@@ -4,7 +4,7 @@ import Observation
 
 @MainActor
 @Observable
-final class NotchViewModel {
+final class PanelViewModel {
     enum ProjectEditor: Equatable {
         case adding
         case renaming(UUID)
@@ -25,7 +25,7 @@ final class NotchViewModel {
 
     var draft = ""
     var isPinned = false
-    var headerHeight: CGFloat = 34
+    var headerHeight = PanelGeometry.headerHeight
     var selectedTaskID: UUID?
     private(set) var editingTaskID: UUID?
     var editingDraft = ""
@@ -37,13 +37,10 @@ final class NotchViewModel {
     var scheduleDraft = ScheduleDraft()
     var scheduleAnchor: CGRect = .zero
     var addedConfirmation: String?
-    var island: IslandMode = .plain
 
     @ObservationIgnored var onResize: (CGSize, Bool) -> Void = { _, _ in }
     @ObservationIgnored var onResetSize: () -> Void = {}
     var panelSize = PanelLayout.current.panelSize
-    /// Fully open: the light panel's glass shows only then, since it can't follow the morph.
-    var isPanelOpen = false
     var hasCustomSize = PanelLayout.current.customSize(in: .standard) != nil
     private(set) var newTaskFocusRequest = 0
 

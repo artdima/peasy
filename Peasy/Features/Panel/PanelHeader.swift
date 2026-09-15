@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PanelHeader: View {
-    @Bindable var model: NotchViewModel
+    @Bindable var model: PanelViewModel
     let onOpenSettings: () -> Void
 
     var body: some View {

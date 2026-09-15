@@ -119,7 +119,7 @@ struct QuickAddView: View {
                     .shadow(color: Self.shadow.opacity(0.55), radius: 45, y: 40)
                     .shadow(color: Self.shadow.opacity(0.35), radius: 15, y: 10)
                 if colorScheme == .light {
-                    GlassBackground(topRadius: 18, bottomRadius: 18)
+                    GlassBackground(cornerRadius: 18)
                 }
             }
         }

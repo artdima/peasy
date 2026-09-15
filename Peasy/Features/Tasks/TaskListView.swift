@@ -5,7 +5,7 @@ struct TaskListView: View {
     let openTasks: [TaskItem]
     let completedTasks: [TaskItem]
     let store: TaskStore
-    let model: NotchViewModel
+    let model: PanelViewModel
 
     @State private var showsCompleted = false
     @State private var dropTargetID: UUID?
