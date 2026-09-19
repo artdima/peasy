@@ -74,6 +74,7 @@ struct TaskStore {
     }
 
     func delete(_ project: Project) {
+        SyncLedger.hasLocalDeletions = true
         context.delete(project)
         save()
     }
@@ -159,11 +160,13 @@ struct TaskStore {
     }
 
     func delete(_ task: TaskItem) {
+        SyncLedger.hasLocalDeletions = true
         context.delete(task)
         save()
     }
 
     func clearCompleted(in list: TaskList) {
+        SyncLedger.hasLocalDeletions = true
         for task in completedTasks(in: list) {
             context.delete(task)
         }

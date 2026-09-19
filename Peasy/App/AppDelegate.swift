@@ -1,11 +1,13 @@
 import AppKit
+import CloudKit
 import CoreData
 import SwiftData
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let panelModel = PanelViewModel()
     private let sync = SyncMonitor()
-    private lazy var settingsWindow = SettingsWindowController(sync: sync)
+    private lazy var folderSync = FolderSync()
+    private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync)
     private var container: ModelContainer?
     private var menuBarController: MenuBarController?
     private var quickAdd: QuickAddController?
@@ -19,6 +21,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sync.start()
         let container = openStore()
         prepare(container)
+        folderSync.attach(container)
+        folderSync.refreshCloudAccount(isActive: sync.isActive)
+        folderSync.start()
         let actions = PanelActions(
             showAbout: { Self.showAbout() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
@@ -37,6 +42,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ) { [weak self] _ in
             MainActor.assumeIsolated {
                 self?.updateHotKey()
+            }
+        })
+        observers.append(NotificationCenter.default.addObserver(
+            forName: .CKAccountChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.folderSync.refreshCloudAccount(isActive: self.sync.isActive)
             }
         })
         observers.append(NotificationCenter.default.addObserver(
@@ -77,15 +92,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         reminders.start()
         for name in [ModelContext.didSave, NSPersistentCloudKitContainer.eventChangedNotification] {
-            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {
                     Reminders.shared.refresh()
+                    self?.folderSync.scheduleSync()
                 }
             })
         }
     }
 
     private func reloadStore() {
+        folderSync.detach()
         menuBarController?.unloadStore()
         quickAdd?.unloadStore()
         Task { [weak self] in
@@ -95,6 +112,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             prepare(container)
             menuBarController?.loadStore(container)
             quickAdd?.loadStore(container)
+            folderSync.attach(container)
+            folderSync.refreshCloudAccount(isActive: sync.isActive)
         }
     }
 

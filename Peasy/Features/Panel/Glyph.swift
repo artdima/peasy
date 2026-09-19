@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Glyph: View {
     enum Kind {
-        case pin, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, spinner, gear
+        case pin, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, folder, spinner, gear
         case sun, sofa, nextWeek
         case sliders, sidebar, menuBarTab, cloudTab
     }
@@ -33,7 +33,7 @@ extension Glyph.Kind {
         case .pin, .gear: 16
         case .chevron: 10
         case .returnKey, .refresh, .sun, .sofa, .nextWeek: 14
-        case .cloud: 18
+        case .cloud, .folder: 18
         case .sliders, .sidebar, .menuBarTab, .cloudTab: 20
         default: 12
         }
@@ -49,7 +49,7 @@ extension Glyph.Kind {
         case .calendar: 1.1
         case .sun, .sofa, .nextWeek: 1.3
         case .returnKey: 1.8
-        case .refresh, .cloud, .spinner: 1.5
+        case .refresh, .cloud, .folder, .spinner: 1.5
         case .sliders, .sidebar, .menuBarTab, .cloudTab: 1.5
         }
     }
@@ -157,6 +157,20 @@ struct GlyphShape: Shape {
             path.addSVGArc(to: CGPoint(x: 4.4, y: 8.3), radius: 4.6, largeArc: false, sweep: false)
             path.addSVGArc(to: CGPoint(x: 5.2, y: 14), radius: 2.9, largeArc: false, sweep: false)
             path.closeSubpath()
+        case .folder:
+            path.move(to: CGPoint(x: 2.5, y: 5))
+            path.addQuadCurve(to: CGPoint(x: 4, y: 3.5), control: CGPoint(x: 2.5, y: 3.5))
+            path.addLine(to: CGPoint(x: 7, y: 3.5))
+            path.addLine(to: CGPoint(x: 8.6, y: 5.2))
+            path.addLine(to: CGPoint(x: 14, y: 5.2))
+            path.addQuadCurve(to: CGPoint(x: 15.5, y: 6.7), control: CGPoint(x: 15.5, y: 5.2))
+            path.addLine(to: CGPoint(x: 15.5, y: 13))
+            path.addQuadCurve(to: CGPoint(x: 14, y: 14.5), control: CGPoint(x: 15.5, y: 14.5))
+            path.addLine(to: CGPoint(x: 4, y: 14.5))
+            path.addQuadCurve(to: CGPoint(x: 2.5, y: 13), control: CGPoint(x: 2.5, y: 14.5))
+            path.closeSubpath()
+            path.move(to: CGPoint(x: 2.5, y: 7.6))
+            path.addLine(to: CGPoint(x: 15.5, y: 7.6))
         case .spinner:
             path.move(to: CGPoint(x: 6, y: 1.2))
             path.addSVGArc(to: CGPoint(x: 1.2, y: 6), radius: 4.8, largeArc: true, sweep: true)

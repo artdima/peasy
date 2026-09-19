@@ -27,7 +27,8 @@
 | **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps to the new task field, ⌘1…⌘9 switch lists. |
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
 | **iCloud sync** | Projects and tasks follow your Apple ID to every Mac. Settings shows the sync status and lets you turn sync off. Without iCloud Peasy keeps everything on this Mac. |
-| **Settings** | iCloud sync, appearance, layout, multiline tasks, Today indicator, quick add shortcut, open at login. English and Russian. |
+| **Folder sync** | For a Mac with another Apple ID or without iCloud: pick a folder that Dropbox, Yandex Disk, Google Drive, Syncthing or a network share keeps in sync, and the same folder on the other Macs. Works alongside iCloud: a Mac with both carries changes between them. |
+| **Settings** | iCloud and folder sync, appearance, layout, multiline tasks, Today indicator, quick add shortcut, open at login. English and Russian. |
 
 ## Build
 
@@ -45,6 +46,16 @@ Debug builds use the Development environment in CloudKit, so real data is never 
 
 To build under another team, change the team in Signing & Capabilities and the container in `CloudSync.containerIdentifier` and the entitlements. A build signed without the iCloud entitlement keeps tasks on this Mac, and Settings says so.
 
+### Folder sync
+
+The sandbox lets Peasy into the folder the user picks (`files.user-selected.read-write`) and remembers it across launches with a security-scoped bookmark (`files.bookmarks.app-scope`). Inside it Peasy keeps a `Peasy` folder:
+
+```
+Peasy/devices/<device>/manifest.json       Mac name, generation, last seen
+Peasy/devices/<device>/snapshot-<n>.json   everything that Mac knew when it compacted
+Peasy/devices/<device>/journal-<n>.jsonl   field changes since, one per line
+```
+
 ## Architecture
 
 ```
@@ -59,11 +70,12 @@ Peasy/
 │   ├── QuickAdd/   quick add window
 │   └── Settings/   settings window, shortcut recorder, launch at login
 ├── Data/           SwiftData models, lists, TaskStore, fractional ordering
+├── Sync/           folder sync: clock, operations, merge engine, folder, SwiftData bridge
 └── Resources/      asset catalog, string catalog
 PeasyTests/         Swift Testing suites
 ```
 
-`MenuBarController` owns the status item and a borderless floating panel under it: `PanelPlacement` works out where the window goes for the item's frame. The controller opens and closes the panel on clicks on the item, routes the keyboard and closes the panel on clicks outside. Views read data through `@Query` and relationships, and change it only through `TaskStore`. `SyncMonitor` follows CloudKit events and the iCloud account; when sync is switched, `AppDelegate` reopens the store and hands the new container to the panel and the quick add window. The controller talks to SwiftUI through `PanelViewModel`: the selected list and task, editing and scheduling state. `Reminders` rebuilds pending notifications from the tasks after every save.
+`MenuBarController` owns the status item and a borderless floating panel under it: `PanelPlacement` works out where the window goes for the item's frame. The controller opens and closes the panel on clicks on the item, routes the keyboard and closes the panel on clicks outside. Views read data through `@Query` and relationships, and change it only through `TaskStore`. `SyncMonitor` follows CloudKit events and the iCloud account; when sync is switched, `AppDelegate` reopens the store and hands the new container to the panel, the quick add window and folder sync. `FolderSync` checks the folder every 15 seconds and a second after every save: it reads the other Macs' journals, has `SyncEngine` capture this Mac's changes and merge theirs, writes the result into the store through `StoreBridge` and appends its own changes to its journal. The controller talks to SwiftUI through `PanelViewModel`: the selected list and task, editing and scheduling state. `Reminders` rebuilds pending notifications from the tasks after every save.
 
 ## Decisions worth explaining
 
@@ -73,6 +85,11 @@ PeasyTests/         Swift Testing suites
 - **Models are CloudKit-ready from day one.** Every property has a default or is optional, relationships are optional with inverses, nothing is unique. Turning on sync is a configuration change, not a migration.
 - **Sync turns itself on.** At launch Peasy reads its own entitlements: a build signed with the iCloud container syncs, an unsigned one stays local. The project builds and tests without a team, and nothing crashes on a missing entitlement.
 - **Sync now reopens the store.** SwiftData has no call to force a sync. Reopening the store makes CloudKit set up, import and export again, which is what the button promises.
+- **Folder sync compares instead of recording.** The models carry no edit times and a deletion leaves no trace, so `SyncEngine` keeps a shadow of the last agreed value of every field and stamps each difference it finds. That catches edits that arrive through iCloud too, and leaves the CloudKit schema alone.
+- **Per field, last writer wins, deletion wins.** A title changed on one Mac and the task finished on another both survive. Stamps come from a hybrid logical clock, so a Mac whose clock is off can't overrule newer edits forever, and applying the same change twice does nothing, so changes that come both through iCloud and through the folder don't echo.
+- **One writer per file.** Each Mac appends only to its own journal and reads the others', so Dropbox and the like never make conflicted copies. A journal over 500 lines is compacted into a snapshot under a new generation; a reader that sees a new generation reads the snapshot first.
+- **A wiped store is refilled, not mirrored.** When the store empties without the user deleting anything (an iCloud account switch can do that), Peasy puts the agreed records back instead of deleting them on every other Mac.
+- **One bridge per iCloud account.** Two Macs on one iCloud account would each import a task from the folder and push their own copy to iCloud. Manifests carry a hash of the account, and only the first such Mac syncs the folder; the other pauses and gets everything through iCloud.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
 - **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so All is virtual and the first project is the user's.
 - **Own key handling.** An agent app has no Edit menu, so the panel routes ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z itself, and a local key monitor handles navigation.
@@ -82,7 +99,7 @@ PeasyTests/         Swift Testing suites
 
 ## Tests
 
-`PeasyTests` uses Swift Testing and covers where the panel goes for a status item near either screen edge and on a second display, models with cascade delete, the panel surviving opening and adding tasks and a store reload, sync status from CloudKit events, errors and account changes, CloudKit rules for the models, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, late and earlier-finished tasks, moving to Today with the time kept, the old Today flag, completion, moves, repeated moves that force renumbering, clearing completed tasks; and which tasks get a reminder.
+`PeasyTests` uses Swift Testing and covers folder sync (changes and new records, edits to different fields on two Macs, the later edit winning in any order, deletion against an edit, merging twice, a Mac with a fast clock, a wiped store, a project deletion taking its tasks, a task arriving before its project, compaction; journals read once and from where they stopped, half-written lines, generations; and two Macs syncing through one folder in one process), where the panel goes for a status item near either screen edge and on a second display, models with cascade delete, the panel surviving opening and adding tasks and a store reload, sync status from CloudKit events, errors and account changes, CloudKit rules for the models, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, late and earlier-finished tasks, moving to Today with the time kept, the old Today flag, completion, moves, repeated moves that force renumbering, clearing completed tasks; and which tasks get a reminder.
 
 ## Known limitations
 
@@ -91,3 +108,6 @@ PeasyTests/         Swift Testing suites
 - In full-screen apps the menu bar is hidden, so the icon is reachable only when the bar slides in.
 - With several displays the panel opens under the icon on the display whose menu bar is active.
 - Open at login is reliable only for a signed build in `/Applications`.
+- Folder sync is as fast as the service behind the folder, and a Mac sees changes only when that service has downloaded them.
+- A Mac away from the folder for over 90 days can bring back tasks deleted meanwhile.
+- If two Macs edit the same field within seconds and one of them got the other's change through iCloud, the Mac that forwarded it may win.

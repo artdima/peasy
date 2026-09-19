@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ already syncs this iCloud account through the folder, so this Mac gets its tasks through iCloud." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ уже синхронизирует этот аккаунт iCloud через папку, поэтому этот Mac получает задачи через iCloud."
+          }
+        }
+      }
+    },
     "%lld tasks" : {
       "localizations" : {
         "en" : {
@@ -49,6 +59,146 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Also syncing here: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Через эту папку также синхронизируются: %@"
+          }
+        }
+      }
+    },
+    "Can’t sync with the folder: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удаётся синхронизироваться с папкой: %@"
+          }
+        }
+      }
+    },
+    "Change…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить…"
+          }
+        }
+      }
+    },
+    "Choose a folder that Dropbox, Yandex Disk, Google Drive or another service keeps in sync. On your other Macs, choose the same folder." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите папку, которую синхронизирует Dropbox, Яндекс Диск, Google Drive или другой сервис. На других Mac выберите ту же папку."
+          }
+        }
+      }
+    },
+    "Choose this folder on your other Macs too." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите эту же папку и на других Mac."
+          }
+        }
+      }
+    },
+    "Dropbox, Yandex Disk, Google Drive or another synced folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dropbox, Яндекс Диск, Google Drive или другая синхронизируемая папка"
+          }
+        }
+      }
+    },
+    "Folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка"
+          }
+        }
+      }
+    },
+    "For a Mac with another Apple ID or without iCloud. Choose the same folder on every Mac." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для Mac с другим Apple ID или без iCloud. Выберите одну и ту же папку на каждом Mac."
+          }
+        }
+      }
+    },
+    "No access to the folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет доступа к папке"
+          }
+        }
+      }
+    },
+    "Paused" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На паузе"
+          }
+        }
+      }
+    },
+    "Peasy lost access to the folder. Choose it again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy потерял доступ к папке. Выберите её ещё раз."
+          }
+        }
+      }
+    },
+    "Sync" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация"
+          }
+        }
+      }
+    },
+    "Sync folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка синхронизации"
+          }
+        }
+      }
+    },
+    "Sync Here" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировать здесь"
           }
         }
       }
@@ -319,16 +469,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вчера"
-          }
-        }
-      }
-    },
-    "iCloud" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iCloud"
           }
         }
       }

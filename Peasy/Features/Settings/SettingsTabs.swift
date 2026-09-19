@@ -15,7 +15,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: String(localized: "General")
         case .panel: String(localized: "Panel")
         case .menuBar: String(localized: "Menu bar")
-        case .icloud: String(localized: "iCloud")
+        case .icloud: String(localized: "Sync")
         }
     }
 
@@ -81,7 +81,9 @@ struct SettingsTabButton: View {
                 FittedText(string: tab.title, size: 11, weight: .medium)
                     .foregroundStyle(isSelected || isHovered ? PanelStyle.primary : PanelStyle.secondary)
             }
-            .frame(width: 76, height: 52)
+            .padding(.horizontal, 6)
+            .frame(minWidth: 76)
+            .frame(height: 52)
             .background(isSelected ? SettingsStyle.tabSelected : .clear, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             .contentShape(Rectangle())
         }

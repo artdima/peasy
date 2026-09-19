@@ -4,11 +4,13 @@ import SwiftUI
 @MainActor
 final class SettingsWindowController {
     private let sync: SyncMonitor
+    private let folderSync: FolderSync
     private var window: NSWindow?
     private var themeObserver: NSObjectProtocol?
 
-    init(sync: SyncMonitor) {
+    init(sync: SyncMonitor, folderSync: FolderSync) {
         self.sync = sync
+        self.folderSync = folderSync
     }
 
     func show() {
@@ -30,7 +32,7 @@ final class SettingsWindowController {
         window.backgroundColor = SettingsStyle.windowNS
         window.isReleasedWhenClosed = false
 
-        let view = NSHostingView(rootView: SettingsView(sync: sync) { [weak window] title in
+        let view = NSHostingView(rootView: SettingsView(sync: sync, folderSync: folderSync) { [weak window] title in
             window?.title = title
         } onHeightChange: { [weak self] height in
             Task { @MainActor [weak self] in

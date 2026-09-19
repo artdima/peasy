@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     let sync: SyncMonitor
+    let folderSync: FolderSync
     var onTitleChange: (String) -> Void = { _ in }
     var onHeightChange: (CGFloat) -> Void = { _ in }
     @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general
@@ -42,7 +43,7 @@ struct SettingsView: View {
             case .general: generalPane
             case .panel: panelPane
             case .menuBar: menuBarPane
-            case .icloud: SyncSection(sync: sync)
+            case .icloud: SyncSection(sync: sync, folderSync: folderSync)
             }
         }
         .padding(EdgeInsets(top: 20, leading: 24, bottom: 24, trailing: 24))
