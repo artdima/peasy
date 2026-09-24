@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Glyph: View {
     enum Kind {
-        case pin, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, folder, spinner, gear
+        case power, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, folder, spinner, gear
         case sun, sofa, nextWeek
         case sliders, sidebar, menuBarTab, cloudTab
     }
@@ -30,7 +30,7 @@ struct Glyph: View {
 extension Glyph.Kind {
     var viewBox: CGFloat {
         switch self {
-        case .pin, .gear: 16
+        case .power, .gear: 16
         case .chevron: 10
         case .returnKey, .refresh, .sun, .sofa, .nextWeek: 14
         case .cloud, .folder: 18
@@ -41,7 +41,7 @@ extension Glyph.Kind {
 
     var strokeWidth: CGFloat? {
         switch self {
-        case .pin, .gear: 1.4
+        case .power, .gear: 1.4
         case .plus: 1.6
         case .chevron: 1.5
         case .check: 1.8
@@ -66,18 +66,11 @@ struct GlyphShape: Shape {
     private var source: Path {
         var path = Path()
         switch kind {
-        case .pin:
-            path.move(to: CGPoint(x: 5.5, y: 1.75))
-            path.addLine(to: CGPoint(x: 10.5, y: 1.75))
-            path.addLine(to: CGPoint(x: 9.75, y: 6.25))
-            path.addLine(to: CGPoint(x: 12.25, y: 8.75))
-            path.addLine(to: CGPoint(x: 12.25, y: 10.25))
-            path.addLine(to: CGPoint(x: 3.75, y: 10.25))
-            path.addLine(to: CGPoint(x: 3.75, y: 8.75))
-            path.addLine(to: CGPoint(x: 6.25, y: 6.25))
-            path.closeSubpath()
-            path.move(to: CGPoint(x: 8, y: 10.25))
-            path.addLine(to: CGPoint(x: 8, y: 14.25))
+        case .power:
+            path.move(to: CGPoint(x: 8, y: 1.6))
+            path.addLine(to: CGPoint(x: 8, y: 7.6))
+            path.move(to: CGPoint(x: 12.3, y: 4.3))
+            path.addSVGArc(to: CGPoint(x: 3.7, y: 4.3), radius: 6, largeArc: true, sweep: true)
         case .plus:
             path.move(to: CGPoint(x: 6, y: 1.5))
             path.addLine(to: CGPoint(x: 6, y: 10.5))

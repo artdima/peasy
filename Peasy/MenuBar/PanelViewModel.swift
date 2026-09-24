@@ -24,7 +24,6 @@ final class PanelViewModel {
     }
 
     var draft = ""
-    var isPinned = false
     var headerHeight = PanelGeometry.headerHeight
     var selectedTaskID: UUID?
     private(set) var editingTaskID: UUID?
@@ -84,7 +83,6 @@ final class PanelViewModel {
 
     func resetInteraction() {
         commitEditing()
-        isPinned = false
         schedulingTaskID = nil
         selectedTaskID = nil
         projectEditor = nil

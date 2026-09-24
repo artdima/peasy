@@ -77,7 +77,7 @@ final class MenuBarController: NSObject {
         observe(NSWorkspace.didActivateApplicationNotification, in: NSWorkspace.shared.notificationCenter) { controller, notification in
             let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
             guard app?.processIdentifier != NSRunningApplication.current.processIdentifier else { return }
-            controller.collapseUnlessPinned()
+            controller.collapseFromOutside()
         }
         appearanceObservation = NSApp.observe(\.effectiveAppearance) { [weak self] _, _ in
             Task { @MainActor [weak self] in
@@ -366,7 +366,7 @@ final class MenuBarController: NSObject {
             return handled ? nil : event
         }
         let outsideClicks = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            MainActor.assumeIsolated { self?.collapseUnlessPinned() }
+            MainActor.assumeIsolated { self?.collapseFromOutside() }
         }
         let localClicks = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             MainActor.assumeIsolated {
@@ -386,7 +386,7 @@ final class MenuBarController: NSObject {
             return
         }
         guard window === panel else {
-            collapseUnlessPinned()
+            collapseFromOutside()
             return
         }
         endEditIfClickedElsewhere(event)
@@ -419,11 +419,9 @@ final class MenuBarController: NSObject {
         store.rename(task, to: title)
     }
 
-    private func collapseUnlessPinned() {
+    private func collapseFromOutside() {
         model.schedulingTaskID = nil
-        if isExpanded, !model.isPinned {
-            collapse()
-        }
+        collapse()
     }
 
     private func handleKey(_ event: NSEvent) -> Bool {

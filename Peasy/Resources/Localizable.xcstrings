@@ -716,16 +716,6 @@
         }
       }
     },
-    "Pin panel" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Закрепить панель"
-          }
-        }
-      }
-    },
     "Pink" : {
       "localizations" : {
         "ru" : {

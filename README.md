@@ -17,7 +17,7 @@
 
 | Feature | What it does |
 | --- | --- |
-| **Menu bar panel** | Click the pea in the menu bar and the panel opens in a floating window under it, ready for typing. It closes on another click on the pea, a click elsewhere, a switch to another app (⌘Tab, Dock) or Esc. The pin in the header keeps it open on clicks and app switches. Right-click the pea for About, Settings and Quit. |
+| **Menu bar panel** | Click the pea in the menu bar and the panel opens in a floating window under it, ready for typing. It closes on another click on the pea, a click elsewhere, a switch to another app (⌘Tab, Dock) or Esc. The power button in the header quits Peasy. Right-click the pea for About, Settings and Quit. |
 | **Today, All, projects** | Today collects the tasks planned for today or earlier from every list, and each morning starts without yesterday's finished ones. All shows every task, with or without a project. Projects get a color each; rename, reorder and delete them from the list. |
 | **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top, wrapping onto new rows when they run out of room. Switch in Settings. |
 | **Resizable** | Drag the bottom-left corner to resize the panel; each layout remembers its size. Reset from the context menu. |

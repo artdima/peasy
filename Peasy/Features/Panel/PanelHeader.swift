@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct PanelHeader: View {
-    @Bindable var model: PanelViewModel
     let onOpenSettings: () -> Void
+    let onQuit: () -> Void
 
     var body: some View {
         HStack(spacing: 14) {
@@ -15,12 +15,11 @@ struct PanelHeader: View {
             } icon: {
                 Glyph(kind: .gear, size: 18)
             }
-            IconButton(label: "Pin panel", isOn: model.isPinned) {
-                model.isPinned.toggle()
+            IconButton(label: "Quit Peasy") {
+                onQuit()
             } icon: {
-                Glyph(kind: .pin, size: 18, filled: model.isPinned)
+                Glyph(kind: .power, size: 18)
             }
-            .accessibilityAddTraits(model.isPinned ? .isSelected : [])
         }
         .padding(.leading, 24)
         .padding(.trailing, 20)
