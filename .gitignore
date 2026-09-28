@@ -9,3 +9,7 @@ build/
 
 .build/
 .swiftpm/
+
+# Left behind by Xcode and SMB shares
+(A Document Being Saved By */
+.smbdelete*
