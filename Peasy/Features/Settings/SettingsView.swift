@@ -50,33 +50,36 @@ struct SettingsView: View {
     }
 
     private var generalPane: some View {
-        SettingsCard {
-            SettingsRow(minHeight: 44) {
-                Text("Quick new task")
-                    .settingsTitle()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                ShortcutRecorder()
+        VStack(alignment: .leading, spacing: 18) {
+            SettingsCard {
+                SettingsRow(minHeight: 44) {
+                    Text("Quick new task")
+                        .settingsTitle()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    ShortcutRecorder()
+                }
+                SettingsRow(minHeight: 44, separated: true) {
+                    Text("Appearance")
+                        .settingsTitle()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    SettingsPopUp(options: AppTheme.allCases.map { ($0, $0.title) }, selection: $theme)
+                }
+                SettingsToggleRow(
+                    title: "Open at login",
+                    subtitle: launchAtLogin.needsApproval ? "Allow Peasy in Login Items to finish." : nil,
+                    isOn: Binding(get: { launchAtLogin.isOn }, set: { launchAtLogin.set($0) }),
+                    minHeight: 44,
+                    separated: true
+                )
+                if let message = launchAtLogin.errorMessage {
+                    Text(message)
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.red)
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, 10)
+                }
             }
-            SettingsRow(minHeight: 44, separated: true) {
-                Text("Appearance")
-                    .settingsTitle()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                SettingsPopUp(options: AppTheme.allCases.map { ($0, $0.title) }, selection: $theme)
-            }
-            SettingsToggleRow(
-                title: "Open at login",
-                subtitle: launchAtLogin.needsApproval ? "Allow Peasy in Login Items to finish." : nil,
-                isOn: Binding(get: { launchAtLogin.isOn }, set: { launchAtLogin.set($0) }),
-                minHeight: 44,
-                separated: true
-            )
-            if let message = launchAtLogin.errorMessage {
-                Text(message)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 10)
-            }
+            ClaudeAccessCard()
         }
     }
 

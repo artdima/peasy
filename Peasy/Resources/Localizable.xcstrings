@@ -113,6 +113,66 @@
         }
       }
     },
+    "Claude access" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ для Claude"
+          }
+        }
+      }
+    },
+    "Claude Code" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code"
+          }
+        }
+      }
+    },
+    "Claude Desktop" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Desktop"
+          }
+        }
+      }
+    },
+    "Copied" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировано"
+          }
+        }
+      }
+    },
+    "Copy Command" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать команду"
+          }
+        }
+      }
+    },
+    "Copy Config" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать конфиг"
+          }
+        }
+      }
+    },
     "Dropbox, Yandex Disk, Google Drive or another synced folder" : {
       "localizations" : {
         "ru" : {
@@ -143,6 +203,16 @@
         }
       }
     },
+    "Lets Claude list your tasks and mark them done through MCP, on this Mac only." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude сможет смотреть задачи и отмечать их выполненными через MCP — только на этом Mac."
+          }
+        }
+      }
+    },
     "No access to the folder" : {
       "localizations" : {
         "ru" : {
@@ -163,12 +233,32 @@
         }
       }
     },
+    "Peasy has to be running. In Claude Desktop paste the config in Settings → Developer → Edit Config and restart it; for Claude Code run the command in Terminal." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy должен быть запущен. В Claude Desktop вставьте конфиг в Settings → Developer → Edit Config и перезапустите его; для Claude Code выполните команду в Терминале."
+          }
+        }
+      }
+    },
     "Peasy lost access to the folder. Choose it again." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peasy потерял доступ к папке. Выберите её ещё раз."
+          }
+        }
+      }
+    },
+    "Read tasks and mark them done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Читать задачи и отмечать выполненными"
           }
         }
       }

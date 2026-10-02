@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let panelModel = PanelViewModel()
     private let sync = SyncMonitor()
     private lazy var folderSync = FolderSync()
+    private lazy var mcpServer = MCPServer(handler: MCPHandler { [weak self] in self?.container })
     private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync)
     private var container: ModelContainer?
     private var menuBarController: MenuBarController?
@@ -35,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKey.action = { quickAdd.toggle() }
         hotKey.register(Shortcut.current)
         startReminders()
+        updateMCPServer()
         observers.append(NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: nil,
@@ -42,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ) { [weak self] _ in
             MainActor.assumeIsolated {
                 self?.updateHotKey()
+                self?.updateMCPServer()
             }
         })
         observers.append(NotificationCenter.default.addObserver(
@@ -114,6 +117,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             quickAdd?.loadStore(container)
             folderSync.attach(container)
             folderSync.refreshCloudAccount(isActive: sync.isActive)
+        }
+    }
+
+    /// Claude reaches the tasks only while the user has it turned on in Settings.
+    private func updateMCPServer() {
+        let settings = MCPSettings.current()
+        guard settings.isEnabled else {
+            mcpServer.stop()
+            return
+        }
+        do {
+            try mcpServer.start(port: settings.port, token: MCPSettings.ensureToken())
+        } catch {
+            mcpServer.stop()
         }
     }
 

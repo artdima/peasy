@@ -28,6 +28,7 @@
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
 | **iCloud sync** | Projects and tasks follow your Apple ID to every Mac. Settings shows the sync status and lets you turn sync off. Without iCloud Peasy keeps everything on this Mac. |
 | **Folder sync** | For a Mac with another Apple ID or without iCloud: pick a folder that Dropbox, Yandex Disk, Google Drive, Syncthing or a network share keeps in sync, and the same folder on the other Macs. Works alongside iCloud: a Mac with both carries changes between them. |
+| **Claude access** | An MCP server for Claude Desktop and Claude Code: Claude lists projects and tasks and marks tasks done or open again. Off until turned on in Settings → General, which also copies the config for either app. |
 | **Settings** | iCloud and folder sync, appearance, layout, multiline tasks, Today indicator, quick add shortcut, open at login. English and Russian. |
 
 ## Build
@@ -56,6 +57,15 @@ Peasy/devices/<device>/snapshot-<n>.json   everything that Mac knew when it comp
 Peasy/devices/<device>/journal-<n>.jsonl   field changes since, one per line
 ```
 
+### Claude access
+
+The app listens on `127.0.0.1:47823` (`network.server`) while Claude access is on, and `Peasy --mcp` connects to it (`network.client`). To try it by hand, run the bridge and type a request:
+
+```sh
+/Applications/Peasy.app/Contents/MacOS/Peasy --mcp
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_tasks","arguments":{}}}
+```
+
 ## Architecture
 
 ```
@@ -71,6 +81,7 @@ Peasy/
 │   └── Settings/   settings window, shortcut recorder, launch at login
 ├── Data/           SwiftData models, lists, TaskStore, fractional ordering
 ├── Sync/           folder sync: clock, operations, merge engine, folder, SwiftData bridge
+├── MCP/            MCP protocol, task tools, local HTTP server, stdio bridge
 └── Resources/      asset catalog, string catalog
 PeasyTests/         Swift Testing suites
 ```
@@ -90,6 +101,8 @@ PeasyTests/         Swift Testing suites
 - **One writer per file.** Each Mac appends only to its own journal and reads the others', so Dropbox and the like never make conflicted copies. A journal over 500 lines is compacted into a snapshot under a new generation; a reader that sees a new generation reads the snapshot first.
 - **A wiped store is refilled, not mirrored.** When the store empties without the user deleting anything (an iCloud account switch can do that), Peasy puts the agreed records back instead of deleting them on every other Mac.
 - **One bridge per iCloud account.** Two Macs on one iCloud account would each import a task from the folder and push their own copy to iCloud. Manifests carry a hash of the account, and only the first such Mac syncs the folder; the other pauses and gets everything through iCloud.
+- **The MCP server lives in the app.** Only the app opens the SwiftData store, so iCloud and folder sync see every change Claude makes and the panel updates at once. Claude Desktop and Claude Code start `Peasy --mcp`, the same executable in a headless mode: it answers discovery itself and passes tool calls to the app over HTTP on 127.0.0.1. Both processes share the sandbox container, so the bridge reads the access token the app keeps in its defaults; Host and Origin are checked against DNS rebinding.
+- **Both MCP eras.** The server answers `initialize` for clients on 2025-11-25 and earlier and `server/discover` with per-request `_meta` for 2026-07-28, so it works with clients on either side of the stateless revision.
 - **Fractional ordering.** Moving a task rewrites one record's `order`; the list is renumbered only when gaps get too small. Fewer writes means fewer sync conflicts.
 - **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so All is virtual and the first project is the user's.
 - **Own key handling.** An agent app has no Edit menu, so the panel routes ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z itself, and a local key monitor handles navigation.
@@ -99,7 +112,7 @@ PeasyTests/         Swift Testing suites
 
 ## Tests
 
-`PeasyTests` uses Swift Testing and covers folder sync (changes and new records, edits to different fields on two Macs, the later edit winning in any order, deletion against an edit, merging twice, a Mac with a fast clock, a wiped store, a project deletion taking its tasks, a task arriving before its project, compaction; journals read once and from where they stopped, half-written lines, generations; and two Macs syncing through one folder in one process), where the panel goes for a status item near either screen edge and on a second display, models with cascade delete, the panel surviving opening and adding tasks and a store reload, sync status from CloudKit events, errors and account changes, CloudKit rules for the models, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, late and earlier-finished tasks, moving to Today with the time kept, the old Today flag, completion, moves, repeated moves that force renumbering, clearing completed tasks; and which tasks get a reminder.
+`PeasyTests` uses Swift Testing and covers the MCP server (discovery in both eras, version errors, the tool list, listing Today and a project, setting a status, unknown tools and projects, HTTP parsing, the token, Host and header checks), folder sync (changes and new records, edits to different fields on two Macs, the later edit winning in any order, deletion against an edit, merging twice, a Mac with a fast clock, a wiped store, a project deletion taking its tasks, a task arriving before its project, compaction; journals read once and from where they stopped, half-written lines, generations; and two Macs syncing through one folder in one process), where the panel goes for a status item near either screen edge and on a second display, models with cascade delete, the panel surviving opening and adding tasks and a store reload, sync status from CloudKit events, errors and account changes, CloudKit rules for the models, and `TaskStore`: creation order and project colors, empty input, Today across lists and its progress, late and earlier-finished tasks, moving to Today with the time kept, the old Today flag, completion, moves, repeated moves that force renumbering, clearing completed tasks; and which tasks get a reminder.
 
 ## Known limitations
 
