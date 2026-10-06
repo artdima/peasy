@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let sync = SyncMonitor()
     private lazy var folderSync = FolderSync()
     private lazy var mcpServer = MCPServer(handler: MCPHandler { [weak self] in self?.container })
-    private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync)
+    private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync, claudeAccess: mcpServer)
     private var container: ModelContainer?
     private var menuBarController: MenuBarController?
     private var quickAdd: QuickAddController?
@@ -127,11 +127,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             mcpServer.stop()
             return
         }
-        do {
-            try mcpServer.start(port: settings.port, token: MCPSettings.ensureToken())
-        } catch {
-            mcpServer.stop()
-        }
+        mcpServer.start(port: settings.port, token: MCPSettings.ensureToken())
     }
 
     private func updateHotKey() {

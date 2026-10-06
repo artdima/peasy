@@ -1,5 +1,30 @@
 import Foundation
 
+nonisolated struct MCPReply: Sendable {
+    var body: Data?
+    /// What Streamable HTTP answers with; stdio only carries the body.
+    var httpStatus: Int
+}
+
+/// A tools/call for a known tool, past the checks every request goes through.
+nonisolated struct MCPToolCall {
+    let id: Any
+    let name: String
+    let arguments: [String: Any]
+    /// The version from `params._meta`, which only 2026-07-28 clients send.
+    let version: String?
+
+    var isModern: Bool {
+        version.map { MCPProtocol.modernVersions.contains($0) } ?? false
+    }
+}
+
+nonisolated enum MCPRoute {
+    /// Answered without the store.
+    case reply(MCPReply)
+    case callTool(MCPToolCall)
+}
+
 /// JSON-RPC and MCP shapes shared by the in-app server and the stdio bridge.
 /// Speaks both eras: `initialize` for clients on 2025-11-25 and earlier, and the
 /// stateless 2026-07-28 revision with `server/discover` and per-request `_meta`.
@@ -17,6 +42,8 @@ nonisolated enum MCPProtocol {
     static let invalidParams = -32602
     static let headerMismatch = -32020
     static let unsupportedVersion = -32022
+
+    static let cacheLifetime = 3_600_000
 
     static var serverInfo: [String: Any] {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -40,6 +67,49 @@ nonisolated enum MCPProtocol {
         return meta?[versionKey] as? String
     }
 
+    /// Everything but running a tool, so the app and the bridge answer alike.
+    static func route(_ body: Data) -> MCPRoute {
+        guard let message = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any] else {
+            return .reply(MCPReply(body: error(id: nil, code: parseError, message: "Parse error"), httpStatus: 400))
+        }
+        guard let method = message["method"] as? String else {
+            return .reply(MCPReply(body: error(id: message["id"], code: invalidRequest, message: "Invalid request"), httpStatus: 400))
+        }
+        guard let id = message["id"] else {
+            return .reply(MCPReply(body: nil, httpStatus: 202))
+        }
+        let params = message["params"] as? [String: Any] ?? [:]
+        let version = requestedVersion(in: message)
+        if let version, !supportedVersions.contains(version) {
+            return .reply(MCPReply(body: unsupportedVersionError(id: id, requested: version), httpStatus: 400))
+        }
+        let isModern = version.map { modernVersions.contains($0) } ?? false
+        func answer(_ result: [String: Any]) -> MCPRoute {
+            .reply(MCPReply(body: response(id: id, result: result), httpStatus: 200))
+        }
+
+        switch method {
+        case "initialize":
+            return answer(initializeResult(requested: params["protocolVersion"] as? String))
+        case "server/discover":
+            return answer(discoverResult())
+        case "ping":
+            return answer(tagged([:], modern: isModern))
+        case "tools/list":
+            return answer(toolsListResult(modern: isModern))
+        case "tools/call":
+            let name = params["name"] as? String ?? ""
+            guard toolNames.contains(name) else {
+                return .reply(MCPReply(body: error(id: id, code: invalidParams, message: "Unknown tool: \(name)"), httpStatus: 200))
+            }
+            let arguments = params["arguments"] as? [String: Any] ?? [:]
+            return .callTool(MCPToolCall(id: id, name: name, arguments: arguments, version: version))
+        default:
+            let notFound = error(id: id, code: methodNotFound, message: "Method not found: \(method)")
+            return .reply(MCPReply(body: notFound, httpStatus: isModern ? 404 : 200))
+        }
+    }
+
     static func initializeResult(requested: String?) -> [String: Any] {
         let version = requested.flatMap { legacyVersions.contains($0) ? $0 : nil } ?? legacyVersions[0]
         return [
@@ -51,29 +121,26 @@ nonisolated enum MCPProtocol {
     }
 
     static func discoverResult() -> [String: Any] {
-        [
-            "resultType": "complete",
+        let result: [String: Any] = [
             "supportedVersions": supportedVersions,
             "capabilities": capabilities,
             "instructions": instructions,
-            "_meta": [serverInfoKey: serverInfo],
-            "ttlMs": 3_600_000,
+            "ttlMs": cacheLifetime,
             "cacheScope": "private",
         ]
+        return tagged(result, modern: true)
     }
 
-    static func toolsListResult() -> [String: Any] {
-        [
-            "resultType": "complete",
-            "tools": tools,
-            "_meta": [serverInfoKey: serverInfo],
-            "ttlMs": 3_600_000,
-            "cacheScope": "private",
-        ]
+    static func toolsListResult(modern: Bool) -> [String: Any] {
+        guard modern else { return ["tools": tools] }
+        let result: [String: Any] = ["tools": tools, "ttlMs": cacheLifetime, "cacheScope": "private"]
+        return tagged(result, modern: true)
     }
 
-    /// A finished result, tagged as the 2026-07-28 revision asks; older clients ignore the extra keys.
-    static func complete(_ result: [String: Any]) -> [String: Any] {
+    /// 2026-07-28 marks each result finished and names the server. Older clients get the
+    /// bare result: the TypeScript SDK rejects a ping result with any extra key.
+    static func tagged(_ result: [String: Any], modern: Bool) -> [String: Any] {
+        guard modern else { return result }
         var result = result
         result["resultType"] = "complete"
         result["_meta"] = [serverInfoKey: serverInfo]
@@ -81,19 +148,23 @@ nonisolated enum MCPProtocol {
     }
 
     static func toolSuccess(_ output: [String: Any]) -> [String: Any] {
-        complete([
+        [
             "content": [["type": "text", "text": encodeString(output)]],
             "structuredContent": output,
             "isError": false,
-        ])
+        ]
     }
 
     /// An error the model can act on, reported inside a normal result.
     static func toolFailure(_ message: String) -> [String: Any] {
-        complete([
+        [
             "content": [["type": "text", "text": message]],
             "isError": true,
-        ])
+        ]
+    }
+
+    static func toolResult(_ result: [String: Any], for call: MCPToolCall) -> Data {
+        response(id: call.id, result: tagged(result, modern: call.isModern))
     }
 
     static func response(id: Any, result: [String: Any]) -> Data {

@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import Observation
 
 nonisolated struct HTTPRequest: Sendable {
     var method: String
@@ -73,33 +74,55 @@ nonisolated struct HTTPResponse: Sendable {
     }
 }
 
-/// Streamable HTTP on 127.0.0.1 only, for the stdio bridge and other local clients.
-/// Every request needs the bearer token; Host and Origin are checked against DNS rebinding.
+/// Streamable HTTP on 127.0.0.1 only, for the stdio bridge. Requests and replies are signed
+/// with the token instead of carrying it; Host and Origin are checked against DNS rebinding.
+@Observable
 final class MCPServer {
     static let maximumRequestSize = 1 << 20
+    static let maximumConnections = 8
+    /// How long a client has to send its request before the connection is dropped.
+    static let requestTimeout: Duration = .seconds(5)
+
+    nonisolated enum Failure: Equatable, Sendable {
+        case portInUse
+        case other(String)
+    }
+
+    /// Why nothing is listening although Claude access is on.
+    private(set) var failure: Failure?
 
     private let handler: MCPHandler
-    private var listener: NWListener?
-    private(set) var port: UInt16?
-    var token = ""
+    @ObservationIgnored private var listener: NWListener?
+    @ObservationIgnored private var connections: [ObjectIdentifier: NWConnection] = [:]
+    @ObservationIgnored private var seenNonces: [String: Date] = [:]
+    @ObservationIgnored private(set) var port: UInt16?
+    @ObservationIgnored var token = ""
 
     init(handler: MCPHandler) {
         self.handler = handler
     }
 
-    var isRunning: Bool {
-        listener != nil
-    }
-
-    func start(port: UInt16, token: String) throws {
-        if listener != nil, self.port == port, self.token == token { return }
+    /// A port that failed is tried again only after `stop()`, not on every defaults change.
+    func start(port: UInt16, token: String) {
+        if self.listener != nil || failure != nil, self.port == port, self.token == token { return }
         stop()
-        guard let endpointPort = NWEndpoint.Port(rawValue: port) else { return }
+        self.port = port
+        self.token = token
+        guard let endpointPort = NWEndpoint.Port(rawValue: port) else {
+            failure = .other("No such port")
+            return
+        }
         let parameters = NWParameters.tcp
         parameters.allowLocalEndpointReuse = true
         parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(.loopback), port: endpointPort)
-        let listener = try NWListener(using: parameters)
-        listener.newConnectionHandler = { [weak self] connection in
+        let newListener: NWListener
+        do {
+            newListener = try NWListener(using: parameters)
+        } catch {
+            failure = .other(error.localizedDescription)
+            return
+        }
+        newListener.newConnectionHandler = { [weak self] connection in
             MainActor.assumeIsolated {
                 guard let self else {
                     connection.cancel()
@@ -108,35 +131,48 @@ final class MCPServer {
                 self.accept(connection)
             }
         }
-        listener.stateUpdateHandler = { [weak self] state in
+        newListener.stateUpdateHandler = { [weak self, weak newListener] state in
             MainActor.assumeIsolated {
-                if case .failed = state {
-                    self?.stop()
+                // A listener replaced by a newer one may still report; only the current one counts.
+                guard let self, let newListener, newListener === self.listener else { return }
+                if case .failed(let error) = state {
+                    self.fail(error)
                 }
             }
         }
-        listener.start(queue: .main)
-        self.listener = listener
-        self.port = port
-        self.token = token
+        newListener.start(queue: .main)
+        listener = newListener
     }
 
     func stop() {
         listener?.cancel()
         listener = nil
         port = nil
+        if failure != nil {
+            failure = nil
+        }
+        for connection in connections.values {
+            connection.cancel()
+        }
+        connections.removeAll()
     }
 
-    func response(for request: HTTPRequest) -> HTTPResponse {
+    func response(for request: HTTPRequest, now: Date = .now) -> HTTPResponse {
         guard request.path.split(separator: "?").first.map(String.init) == "/mcp" else {
             return HTTPResponse(status: 404)
         }
         guard Self.isLocal(host: request.headers["host"]), Self.isLocal(origin: request.headers["origin"]) else {
             return HTTPResponse(status: 403)
         }
-        guard !token.isEmpty, request.headers["authorization"] == "Bearer \(token)" else {
+        guard let nonce = authenticate(request, now: now) else {
             return HTTPResponse(status: 401)
         }
+        var response = reply(to: request)
+        response.headers[MCPSignature.signatureHeader] = MCPSignature(token: token).signResponse(response.body, nonce: nonce)
+        return response
+    }
+
+    private func reply(to request: HTTPRequest) -> HTTPResponse {
         guard request.method == "POST" else {
             return HTTPResponse(status: 405, headers: ["Allow": "POST"])
         }
@@ -147,9 +183,49 @@ final class MCPServer {
         return HTTPResponse(status: reply.httpStatus, body: reply.body ?? Data())
     }
 
+    /// The nonce of a fresh request signed with the token, seen for the first time.
+    private func authenticate(_ request: HTTPRequest, now: Date) -> String? {
+        guard !token.isEmpty,
+              let timestamp = request.headers[MCPSignature.timestampHeader.lowercased()],
+              let nonce = request.headers[MCPSignature.nonceHeader.lowercased()],
+              let signature = request.headers[MCPSignature.signatureHeader.lowercased()],
+              let seconds = Int(timestamp),
+              abs(now.timeIntervalSince1970 - TimeInterval(seconds)) <= MCPSignature.window,
+              MCPSignature.bytes(hex: nonce)?.count == 16,
+              MCPSignature(token: token).isValidRequest(request.body, timestamp: timestamp, nonce: nonce, signature: signature)
+        else { return nil }
+        seenNonces = seenNonces.filter { now.timeIntervalSince($0.value) < 2 * MCPSignature.window }
+        guard seenNonces.updateValue(now, forKey: nonce) == nil else { return nil }
+        return nonce
+    }
+
+    private func fail(_ error: NWError) {
+        listener?.cancel()
+        listener = nil
+        if case .posix(.EADDRINUSE) = error {
+            failure = .portInUse
+        } else {
+            failure = .other(error.localizedDescription)
+        }
+    }
+
     private func accept(_ connection: NWConnection) {
+        guard connections.count < Self.maximumConnections else {
+            connection.cancel()
+            return
+        }
+        connections[ObjectIdentifier(connection)] = connection
         connection.start(queue: .main)
         receive(on: connection, buffer: Data())
+        Task { [weak self] in
+            try? await Task.sleep(for: Self.requestTimeout)
+            self?.close(connection)
+        }
+    }
+
+    private func close(_ connection: NWConnection) {
+        connection.cancel()
+        connections[ObjectIdentifier(connection)] = nil
     }
 
     private func receive(on connection: NWConnection, buffer: Data) {
@@ -178,8 +254,14 @@ final class MCPServer {
     }
 
     private func send(_ response: HTTPResponse, on connection: NWConnection) {
-        connection.send(content: response.data, completion: .contentProcessed { _ in
-            connection.cancel()
+        connection.send(content: response.data, completion: .contentProcessed { [weak self] _ in
+            MainActor.assumeIsolated {
+                if let self {
+                    self.close(connection)
+                } else {
+                    connection.cancel()
+                }
+            }
         })
     }
 

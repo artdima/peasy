@@ -73,6 +73,25 @@ struct MCPTests {
         #expect(result["ttlMs"] as? Int != nil)
     }
 
+    @Test func olderClientsGetBareResults() throws {
+        let ping = try send(["jsonrpc": "2.0", "id": 1, "method": "ping"])
+        #expect((ping["result"] as? [String: Any])?.isEmpty == true)
+        let modernPing = try send(["jsonrpc": "2.0", "id": 2, "method": "ping", "params": ["_meta": modern]])
+        #expect((modernPing["result"] as? [String: Any])?["resultType"] as? String == "complete")
+
+        let list = try send(["jsonrpc": "2.0", "id": 3, "method": "tools/list"])
+        let result = try #require(list["result"] as? [String: Any])
+        #expect(result.keys.contains("tools"))
+        #expect(!result.keys.contains("resultType"))
+        #expect(!result.keys.contains("ttlMs"))
+
+        let params: [String: Any] = ["name": "list_tasks", "arguments": [:] as [String: Any]]
+        let legacyCall = try send(["jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": params])
+        let called = try #require(legacyCall["result"] as? [String: Any])
+        #expect(called["isError"] as? Bool == false)
+        #expect(!called.keys.contains("resultType"))
+    }
+
     @Test func notificationsGetNoReply() {
         let body = Data(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#.utf8)
         let reply = handler.handle(body)
@@ -126,7 +145,7 @@ struct MCPTests {
     }
 
     @Test func requestsAreParsedOnlyWhenComplete() throws {
-        let head = "POST /mcp HTTP/1.1\r\nHost: 127.0.0.1:47823\r\nContent-Length: 2\r\n\r\n"
+        let head = "POST /mcp HTTP/1.1\r\nHost: 127.0.0.1:47501\r\nContent-Length: 2\r\n\r\n"
         guard case .incomplete = HTTPRequest.parse(Data((head + "{").utf8)) else {
             Issue.record("A short body should wait for the rest")
             return
@@ -137,41 +156,101 @@ struct MCPTests {
         }
         #expect(request.method == "POST")
         #expect(request.path == "/mcp")
-        #expect(request.headers["host"] == "127.0.0.1:47823")
+        #expect(request.headers["host"] == "127.0.0.1:47501")
         #expect(request.body == Data("{}".utf8))
     }
 
-    @Test func serverChecksTokenHostMethodAndHeaders() throws {
+    private func signedRequest(
+        _ message: [String: Any],
+        method: String = "POST",
+        host: String = "127.0.0.1:47501",
+        token: String = "secret",
+        sentAt: Date = .now,
+        headers: [String: String] = [:]
+    ) throws -> HTTPRequest {
+        let body = try JSONSerialization.data(withJSONObject: message)
+        let timestamp = String(Int(sentAt.timeIntervalSince1970))
+        let nonce = MCPSignature.makeNonce()
+        var all = headers
+        all["host"] = host
+        all[MCPSignature.timestampHeader.lowercased()] = timestamp
+        all[MCPSignature.nonceHeader.lowercased()] = nonce
+        all[MCPSignature.signatureHeader.lowercased()] = MCPSignature(token: token).signRequest(body, timestamp: timestamp, nonce: nonce)
+        return HTTPRequest(method: method, path: "/mcp", headers: all, body: body)
+    }
+
+    @Test func serverChecksSignatureHostMethodAndHeaders() throws {
         let server = MCPServer(handler: handler)
         server.token = "secret"
-        func request(
-            method: String = "POST",
-            host: String = "127.0.0.1:47823",
-            token: String? = "secret",
-            headers: [String: String] = [:],
-            body: [String: Any]
-        ) throws -> HTTPRequest {
-            var all = headers
-            all["host"] = host
-            if let token {
-                all["authorization"] = "Bearer \(token)"
-            }
-            return HTTPRequest(method: method, path: "/mcp", headers: all, body: try JSONSerialization.data(withJSONObject: body))
-        }
         let discover: [String: Any] = ["jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": ["_meta": modern]]
         let modernHeaders = ["mcp-protocol-version": "2026-07-28", "mcp-method": "server/discover"]
 
-        #expect(server.response(for: try request(headers: modernHeaders, body: discover)).status == 200)
-        #expect(server.response(for: try request(token: nil, headers: modernHeaders, body: discover)).status == 401)
-        #expect(server.response(for: try request(host: "evil.example:47823", headers: modernHeaders, body: discover)).status == 403)
-        #expect(server.response(for: try request(method: "GET", headers: modernHeaders, body: discover)).status == 405)
-        #expect(server.response(for: try request(body: discover)).status == 400)
+        let request = try signedRequest(discover, headers: modernHeaders)
+        let response = server.response(for: request)
+        #expect(response.status == 200)
+        let nonce = try #require(request.headers[MCPSignature.nonceHeader.lowercased()])
+        let proof = try #require(response.headers[MCPSignature.signatureHeader])
+        #expect(MCPSignature(token: "secret").isValidResponse(response.body, nonce: nonce, signature: proof))
+        #expect(!MCPSignature(token: "guess").isValidResponse(response.body, nonce: nonce, signature: proof))
+
+        var unsigned = try signedRequest(discover, headers: modernHeaders)
+        unsigned.headers[MCPSignature.signatureHeader.lowercased()] = nil
+        #expect(server.response(for: unsigned).status == 401)
+        #expect(server.response(for: try signedRequest(discover, token: "guess", headers: modernHeaders)).status == 401)
+        #expect(server.response(for: try signedRequest(discover, host: "evil.example:47501", headers: modernHeaders)).status == 403)
+        #expect(server.response(for: try signedRequest(discover, method: "GET", headers: modernHeaders)).status == 405)
+        #expect(server.response(for: try signedRequest(discover)).status == 400)
 
         let params: [String: Any] = ["name": "list_tasks", "arguments": [:] as [String: Any], "_meta": modern]
         let callBody: [String: Any] = ["jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": params]
         var callHeaders = ["mcp-protocol-version": "2026-07-28", "mcp-method": "tools/call"]
-        #expect(server.response(for: try request(headers: callHeaders, body: callBody)).status == 400)
+        #expect(server.response(for: try signedRequest(callBody, headers: callHeaders)).status == 400)
         callHeaders["mcp-name"] = "list_tasks"
-        #expect(server.response(for: try request(headers: callHeaders, body: callBody)).status == 200)
+        #expect(server.response(for: try signedRequest(callBody, headers: callHeaders)).status == 200)
+    }
+
+    @Test func aSignedRequestWorksOnceAndOnlyWhileFresh() throws {
+        let server = MCPServer(handler: handler)
+        server.token = "secret"
+        let ping: [String: Any] = ["jsonrpc": "2.0", "id": 1, "method": "ping"]
+
+        let request = try signedRequest(ping)
+        #expect(server.response(for: request).status == 200)
+        #expect(server.response(for: request).status == 401)
+        #expect(server.response(for: try signedRequest(ping, sentAt: .now - 300)).status == 401)
+        #expect(server.response(for: try signedRequest(ping, sentAt: .now + 300)).status == 401)
+    }
+
+    @Test func bridgeAnswersWithoutTheAppWhenItCan() async throws {
+        func reply(_ message: [String: Any]) async throws -> [String: Any] {
+            let body = try JSONSerialization.data(withJSONObject: message)
+            let data = try #require(await MCPBridge.reply(to: body))
+            return try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        }
+        let list = try await reply(["jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": ["_meta": modern]])
+        #expect(((list["result"] as? [String: Any])?["tools"] as? [[String: Any]])?.count == 3)
+
+        let params: [String: Any] = ["name": "delete_everything", "arguments": [:] as [String: Any]]
+        let unknown = try await reply(["jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": params])
+        #expect((unknown["error"] as? [String: Any])?["code"] as? Int == -32602)
+
+        let notification = Data(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#.utf8)
+        #expect(await MCPBridge.reply(to: notification) == nil)
+    }
+
+    @Test func stdinIsCutOnlyAtLineFeeds() {
+        let first = "{\"query\":\"a\u{2028}b\u{85}c\"}"
+        let input = Data((first + "\r\n \n{\"id\":1}").utf8)
+        var buffer = LineBuffer()
+        var lines: [Data] = []
+        for byte in input {
+            if let line = buffer.append(byte) {
+                lines.append(line)
+            }
+        }
+        if let line = buffer.finish() {
+            lines.append(line)
+        }
+        #expect(lines == [Data(first.utf8), Data("{\"id\":1}".utf8)])
     }
 }

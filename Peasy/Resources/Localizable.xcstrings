@@ -243,6 +243,36 @@
         }
       }
     },
+    "Move Peasy to Applications and open it from there: macOS is running a temporary copy that Claude won’t find after a restart." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переместите Peasy в «Программы» и откройте оттуда: сейчас macOS запускает временную копию, которую Claude не найдёт после перезагрузки."
+          }
+        }
+      }
+    },
+    "Another app is using port %lld, so Claude can’t reach Peasy. Quit that app, then turn Claude access off and on." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порт %lld занят другим приложением, поэтому Claude не может связаться с Peasy. Закройте это приложение, затем выключите и снова включите доступ для Claude."
+          }
+        }
+      }
+    },
+    "Peasy couldn’t open port %lld: %@. Turn Claude access off and on to try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy не удалось открыть порт %lld: %@. Выключите и снова включите доступ для Claude, чтобы попробовать ещё раз."
+          }
+        }
+      }
+    },
     "Peasy lost access to the folder. Choose it again." : {
       "localizations" : {
         "ru" : {

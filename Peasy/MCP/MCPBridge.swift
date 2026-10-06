@@ -4,84 +4,120 @@ import Foundation
 /// discovery itself and hands tool calls to the running app, which owns the store.
 nonisolated enum MCPBridge {
     static func run() async {
-        do {
-            for try await line in FileHandle.standardInput.bytes.lines {
-                let text = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !text.isEmpty, let reply = await reply(to: Data(text.utf8)) else { continue }
-                var output = reply
-                output.append(0x0A)
-                try FileHandle.standardOutput.write(contentsOf: output)
+        let output = StandardOutput()
+        await withDiscardingTaskGroup { group in
+            var lines = LineBuffer()
+            do {
+                for try await byte in FileHandle.standardInput.bytes {
+                    if let line = lines.append(byte) {
+                        group.addTask { await MCPBridge.respond(to: line, through: output) }
+                    }
+                }
+            } catch {
+                FileHandle.standardError.write(Data("peasy: \(error.localizedDescription)\n".utf8))
             }
-        } catch {
-            FileHandle.standardError.write(Data("peasy: \(error.localizedDescription)\n".utf8))
+            if let line = lines.finish() {
+                group.addTask { await MCPBridge.respond(to: line, through: output) }
+            }
         }
         exit(0)
     }
 
     static func reply(to body: Data) async -> Data? {
-        guard let message = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any] else {
-            return MCPProtocol.error(id: nil, code: MCPProtocol.parseError, message: "Parse error")
-        }
-        guard let id = message["id"], let method = message["method"] as? String else { return nil }
-        let params = message["params"] as? [String: Any] ?? [:]
-        let version = MCPProtocol.requestedVersion(in: message)
-        if let version, !MCPProtocol.supportedVersions.contains(version) {
-            return MCPProtocol.unsupportedVersionError(id: id, requested: version)
-        }
-        switch method {
-        case "initialize":
-            return MCPProtocol.response(id: id, result: MCPProtocol.initializeResult(requested: params["protocolVersion"] as? String))
-        case "server/discover":
-            return MCPProtocol.response(id: id, result: MCPProtocol.discoverResult())
-        case "ping":
-            return MCPProtocol.response(id: id, result: MCPProtocol.complete([:]))
-        case "tools/list":
-            return MCPProtocol.response(id: id, result: MCPProtocol.toolsListResult())
-        case "tools/call":
-            return await forward(body, id: id, version: version, toolName: params["name"] as? String)
-        default:
-            return MCPProtocol.error(id: id, code: MCPProtocol.methodNotFound, message: "Method not found: \(method)")
+        switch MCPProtocol.route(body) {
+        case .reply(let reply):
+            return reply.body
+        case .callTool(let call):
+            return await forward(body, call)
         }
     }
 
-    private static func forward(_ body: Data, id: Any, version: String?, toolName: String?) async -> Data {
+    private static func respond(to line: Data, through output: StandardOutput) async {
+        guard let answer = await reply(to: line) else { return }
+        await output.write(answer)
+    }
+
+    private static let session: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        // Straight to loopback, even with a system proxy or a PAC file set.
+        configuration.connectionProxyDictionary = [:]
+        configuration.timeoutIntervalForRequest = 30
+        return URLSession(configuration: configuration)
+    }()
+
+    private static func forward(_ body: Data, _ call: MCPToolCall) async -> Data {
         let settings = MCPSettings.current()
         guard settings.isEnabled, !settings.token.isEmpty else {
-            return MCPProtocol.response(id: id, result: MCPProtocol.toolFailure(
-                "Claude access is turned off in Peasy. Ask the user to turn it on in Peasy Settings → General → Claude."
-            ))
+            return failure("Claude access is turned off in Peasy. Ask the user to turn it on in Peasy Settings → General → Claude access.", for: call)
         }
-        var request = URLRequest(url: settings.endpoint, timeoutInterval: 30)
+        let signature = MCPSignature(token: settings.token)
+        let nonce = MCPSignature.makeNonce()
+        let timestamp = String(Int(Date().timeIntervalSince1970))
+        var request = URLRequest(url: settings.endpoint)
         request.httpMethod = "POST"
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json, text/event-stream", forHTTPHeaderField: "Accept")
-        request.setValue("Bearer \(settings.token)", forHTTPHeaderField: "Authorization")
-        request.setValue(version ?? MCPProtocol.legacyVersions[0], forHTTPHeaderField: "MCP-Protocol-Version")
+        request.setValue(call.version ?? MCPProtocol.legacyVersions[0], forHTTPHeaderField: "MCP-Protocol-Version")
         request.setValue("tools/call", forHTTPHeaderField: "Mcp-Method")
-        if let toolName {
-            request.setValue(headerValue(toolName), forHTTPHeaderField: "Mcp-Name")
-        }
+        request.setValue(call.name, forHTTPHeaderField: "Mcp-Name")
+        request.setValue(timestamp, forHTTPHeaderField: MCPSignature.timestampHeader)
+        request.setValue(nonce, forHTTPHeaderField: MCPSignature.nonceHeader)
+        request.setValue(signature.signRequest(body, timestamp: timestamp, nonce: nonce), forHTTPHeaderField: MCPSignature.signatureHeader)
+
+        let exchange: (Data, URLResponse)
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-            guard status == 200, !data.isEmpty else {
-                return MCPProtocol.response(id: id, result: MCPProtocol.toolFailure("Peasy couldn't run the tool (HTTP \(status))."))
-            }
-            return data
+            exchange = try await session.data(for: request)
         } catch {
-            return MCPProtocol.response(id: id, result: MCPProtocol.toolFailure(
-                "Peasy isn't running. Ask the user to open Peasy, then try again."
-            ))
+            return failure("Peasy isn't running or can't take requests. Ask the user to open Peasy and check Settings → General → Claude access.", for: call)
         }
+        let (data, response) = exchange
+        let http = response as? HTTPURLResponse
+        // JSON-RPC errors such as a version mismatch come through as Peasy wrote them.
+        guard let proof = http?.value(forHTTPHeaderField: MCPSignature.signatureHeader),
+              signature.isValidResponse(data, nonce: nonce, signature: proof),
+              !data.isEmpty
+        else {
+            let status = http?.statusCode ?? 0
+            return failure("The reply on port \(settings.port) didn't come from Peasy (HTTP \(status)), so it was ignored. Ask the user to quit whatever else uses that port, or to turn Claude access off and on.", for: call)
+        }
+        return data
     }
 
-    /// Plain ASCII as is, anything else in the Base64 form the transport defines.
-    private static func headerValue(_ value: String) -> String {
-        let isPlain = value.unicodeScalars.allSatisfy { $0.value >= 0x21 && $0.value <= 0x7E }
-        if isPlain, !(value.hasPrefix("=?base64?") && value.hasSuffix("?=")) {
-            return value
+    private static func failure(_ message: String, for call: MCPToolCall) -> Data {
+        MCPProtocol.toolResult(MCPProtocol.toolFailure(message), for: call)
+    }
+}
+
+/// Cuts stdin at LF only: a JSON string may hold U+2028 or NEL, where `bytes.lines` cuts too.
+nonisolated struct LineBuffer {
+    private var pending = Data()
+
+    /// The line a LF ends, without a trailing CR; nil while the line goes on or when it is blank.
+    mutating func append(_ byte: UInt8) -> Data? {
+        guard byte == 0x0A else {
+            pending.append(byte)
+            return nil
         }
-        return "=?base64?\(Data(value.utf8).base64EncodedString())?="
+        return finish()
+    }
+
+    /// Whatever is left once input ends.
+    mutating func finish() -> Data? {
+        var line = pending
+        pending = Data()
+        if line.last == 0x0D {
+            line.removeLast()
+        }
+        return line.allSatisfy { $0 == 0x20 || $0 == 0x09 || $0 == 0x0D } ? nil : line
+    }
+}
+
+/// Replies to requests handled side by side go out one whole line at a time.
+private actor StandardOutput {
+    func write(_ reply: Data) {
+        var line = reply
+        line.append(0x0A)
+        try? FileHandle.standardOutput.write(contentsOf: line)
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     let sync: SyncMonitor
     let folderSync: FolderSync
+    var claudeAccess: MCPServer?
     var onTitleChange: (String) -> Void = { _ in }
     var onHeightChange: (CGFloat) -> Void = { _ in }
     @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general
@@ -79,7 +80,7 @@ struct SettingsView: View {
                         .padding(.bottom, 10)
                 }
             }
-            ClaudeAccessCard()
+            ClaudeAccessCard(failure: claudeAccess?.failure)
         }
     }
 

@@ -5,9 +5,13 @@ nonisolated struct MCPSettings: Sendable {
     static let enabledKey = "claudeAccessEnabled"
     static let tokenKey = "claudeAccessToken"
     static let portKey = "claudeAccessPort"
-    static let defaultPort: UInt16 = 47823
     static let bridgeArgument = "--mcp"
     static let serverName = "peasy"
+
+    /// One port per account, so two people signed in on one Mac each reach their own Peasy.
+    static var defaultPort: UInt16 {
+        UInt16(47_000 + Int(getuid() % 1_000))
+    }
 
     let isEnabled: Bool
     let port: UInt16
@@ -23,7 +27,7 @@ nonisolated struct MCPSettings: Sendable {
         )
     }
 
-    /// The bridge proves it belongs to this app with a secret only this container can read.
+    /// The secret both processes sign with; only this container can read it.
     @discardableResult
     static func ensureToken(in defaults: UserDefaults = .standard) -> String {
         if let token = defaults.string(forKey: tokenKey), !token.isEmpty {
@@ -40,6 +44,12 @@ nonisolated struct MCPSettings: Sendable {
 
     static var executablePath: String {
         Bundle.main.executablePath ?? "/Applications/Peasy.app/Contents/MacOS/Peasy"
+    }
+
+    /// Opened straight from Downloads or a disk image, the app runs from a random read-only
+    /// copy that is gone after a restart, so a config pointing there would break.
+    static var isTranslocated: Bool {
+        executablePath.contains("/AppTranslocation/")
     }
 
     static var desktopConfig: String {
