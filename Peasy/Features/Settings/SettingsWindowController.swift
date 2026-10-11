@@ -15,15 +15,28 @@ final class SettingsWindowController {
         self.claudeAccess = claudeAccess
     }
 
-    func show() {
+    /// The panel floats above every window, so Settings moves out from under it.
+    func show(beside panel: CGRect? = nil) {
         let window = self.window ?? makeWindow()
         self.window = window
+        if let panel {
+            moveAside(window, from: panel)
+        }
         NSApp.activate()
         window.makeKeyAndOrderFront(nil)
     }
 
+    private func moveAside(_ window: NSWindow, from panel: CGRect) {
+        guard window.frame.intersects(panel),
+              let visible = NSScreen.screens.first(where: { $0.frame.intersects(panel) })?.visibleFrame
+        else { return }
+        let x = panel.minX - 16 - window.frame.width
+        guard x >= visible.minX else { return }
+        window.setFrameOrigin(CGPoint(x: x, y: window.frame.minY))
+    }
+
     private func makeWindow() -> NSWindow {
-        let window = NSWindow(
+        let window = SettingsWindow(
             contentRect: CGRect(x: 0, y: 0, width: 560, height: 320),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered,
@@ -74,3 +87,6 @@ final class SettingsWindowController {
         window.setFrame(frame, display: true, animate: window.isVisible)
     }
 }
+
+/// Lets the panel tell Settings apart from other windows.
+final class SettingsWindow: NSWindow {}

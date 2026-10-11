@@ -49,12 +49,7 @@ final class MenuBarController: NSObject {
         }
 
         self.actions.collapse = { [weak self] in self?.collapse() }
-        let openSettings = actions.openSettings
         let showAbout = actions.showAbout
-        self.actions.openSettings = { [weak self] in
-            self?.collapse()
-            openSettings()
-        }
         self.actions.showAbout = { [weak self] in
             self?.collapse()
             showAbout()
@@ -91,6 +86,10 @@ final class MenuBarController: NSObject {
     /// The panel body, header included.
     var expandedPanelSize: CGSize {
         model.panelSize
+    }
+
+    var openPanelFrame: CGRect? {
+        isExpanded ? panel.frame : nil
     }
 
     func expand() {
@@ -379,10 +378,11 @@ final class MenuBarController: NSObject {
     }
 
     /// Clicks in our own windows: in the panel they end an edit and give the clicked
-    /// field the keyboard; in the status item the button toggles; elsewhere they close.
+    /// field the keyboard; in the status item the button toggles; Settings keeps the
+    /// panel open to show its changes; elsewhere they close.
     private func handleLocalClick(_ event: NSEvent) {
         guard let window = event.window else { return }
-        if window === statusItem.button?.window || window is SchedulePickerPanel {
+        if window === statusItem.button?.window || window is SchedulePickerPanel || window is SettingsWindow {
             return
         }
         guard window === panel else {
