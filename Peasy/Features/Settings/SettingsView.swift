@@ -99,7 +99,7 @@ struct SettingsView: View {
         SettingsCard {
             SettingsToggleRow(
                 title: "Today indicator",
-                subtitle: "The pea in the menu bar grows as you finish today's tasks and shows how many are left",
+                subtitle: "Shows next to the sprout in the menu bar how many of today's tasks are left",
                 isOn: $showsIndicator
             )
         }

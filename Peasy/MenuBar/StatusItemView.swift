@@ -4,11 +4,11 @@ import SwiftUI
 
 enum StatusItemMode: Equatable {
     case plain
-    case indicator(stage: PeaStage, remaining: Int)
+    case indicator(remaining: Int)
     case added(colorHex: String)
 }
 
-/// What the status item shows: the pea and today's count.
+/// What the status item shows: the sprout and how many of today's tasks are left.
 struct StatusItemView: View {
     let model: PanelViewModel
     let onWidthChange: (CGFloat) -> Void
@@ -25,20 +25,16 @@ struct StatusItemView: View {
             return .added(colorHex: added)
         }
         guard showsIndicator else { return .plain }
-        let now = DayClock.shared.today
-        let progress = TaskQueries.todayProgress(from: tasks, now: now)
-        let remaining = TaskQueries.openTasks(in: .today, from: tasks, now: now).count
-        return .indicator(stage: PeaStage(done: progress.done, total: progress.total), remaining: remaining)
+        let remaining = TaskQueries.openTasks(in: .today, from: tasks, now: DayClock.shared.today).count
+        return .indicator(remaining: remaining)
     }
 }
 
 struct StatusItemLabel: View {
-    static let peaHeight: CGFloat = 18
+    static let iconSize: CGFloat = 17
 
     let mode: StatusItemMode
     var onWidthChange: (CGFloat) -> Void = { _ in }
-
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         content
@@ -58,10 +54,10 @@ struct StatusItemLabel: View {
     private var content: some View {
         switch mode {
         case .plain:
-            pea(.pea)
-        case .indicator(let stage, let remaining):
+            sprout
+        case .indicator(let remaining):
             HStack(spacing: 5) {
-                pea(stage)
+                sprout
                 if remaining > 0 {
                     Text(remaining, format: .number)
                         .monospacedDigit()
@@ -75,10 +71,10 @@ struct StatusItemLabel: View {
         }
     }
 
-    /// The pea is light on a dark menu bar and dark on a light one.
-    private func pea(_ stage: PeaStage) -> some View {
-        let scale = Self.peaHeight / BuddyLayerView.size.height
-        return BuddyView(stage: stage, scale: scale, isInverted: colorScheme == .light)
+    /// In the menu bar's text color, like the system's own icons.
+    private var sprout: some View {
+        SproutIcon(color: .primary)
+            .frame(width: Self.iconSize, height: Self.iconSize)
     }
 }
 

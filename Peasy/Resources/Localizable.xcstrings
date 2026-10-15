@@ -63,276 +63,6 @@
         }
       }
     },
-    "Also syncing here: %@" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Через эту папку также синхронизируются: %@"
-          }
-        }
-      }
-    },
-    "Can’t sync with the folder: %@" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удаётся синхронизироваться с папкой: %@"
-          }
-        }
-      }
-    },
-    "Change…" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Изменить…"
-          }
-        }
-      }
-    },
-    "Choose a folder that Dropbox, Yandex Disk, Google Drive or another service keeps in sync. On your other Macs, choose the same folder." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите папку, которую синхронизирует Dropbox, Яндекс Диск, Google Drive или другой сервис. На других Mac выберите ту же папку."
-          }
-        }
-      }
-    },
-    "Choose this folder on your other Macs too." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите эту же папку и на других Mac."
-          }
-        }
-      }
-    },
-    "Claude access" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Доступ для Claude"
-          }
-        }
-      }
-    },
-    "Claude Code" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude Code"
-          }
-        }
-      }
-    },
-    "Claude Desktop" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude Desktop"
-          }
-        }
-      }
-    },
-    "Copied" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скопировано"
-          }
-        }
-      }
-    },
-    "Copy Command" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скопировать команду"
-          }
-        }
-      }
-    },
-    "Copy Config" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скопировать конфиг"
-          }
-        }
-      }
-    },
-    "Dropbox, Yandex Disk, Google Drive or another synced folder" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dropbox, Яндекс Диск, Google Drive или другая синхронизируемая папка"
-          }
-        }
-      }
-    },
-    "Folder" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Папка"
-          }
-        }
-      }
-    },
-    "For a Mac with another Apple ID or without iCloud. Choose the same folder on every Mac." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Для Mac с другим Apple ID или без iCloud. Выберите одну и ту же папку на каждом Mac."
-          }
-        }
-      }
-    },
-    "Lets Claude list your tasks and mark them done through MCP, on this Mac only." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude сможет смотреть задачи и отмечать их выполненными через MCP — только на этом Mac."
-          }
-        }
-      }
-    },
-    "No access to the folder" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нет доступа к папке"
-          }
-        }
-      }
-    },
-    "Paused" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "На паузе"
-          }
-        }
-      }
-    },
-    "Peasy has to be running. In Claude Desktop paste the config in Settings → Developer → Edit Config and restart it; for Claude Code run the command in Terminal." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peasy должен быть запущен. В Claude Desktop вставьте конфиг в Settings → Developer → Edit Config и перезапустите его; для Claude Code выполните команду в Терминале."
-          }
-        }
-      }
-    },
-    "Move Peasy to Applications and open it from there: macOS is running a temporary copy that Claude won’t find after a restart." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переместите Peasy в «Программы» и откройте оттуда: сейчас macOS запускает временную копию, которую Claude не найдёт после перезагрузки."
-          }
-        }
-      }
-    },
-    "Another app is using port %lld, so Claude can’t reach Peasy. Quit that app, then turn Claude access off and on." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Порт %lld занят другим приложением, поэтому Claude не может связаться с Peasy. Закройте это приложение, затем выключите и снова включите доступ для Claude."
-          }
-        }
-      }
-    },
-    "Peasy couldn’t open port %lld: %@. Turn Claude access off and on to try again." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peasy не удалось открыть порт %lld: %@. Выключите и снова включите доступ для Claude, чтобы попробовать ещё раз."
-          }
-        }
-      }
-    },
-    "Peasy lost access to the folder. Choose it again." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peasy потерял доступ к папке. Выберите её ещё раз."
-          }
-        }
-      }
-    },
-    "Read tasks and mark them done" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Читать задачи и отмечать выполненными"
-          }
-        }
-      }
-    },
-    "Sync" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Синхронизация"
-          }
-        }
-      }
-    },
-    "Sync folder" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Папка синхронизации"
-          }
-        }
-      }
-    },
-    "Sync Here" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Синхронизировать здесь"
-          }
-        }
-      }
-    },
-    "The pea in the menu bar grows as you finish today's tasks and shows how many are left" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Горошина в строке меню растёт по мере выполнения задач на сегодня и показывает, сколько их осталось"
-          }
-        }
-      }
-    },
     "About Peasy" : {
       "localizations" : {
         "ru" : {
@@ -403,6 +133,26 @@
         }
       }
     },
+    "Also syncing here: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Через эту папку также синхронизируются: %@"
+          }
+        }
+      }
+    },
+    "Another app is using port %lld, so Claude can’t reach Peasy. Quit that app, then turn Claude access off and on." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порт %lld занят другим приложением, поэтому Claude не может связаться с Peasy. Закройте это приложение, затем выключите и снова включите доступ для Claude."
+          }
+        }
+      }
+    },
     "Appearance" : {
       "localizations" : {
         "ru" : {
@@ -433,12 +183,82 @@
         }
       }
     },
+    "Can’t sync with the folder: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удаётся синхронизироваться с папкой: %@"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отменить"
+          }
+        }
+      }
+    },
+    "Change…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить…"
+          }
+        }
+      }
+    },
+    "Choose a folder that Dropbox, Yandex Disk, Google Drive or another service keeps in sync. On your other Macs, choose the same folder." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите папку, которую синхронизирует Dropbox, Яндекс Диск, Google Drive или другой сервис. На других Mac выберите ту же папку."
+          }
+        }
+      }
+    },
+    "Choose this folder on your other Macs too." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите эту же папку и на других Mac."
+          }
+        }
+      }
+    },
+    "Claude access" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ для Claude"
+          }
+        }
+      }
+    },
+    "Claude Code" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code"
+          }
+        }
+      }
+    },
+    "Claude Desktop" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Desktop"
           }
         }
       }
@@ -459,6 +279,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выполнено · %lld"
+          }
+        }
+      }
+    },
+    "Copied" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировано"
+          }
+        }
+      }
+    },
+    "Copy Command" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать команду"
+          }
+        }
+      }
+    },
+    "Copy Config" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать конфиг"
           }
         }
       }
@@ -513,22 +363,22 @@
         }
       }
     },
-    "Delete Task" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить задачу"
-          }
-        }
-      }
-    },
     "Delete “%@” and all its tasks?" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить «%@» вместе со всеми задачами?"
+          }
+        }
+      }
+    },
+    "Delete Task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить задачу"
           }
         }
       }
@@ -543,12 +393,42 @@
         }
       }
     },
+    "Dropbox, Yandex Disk, Google Drive or another synced folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dropbox, Яндекс Диск, Google Drive или другая синхронизируемая папка"
+          }
+        }
+      }
+    },
     "Edit" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изменить"
+          }
+        }
+      }
+    },
+    "Folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка"
+          }
+        }
+      }
+    },
+    "For a Mac with another Apple ID or without iCloud. Choose the same folder on every Mac." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для Mac с другим Apple ID или без iCloud. Выберите одну и ту же папку на каждом Mac."
           }
         }
       }
@@ -583,22 +463,22 @@
         }
       }
     },
-    "Yesterday" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вчера"
-          }
-        }
-      }
-    },
     "iCloud sync" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Синхронизация через iCloud"
+          }
+        }
+      }
+    },
+    "Lets Claude list your tasks and mark them done through MCP, on this Mac only." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude сможет смотреть задачи и отмечать их выполненными через MCP — только на этом Mac."
           }
         }
       }
@@ -676,6 +556,26 @@
         }
       }
     },
+    "Menu bar" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Строка меню"
+          }
+        }
+      }
+    },
+    "Move Peasy to Applications and open it from there: macOS is running a temporary copy that Claude won’t find after a restart." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переместите Peasy в «Программы» и откройте оттуда: сейчас macOS запускает временную копию, которую Claude не найдёт после перезагрузки."
+          }
+        }
+      }
+    },
     "Multiline tasks" : {
       "localizations" : {
         "ru" : {
@@ -736,6 +636,26 @@
         }
       }
     },
+    "No access to the folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет доступа к папке"
+          }
+        }
+      }
+    },
+    "No connection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет подключения к сети"
+          }
+        }
+      }
+    },
     "No Date" : {
       "localizations" : {
         "ru" : {
@@ -756,32 +676,12 @@
         }
       }
     },
-    "No connection" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нет подключения к сети"
-          }
-        }
-      }
-    },
     "Not signed in to iCloud" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нет входа в iCloud"
-          }
-        }
-      }
-    },
-    "Menu bar" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Строка меню"
           }
         }
       }
@@ -822,6 +722,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Панель"
+          }
+        }
+      }
+    },
+    "Paused" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На паузе"
+          }
+        }
+      }
+    },
+    "Peasy couldn’t open port %lld: %@. Turn Claude access off and on to try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy не удалось открыть порт %lld: %@. Выключите и снова включите доступ для Claude, чтобы попробовать ещё раз."
+          }
+        }
+      }
+    },
+    "Peasy has to be running. In Claude Desktop paste the config in Settings → Developer → Edit Config and restart it; for Claude Code run the command in Terminal." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy должен быть запущен. В Claude Desktop вставьте конфиг в Settings → Developer → Edit Config и перезапустите его; для Claude Code выполните команду в Терминале."
+          }
+        }
+      }
+    },
+    "Peasy lost access to the folder. Choose it again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy потерял доступ к папке. Выберите её ещё раз."
           }
         }
       }
@@ -946,6 +886,16 @@
         }
       }
     },
+    "Read tasks and mark them done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Читать задачи и отмечать выполненными"
+          }
+        }
+      }
+    },
     "Remove Date" : {
       "localizations" : {
         "ru" : {
@@ -1016,6 +966,16 @@
         }
       }
     },
+    "Shows next to the sprout in the menu bar how many of today's tasks are left" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывает рядом с ростком в строке меню, сколько задач на сегодня осталось"
+          }
+        }
+      }
+    },
     "Sign in to iCloud in System Settings to sync your tasks." : {
       "localizations" : {
         "ru" : {
@@ -1036,12 +996,42 @@
         }
       }
     },
+    "Sync" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация"
+          }
+        }
+      }
+    },
     "Sync error" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ошибка синхронизации"
+          }
+        }
+      }
+    },
+    "Sync folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка синхронизации"
+          }
+        }
+      }
+    },
+    "Sync Here" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировать здесь"
           }
         }
       }
@@ -1136,6 +1126,16 @@
         }
       }
     },
+    "This build of Peasy is signed without iCloud, so tasks are stored only on this Mac." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта сборка Peasy подписана без iCloud, поэтому задачи хранятся только на этом Mac."
+          }
+        }
+      }
+    },
     "This Month" : {
       "localizations" : {
         "ru" : {
@@ -1152,16 +1152,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На выходных"
-          }
-        }
-      }
-    },
-    "This build of Peasy is signed without iCloud, so tasks are stored only on this Mac." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Эта сборка Peasy подписана без iCloud, поэтому задачи хранятся только на этом Mac."
           }
         }
       }
@@ -1245,7 +1235,17 @@
           }
         }
       }
+    },
+    "Yesterday" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вчера"
+          }
+        }
+      }
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }

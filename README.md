@@ -17,12 +17,12 @@
 
 | Feature | What it does |
 | --- | --- |
-| **Menu bar panel** | Click the pea in the menu bar and the panel opens in a floating window under it, ready for typing. It closes on another click on the pea, a click elsewhere, a switch to another app (⌘Tab, Dock) or Esc. The power button in the header quits Peasy. Right-click the pea for About, Settings and Quit. |
+| **Menu bar panel** | Click the sprout in the menu bar and the panel opens in a floating window under it, ready for typing. It closes on another click on the sprout, a click elsewhere, a switch to another app (⌘Tab, Dock) or Esc. The power button in the header quits Peasy. Right-click the sprout for About, Settings and Quit. |
 | **Today, All, projects** | Today collects the tasks planned for today or earlier from every list, and each morning starts without yesterday's finished ones. All shows every task, with or without a project. Projects get a color each; rename, reorder and delete them from the list. |
 | **Two layouts** | Vertical: projects in a column on the left. Horizontal: projects as tabs on top, wrapping onto new rows when they run out of room. Switch in Settings. |
 | **Resizable** | Drag the bottom-left corner to resize the panel; each layout remembers its size. Reset from the context menu. |
 | **Date and time** | The calendar button on a task opens a picker beside it: Today, Tomorrow, This Weekend, Next Week, any day in the calendar, and an optional time. The choice is saved when the picker closes. Late tasks stay in Today marked in red; a task with a time sends a notification. |
-| **Menu bar icon** | A pea that grows as today's tasks get done: it sprouts, puts out leaves and a bud, and flowers when the day is complete. Next to it, how many tasks are left today. Also a short "Added" after a quick add. |
+| **Menu bar icon** | A sprout in the menu bar's own text color, and next to it how many tasks are left today. Also a short "Added" after a quick add. |
 | **Quick add** | ⌃⌥N from any app opens a small window in the middle of the screen. Type, pick a project or Today, press Return. The shortcut is configurable. |
 | **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps to the new task field, ⌘1…⌘9 switch lists. |
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
@@ -76,7 +76,6 @@ Peasy/
 │   ├── Panel/      panel content, header, shared colors and controls
 │   ├── Tasks/      task list, rows, new task field, date picker
 │   ├── Projects/   sidebar and tab bar
-│   ├── Pea/        the pea in the menu bar
 │   ├── QuickAdd/   quick add window
 │   └── Settings/   settings window, shortcut recorder, launch at login
 ├── Data/           SwiftData models, lists, TaskStore, fractional ordering
@@ -108,7 +107,6 @@ PeasyTests/         Swift Testing suites
 - **Nothing is created on first launch.** A seeded default project would be duplicated on every Mac once iCloud sync is on, so All is virtual and the first project is the user's.
 - **Own key handling.** An agent app has no Edit menu, so the panel routes ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z itself, and a local key monitor handles navigation.
 - **Today is a date, All is a query.** A task belongs to at most one project and can also have a planned date, so Today never duplicates data. Older versions kept a Today flag; it is turned into today's date on launch. All is simply every task; there is no list record to duplicate across Macs.
-- **The pea runs in the render server.** It is drawn with Core Animation shape layers, so growing into the next stage costs nothing on the main thread. Reduce Motion stops the animation.
 - **Carbon for the global shortcut.** `RegisterEventHotKey` works without Accessibility permission, unlike a global key monitor.
 
 ## Tests
