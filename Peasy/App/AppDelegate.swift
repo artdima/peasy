@@ -27,10 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         folderSync.start()
         let actions = PanelActions(
             showAbout: { Self.showAbout() },
-            openSettings: { [weak self] in
-                guard let self else { return }
-                self.settingsWindow.show(beside: self.menuBarController?.openPanelFrame)
-            },
+            openSettings: { [weak self] in self?.settingsWindow.show() },
             quit: { NSApp.terminate(nil) }
         )
         menuBarController = MenuBarController(model: panelModel, actions: actions, modelContainer: container)

@@ -88,10 +88,6 @@ final class MenuBarController: NSObject {
         model.panelSize
     }
 
-    var openPanelFrame: CGRect? {
-        isExpanded ? panel.frame : nil
-    }
-
     func expand() {
         guard modelContainer != nil else { return }
         if !isExpanded {

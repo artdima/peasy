@@ -15,24 +15,14 @@ final class SettingsWindowController {
         self.claudeAccess = claudeAccess
     }
 
-    /// The panel floats above every window, so Settings moves out from under it.
-    func show(beside panel: CGRect? = nil) {
+    func show() {
         let window = self.window ?? makeWindow()
         self.window = window
-        if let panel {
-            moveAside(window, from: panel)
-        }
+        window.level = MenuBarPanel.level
         NSApp.activate()
         window.makeKeyAndOrderFront(nil)
-    }
-
-    private func moveAside(_ window: NSWindow, from panel: CGRect) {
-        guard window.frame.intersects(panel),
-              let visible = NSScreen.screens.first(where: { $0.frame.intersects(panel) })?.visibleFrame
-        else { return }
-        let x = panel.minX - 16 - window.frame.width
-        guard x >= visible.minX else { return }
-        window.setFrameOrigin(CGPoint(x: x, y: window.frame.minY))
+        // macOS may decline activation while the panel holds the keyboard; the window must show anyway.
+        window.orderFrontRegardless()
     }
 
     private func makeWindow() -> NSWindow {
@@ -46,6 +36,7 @@ final class SettingsWindowController {
         window.appearance = AppTheme.current.appearance
         window.backgroundColor = SettingsStyle.windowNS
         window.isReleasedWhenClosed = false
+        window.collectionBehavior = [.moveToActiveSpace]
 
         let view = NSHostingView(rootView: SettingsView(sync: sync, folderSync: folderSync, claudeAccess: claudeAccess) { [weak window] title in
             window?.title = title
@@ -88,5 +79,17 @@ final class SettingsWindowController {
     }
 }
 
-/// Lets the panel tell Settings apart from other windows.
-final class SettingsWindow: NSWindow {}
+/// Rises to the panel's level while it has the keyboard, so it opens on top of the panel,
+/// and drops back to a normal window after, so it never floats over other apps.
+final class SettingsWindow: NSWindow {
+    override func becomeKey() {
+        level = MenuBarPanel.level
+        super.becomeKey()
+        orderFrontRegardless()
+    }
+
+    override func resignKey() {
+        super.resignKey()
+        level = .normal
+    }
+}
