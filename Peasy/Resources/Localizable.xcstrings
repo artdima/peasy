@@ -163,6 +163,16 @@
         }
       }
     },
+    "Applies after Peasy restarts" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Применится после перезапуска Peasy"
+          }
+        }
+      }
+    },
     "Blue" : {
       "localizations" : {
         "ru" : {
@@ -469,6 +479,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Синхронизация через iCloud"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык"
           }
         }
       }
@@ -942,6 +962,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изменить размер панели"
+          }
+        }
+      }
+    },
+    "Restart" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустить"
           }
         }
       }

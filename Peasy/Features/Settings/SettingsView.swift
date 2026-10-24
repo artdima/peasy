@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage(PanelSettings.showsTodayIndicatorKey) private var showsIndicator = true
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
     @State private var launchAtLogin = LaunchAtLogin()
+    @State private var language = AppLanguage.current()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -65,6 +66,7 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     SettingsPopUp(options: AppTheme.allCases.map { ($0, $0.title) }, selection: $theme)
                 }
+                languageRow
                 SettingsToggleRow(
                     title: "Open at login",
                     subtitle: launchAtLogin.needsApproval ? "Allow Peasy in Login Items to finish." : nil,
@@ -81,6 +83,35 @@ struct SettingsView: View {
                 }
             }
             ClaudeAccessCard(failure: claudeAccess?.failure)
+        }
+    }
+
+    private var languageRow: some View {
+        SettingsRow(minHeight: 44, separated: true) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Language")
+                    .settingsTitle()
+                if language.needsRelaunch {
+                    Text("Applies after Peasy restarts")
+                        .settingsSubtitle()
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if language.needsRelaunch {
+                SettingsTextButton(title: "Restart") {
+                    AppLanguage.relaunch()
+                }
+            }
+            SettingsPopUp(options: AppLanguage.allCases.map { ($0, $0.title) }, selection: languageSelection)
+        }
+    }
+
+    private var languageSelection: Binding<AppLanguage> {
+        Binding {
+            language
+        } set: { choice in
+            language = choice
+            choice.apply()
         }
     }
 

@@ -29,7 +29,8 @@
 | **iCloud sync** | Projects and tasks follow your Apple ID to every Mac. Settings shows the sync status and lets you turn sync off. Without iCloud Peasy keeps everything on this Mac. |
 | **Folder sync** | For a Mac with another Apple ID or without iCloud: pick a folder that Dropbox, Yandex Disk, Google Drive, Syncthing or a network share keeps in sync, and the same folder on the other Macs. Works alongside iCloud: a Mac with both carries changes between them. |
 | **Claude access** | An MCP server for Claude Desktop and Claude Code: Claude lists projects and tasks and marks tasks done or open again. Off until turned on in Settings → General, which also copies the config for either app. |
-| **Settings** | iCloud and folder sync, appearance, layout, multiline tasks, Today indicator, quick add shortcut, open at login. English and Russian. |
+| **Settings** | iCloud and folder sync, appearance, interface language, layout, multiline tasks, Today indicator, quick add shortcut, open at login. |
+| **Language** | English and Russian. Peasy follows macOS or the language picked in Settings → General; a new choice applies after a restart, which Settings offers right there. |
 
 ## Build
 
@@ -77,7 +78,7 @@ Peasy/
 │   ├── Tasks/      task list, rows, new task field, date picker
 │   ├── Projects/   sidebar and tab bar
 │   ├── QuickAdd/   quick add window
-│   └── Settings/   settings window, shortcut recorder, launch at login
+│   └── Settings/   settings window, shortcut recorder, launch at login, language
 ├── Data/           SwiftData models, lists, TaskStore, fractional ordering
 ├── Sync/           folder sync: clock, operations, merge engine, folder, SwiftData bridge
 ├── MCP/            MCP protocol, task tools, local HTTP server, request signing, stdio bridge

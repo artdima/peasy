@@ -10,6 +10,7 @@ enum PeasyMain {
             }
             dispatchMain()
         }
+        AppLanguage.waitForPreviousInstance()
         PeasyApp.main()
     }
 }
