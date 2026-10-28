@@ -996,12 +996,12 @@
         }
       }
     },
-    "Shows next to the sprout in the menu bar how many of today's tasks are left" : {
+    "Shows how many tasks are left today next to the sprout" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Показывает рядом с ростком в строке меню, сколько задач на сегодня осталось"
+            "value" : "Показывает у ростка, сколько задач осталось на сегодня"
           }
         }
       }
