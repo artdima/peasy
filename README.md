@@ -29,3 +29,7 @@ Turn on **Claude access** in Settings → General, then:
 - **Claude Code:** click Copy Command and run it in Terminal.
 
 Peasy has to be running while Claude uses it.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
