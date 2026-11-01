@@ -15,6 +15,12 @@
 - **Claude access.** A built-in MCP server lets Claude Desktop and Claude Code read your tasks and mark them done.
 - **English and Russian**, dark and light themes.
 
+<p align="center">
+  <img src="docs/quick-add.png" alt="Quick add window with a new task, a project and Today picked">
+  <br>
+  <sub>Quick add: ⌃⌥N in any app, type, press Return.</sub>
+</p>
+
 ## Build
 
 You need macOS 14 or later and Xcode 26 or later. Open `Peasy.xcodeproj` and run.
