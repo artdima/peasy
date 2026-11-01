@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Glyph: View {
     enum Kind {
-        case power, plus, chevron, check, checkBold, calendar, returnKey, refresh, cloud, folder, spinner, gear
+        case power, plus, chevron, check, checkBold, calendar, copy, returnKey, refresh, cloud, folder, spinner, gear
         case sun, sofa, nextWeek
         case sliders, sidebar, menuBarTab, cloudTab
     }
@@ -46,7 +46,7 @@ extension Glyph.Kind {
         case .chevron: 1.5
         case .check: 1.8
         case .checkBold: 2.2
-        case .calendar: 1.1
+        case .calendar, .copy: 1.1
         case .sun, .sofa, .nextWeek: 1.3
         case .returnKey: 1.8
         case .refresh, .cloud, .folder, .spinner: 1.5
@@ -92,6 +92,14 @@ struct GlyphShape: Shape {
                 path.move(to: CGPoint(x: x, y: 1.25))
                 path.addLine(to: CGPoint(x: x, y: 3.25))
             }
+        case .copy:
+            path.addRoundedRect(in: CGRect(x: 4.25, y: 4.25, width: 6.5, height: 6.5), cornerSize: CGSize(width: 1.4, height: 1.4))
+            path.move(to: CGPoint(x: 2.65, y: 7.75))
+            path.addQuadCurve(to: CGPoint(x: 1.25, y: 6.35), control: CGPoint(x: 1.25, y: 7.75))
+            path.addLine(to: CGPoint(x: 1.25, y: 2.65))
+            path.addQuadCurve(to: CGPoint(x: 2.65, y: 1.25), control: CGPoint(x: 1.25, y: 1.25))
+            path.addLine(to: CGPoint(x: 6.35, y: 1.25))
+            path.addQuadCurve(to: CGPoint(x: 7.75, y: 2.65), control: CGPoint(x: 7.75, y: 1.25))
         case .sun:
             path.addEllipse(in: CGRect(x: 4.4, y: 4.4, width: 5.2, height: 5.2))
             for ray in 0..<8 {

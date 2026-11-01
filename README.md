@@ -25,6 +25,7 @@
 | **Menu bar icon** | A sprout in the menu bar's own text color, and next to it how many tasks are left today. Also a short "Added" after a quick add. |
 | **Quick add** | ⌃⌥N from any app opens a small window in the middle of the screen. Type, pick a project or Today, press Return. The shortcut is configurable. |
 | **Keyboard** | ↑/↓ select, Space completes, Return edits, ⌘⌫ deletes, ⌘Z undoes, ⌘N jumps to the new task field, ⌘1…⌘9 switch lists. |
+| **Copy a task** | The copy button that shows on a hovered task, or Copy Text in its context menu, puts the task's text on the clipboard. |
 | **Reorder** | Drag tasks inside a list and projects inside the sidebar or the tab bar. |
 | **iCloud sync** | Projects and tasks follow your Apple ID to every Mac. Settings shows the sync status and lets you turn sync off. Without iCloud Peasy keeps everything on this Mac. |
 | **Folder sync** | For a Mac with another Apple ID or without iCloud: pick a folder that Dropbox, Yandex Disk, Google Drive, Syncthing or a network share keeps in sync, and the same folder on the other Macs. Works alongside iCloud: a Mac with both carries changes between them. |

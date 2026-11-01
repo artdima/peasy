@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct TaskRow: View {
@@ -9,6 +10,7 @@ struct TaskRow: View {
     @AppStorage(PanelSettings.multilineTasksKey) private var isMultiline = false
     @State private var isHovered = false
     @State private var isChecking = false
+    @State private var isCopied = false
     @State private var dateButtonFrame: CGRect = .zero
     @FocusState private var isEditorFocused: Bool
 
@@ -16,6 +18,7 @@ struct TaskRow: View {
     private var isSelected: Bool { model.selectedTaskID == task.id }
     private var isScheduling: Bool { model.schedulingTaskID == task.id }
     private var showsDateButton: Bool { isHovered || isScheduling }
+    private var showsCopyButton: Bool { isHovered && !isEditing }
 
     var body: some View {
         let wraps = isMultiline && !isEditing
@@ -61,6 +64,9 @@ struct TaskRow: View {
                             .lineLimit(1)
                             .padding(.trailing, showsDateButton ? 0 : 2)
                     }
+                    if showsCopyButton {
+                        copyButton
+                    }
                     if showsDateButton {
                         RowActionButton(glyph: .calendar, label: "Date and Time", isActive: isScheduling, action: openSchedule)
                     }
@@ -74,6 +80,9 @@ struct TaskRow: View {
                 }
                 .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
                 .padding(.top, wraps ? 8 : 0)
+            } else if showsCopyButton {
+                copyButton
+                    .padding(.top, wraps ? 8 : 0)
             }
         }
         .padding(.leading, 4)
@@ -104,6 +113,7 @@ struct TaskRow: View {
                 Button("Date and Time…", action: openSchedule)
             }
             Button("Edit", action: startEditing)
+            Button("Copy Text", action: copyTitle)
             Divider()
             Button("Delete", role: .destructive, action: delete)
         }
@@ -130,6 +140,20 @@ struct TaskRow: View {
             return when.map { place + Text(verbatim: " · ") + $0 } ?? place
         case .project:
             return when
+        }
+    }
+
+    private var copyButton: some View {
+        RowActionButton(glyph: isCopied ? .check : .copy, label: isCopied ? LocalizedStringKey("Copied") : "Copy Text", action: copyTitle)
+    }
+
+    private func copyTitle() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(task.title, forType: .string)
+        isCopied = true
+        Task {
+            try? await Task.sleep(for: .seconds(1.2))
+            isCopied = false
         }
     }
 
