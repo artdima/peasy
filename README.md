@@ -21,9 +21,13 @@
   <sub>Quick add: ⌃⌥N in any app, type, press Return.</sub>
 </p>
 
+## Install
+
+Download the latest release from [Releases](https://github.com/artdima/peasy/releases), unzip it and move Peasy to Applications. Peasy needs macOS 14 or later.
+
 ## Build
 
-You need macOS 14 or later and Xcode 26 or later. Open `Peasy.xcodeproj` and run.
+You need Xcode 26 or later. Open `Peasy.xcodeproj` and run.
 
 iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements` and in `CloudSync.containerIdentifier`. Without the container, Peasy keeps tasks on the Mac.
 
