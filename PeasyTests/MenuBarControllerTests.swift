@@ -74,6 +74,26 @@ struct MenuBarControllerTests {
         #expect(layout.customSize(in: .standard) == nil)
     }
 
+    @Test func expandingFitsAnOversizedPanelOnScreen() throws {
+        let layout = PanelLayout.current
+        let savedSize = layout.customSize(in: .standard)
+        let oversized = CGSize(width: 10_000, height: 10_000)
+        layout.saveSize(oversized)
+        defer {
+            if let savedSize { layout.saveSize(savedSize) } else { layout.resetSize() }
+        }
+        let container = try Persistence.makeContainer(inMemory: true)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
+        defer { controller.shutdown() }
+
+        controller.expand()
+        #expect(controller.expandedPanelSize.width < oversized.width)
+        #expect(controller.expandedPanelSize.height < oversized.height)
+        #expect(layout.panelSize == oversized)
+    }
+
     @Test func foldingThePanelSavesTheEdit() async throws {
         let container = try Persistence.makeContainer(inMemory: true)
         let model = PanelViewModel()

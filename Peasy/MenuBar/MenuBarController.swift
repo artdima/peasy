@@ -67,8 +67,14 @@ final class MenuBarController: NSObject {
         installPanel()
 
         observe(NSApplication.didChangeScreenParametersNotification) { controller, _ in
-            if controller.isExpanded {
-                controller.place()
+            // The menu bar lays its items out only after the screen has changed.
+            DispatchQueue.main.async { [weak controller] in
+                controller?.followStatusItem()
+            }
+        }
+        observe(NSWindow.didMoveNotification) { controller, notification in
+            if (notification.object as? NSWindow) === controller.statusItem.button?.window {
+                controller.followStatusItem()
             }
         }
         observe(UserDefaults.didChangeNotification) { controller, _ in
@@ -97,6 +103,7 @@ final class MenuBarController: NSObject {
         guard modelContainer != nil else { return }
         if !isExpanded {
             isExpanded = true
+            model.panelSize = layout.clamp(layout.panelSize, to: sizeLimit)
             place()
             panel.alphaValue = 0
             NSAnimationContext.runAnimationGroup { context in
@@ -206,12 +213,24 @@ final class MenuBarController: NSObject {
         statusItem.button?.window?.screen ?? NSScreen.main
     }
 
-    private func place() {
+    private func currentPlacement() -> PanelPlacement {
         let frame = screen?.frame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
-        let placement = PanelPlacement(item: statusItemFrame(), screen: frame, panelSize: model.panelSize)
+        return PanelPlacement(item: statusItemFrame(), screen: frame, panelSize: model.panelSize)
+    }
+
+    private func place() {
+        let placement = currentPlacement()
         self.placement = placement
         panel.setFrame(placement.frame, display: true)
         render()
+    }
+
+    private func followStatusItem() {
+        guard isExpanded else { return }
+        let size = layout.clamp(model.panelSize, to: sizeLimit)
+        guard size != model.panelSize || currentPlacement() != placement else { return }
+        model.panelSize = size
+        place()
     }
 
     private func render() {
