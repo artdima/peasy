@@ -1,6 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>Peasy</title>
+        <item>
+            <title>0.2.0</title>
+            <pubDate>Mon, 09 Nov 2026 07:22:39 +0100</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description sparkle:format="markdown"><![CDATA[- Peasy now keeps itself up to date. Check for Updates… is in the menu, and Settings → General can turn automatic checks off.
+]]></description>
+            <enclosure url="https://github.com/artdima/peasy/releases/download/v0.2.0/Peasy-0.2.0.zip" length="2554864" type="application/octet-stream" sparkle:edSignature="p6ZgAENaNpTFYdX8JrzhfjUyaeTbOQ0dOeRtJFuV9ABhp67iOWfPshn2cz06uI+P0VnaMf5At+mIM9wV7JDQDA=="/>
+        </item>
     </channel>
 </rss>
