@@ -54,6 +54,11 @@ final class MenuBarController: NSObject {
             self?.collapse()
             showAbout()
         }
+        let checkForUpdates = actions.checkForUpdates
+        self.actions.checkForUpdates = { [weak self] in
+            self?.collapse()
+            checkForUpdates()
+        }
         model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
         model.onCommitEdit = { [weak self] id, title in self?.commitEdit(of: id, title: title) }
         model.onResetSize = { [weak self] in self?.resetSize() }
@@ -169,6 +174,7 @@ final class MenuBarController: NSObject {
     private func showMenu() {
         let menu = NSMenu()
         menu.addItem(withTitle: String(localized: "About Peasy"), action: #selector(menuAbout), keyEquivalent: "").target = self
+        menu.addItem(withTitle: String(localized: "Check for Updates…"), action: #selector(menuCheckForUpdates), keyEquivalent: "").target = self
         menu.addItem(withTitle: String(localized: "Settings…"), action: #selector(menuSettings), keyEquivalent: ",").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: String(localized: "Quit Peasy"), action: #selector(menuQuit), keyEquivalent: "q").target = self
@@ -179,6 +185,7 @@ final class MenuBarController: NSObject {
     }
 
     @objc private func menuAbout() { actions.showAbout() }
+    @objc private func menuCheckForUpdates() { actions.checkForUpdates() }
     @objc private func menuSettings() { actions.openSettings() }
     @objc private func menuQuit() { actions.quit() }
 

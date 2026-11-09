@@ -8,7 +8,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let sync = SyncMonitor()
     private lazy var folderSync = FolderSync()
     private lazy var mcpServer = MCPServer(handler: MCPHandler { [weak self] in self?.container })
-    private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync, claudeAccess: mcpServer)
+    private let updater = Updater()
+    private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync, claudeAccess: mcpServer, updater: updater)
     private var container: ModelContainer?
     private var menuBarController: MenuBarController?
     private var quickAdd: QuickAddController?
@@ -27,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         folderSync.start()
         let actions = PanelActions(
             showAbout: { Self.showAbout() },
+            checkForUpdates: { [weak self] in self?.updater.checkForUpdates() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
             quit: { NSApp.terminate(nil) }
         )
@@ -36,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKey.action = { quickAdd.toggle() }
         hotKey.register(Shortcut.current)
         startReminders()
+        updater.start()
         updateMCPServer()
         observers.append(NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
@@ -92,6 +95,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         reminders.onOpen = { [weak self] in
             self?.menuBarController?.expand()
+        }
+        reminders.onOpenUpdate = { [weak self] in
+            self?.updater.checkForUpdates()
         }
         reminders.start()
         for name in [ModelContext.didSave, NSPersistentCloudKitContainer.eventChangedNotification] {

@@ -13,6 +13,7 @@
 - **Keyboard.** ↑/↓ to select, Space to complete, Return to edit, ⌘N for a new task.
 - **Sync.** iCloud across your Macs, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
 - **Claude access.** A built-in MCP server lets Claude Desktop and Claude Code read your tasks and mark them done.
+- **Updates.** Peasy checks for new versions and installs them in a click.
 - **English and Russian**, dark and light themes.
 
 <p align="center">
@@ -30,6 +31,8 @@ Download the latest release from [Releases](https://github.com/artdima/peasy/rel
 You need Xcode 26 or later. Open `Peasy.xcodeproj` and run.
 
 iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements` and in `CloudSync.containerIdentifier`. Without the container, Peasy keeps tasks on the Mac.
+
+Updates come through Sparkle, see [docs/releasing.md](docs/releasing.md).
 
 ## Connect Claude
 

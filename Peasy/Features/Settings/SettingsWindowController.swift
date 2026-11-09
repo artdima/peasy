@@ -6,13 +6,15 @@ final class SettingsWindowController {
     private let sync: SyncMonitor
     private let folderSync: FolderSync
     private let claudeAccess: MCPServer
+    private let updater: Updater
     private var window: NSWindow?
     private var themeObserver: NSObjectProtocol?
 
-    init(sync: SyncMonitor, folderSync: FolderSync, claudeAccess: MCPServer) {
+    init(sync: SyncMonitor, folderSync: FolderSync, claudeAccess: MCPServer, updater: Updater) {
         self.sync = sync
         self.folderSync = folderSync
         self.claudeAccess = claudeAccess
+        self.updater = updater
     }
 
     func show() {
@@ -38,7 +40,7 @@ final class SettingsWindowController {
         window.isReleasedWhenClosed = false
         window.collectionBehavior = [.moveToActiveSpace]
 
-        let view = NSHostingView(rootView: SettingsView(sync: sync, folderSync: folderSync, claudeAccess: claudeAccess) { [weak window] title in
+        let view = NSHostingView(rootView: SettingsView(sync: sync, folderSync: folderSync, updater: updater, claudeAccess: claudeAccess) { [weak window] title in
             window?.title = title
         } onHeightChange: { [weak self] height in
             Task { @MainActor [weak self] in

@@ -11,6 +11,46 @@
         }
       }
     },
+    "Check for Updates…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверить обновления…"
+          }
+        }
+      }
+    },
+    "Check for updates automatically" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверять обновления автоматически"
+          }
+        }
+      }
+    },
+    "Check Now" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверить"
+          }
+        }
+      }
+    },
+    "Click to see what’s new and install it." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите, чтобы посмотреть, что нового, и установить."
+          }
+        }
+      }
+    },
     "%lld tasks" : {
       "localizations" : {
         "en" : {
@@ -766,6 +806,16 @@
         }
       }
     },
+    "Peasy %@ is available" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступен Peasy %@"
+          }
+        }
+      }
+    },
     "Peasy couldn’t open port %lld: %@. Turn Claude access off and on to try again." : {
       "localizations" : {
         "ru" : {
@@ -1232,6 +1282,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Завтра"
+          }
+        }
+      }
+    },
+    "Updates" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновления"
+          }
+        }
+      }
+    },
+    "Version %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версия %@"
           }
         }
       }

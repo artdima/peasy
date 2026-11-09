@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     let sync: SyncMonitor
     let folderSync: FolderSync
+    let updater: Updater
     var claudeAccess: MCPServer?
     var onTitleChange: (String) -> Void = { _ in }
     var onHeightChange: (CGFloat) -> Void = { _ in }
@@ -83,6 +84,31 @@ struct SettingsView: View {
                 }
             }
             ClaudeAccessCard(failure: claudeAccess?.failure)
+            updatesCard
+        }
+    }
+
+    private var updatesCard: some View {
+        SettingsCard {
+            SettingsRow(minHeight: 44) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Updates")
+                        .settingsTitle()
+                    Text("Version \(Updater.currentVersion)")
+                        .settingsSubtitle()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                SettingsTextButton(title: "Check Now") {
+                    updater.checkForUpdates()
+                }
+            }
+            SettingsToggleRow(
+                title: "Check for updates automatically",
+                subtitle: nil,
+                isOn: Binding(get: { updater.checksAutomatically }, set: { updater.setChecksAutomatically($0) }),
+                minHeight: 44,
+                separated: true
+            )
         }
     }
 

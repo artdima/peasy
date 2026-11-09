@@ -36,6 +36,7 @@ struct PanelContentView: View {
         .contentShape(Rectangle())
         .contextMenu {
             Button("About Peasy", action: actions.showAbout)
+            Button("Check for Updates…", action: actions.checkForUpdates)
             Button("Settings…", action: actions.openSettings)
             if model.hasCustomSize {
                 Button("Reset Panel Size", action: model.onResetSize)

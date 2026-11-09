@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8F3A1C3C2EA9000100D4E001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 8F3A1C3E2EA9000100D4E001 /* Sparkle */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		8F3A1C362EA9000100D4E001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,9 +25,22 @@
 		8F3A1C302EA9000100D4E001 /* PeasyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PeasyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8F3A1C3B2EA9000100D4E001 /* Exceptions for "Peasy" folder in "Peasy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8F3A1C172EA9000100D4E001 /* Peasy */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8F3A1C1A2EA9000100D4E001 /* Peasy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8F3A1C3B2EA9000100D4E001 /* Exceptions for "Peasy" folder in "Peasy" target */,
+			);
 			path = Peasy;
 			sourceTree = "<group>";
 		};
@@ -39,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F3A1C3C2EA9000100D4E001 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +108,7 @@
 			);
 			name = Peasy;
 			packageProductDependencies = (
+				8F3A1C3E2EA9000100D4E001 /* Sparkle */,
 			);
 			productName = Peasy;
 			productReference = 8F3A1C182EA9000100D4E001 /* Peasy.app */;
@@ -147,6 +166,9 @@
 			);
 			mainGroup = 8F3A1C0F2EA9000100D4E001;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8F3A1C3D2EA9000100D4E001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8F3A1C192EA9000100D4E001 /* Products */;
 			projectDirPath = "";
@@ -333,6 +355,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Peasy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Peasy;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -367,6 +390,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Peasy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Peasy;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -456,6 +480,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8F3A1C3D2EA9000100D4E001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8F3A1C3E2EA9000100D4E001 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8F3A1C3D2EA9000100D4E001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8F3A1C102EA9000100D4E001 /* Project object */;
 }
