@@ -1,32 +1,56 @@
 #!/bin/bash
 set -euo pipefail
-
-if [ $# -ne 1 ]; then
-    echo "usage: scripts/release.sh path/to/Peasy.app" >&2
-    exit 64
-fi
-app="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 cd "$(dirname "$0")/.."
+
+profile=${NOTARY_PROFILE:-peasy}
 
 fail() {
     echo "error: $*" >&2
     exit 1
 }
 
-info="$app/Contents/Info.plist"
-[ -f "$info" ] || fail "$1 is not an app"
-version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$info")
-build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$info")
+setting() {
+    awk -F ' = ' -v key="$1" '$1 ~ ("^ *" key "$") { print $2; exit }' <<<"$settings"
+}
+
+[ -z "$(git status --porcelain)" ] || fail "commit your changes first"
+[ "$(git rev-parse HEAD)" = "$(git rev-parse '@{u}')" ] || fail "push main first"
+
+settings=$(xcodebuild -project Peasy.xcodeproj -scheme Peasy -configuration Release -showBuildSettings 2>/dev/null)
+version=$(setting MARKETING_VERSION)
+build=$(setting CURRENT_PROJECT_VERSION)
+build_dir=$(setting BUILD_DIR)
+sparkle="${build_dir%/Build/Products}/SourcePackages/artifacts/sparkle/Sparkle/bin"
 notes="docs/releases/$version.md"
-sparkle=$(ls -d ~/Library/Developer/Xcode/DerivedData/Peasy-*/SourcePackages/artifacts/sparkle/Sparkle/bin 2>/dev/null | head -n 1 || true)
 
 [ -f "$notes" ] || fail "write the release notes in $notes"
-[ -n "$sparkle" ] || fail "open Peasy.xcodeproj in Xcode so it downloads Sparkle"
 if grep -q "<sparkle:version>$build</sparkle:version>" appcast.xml; then
     fail "build $build is already in appcast.xml, raise CURRENT_PROJECT_VERSION"
 fi
-xcrun stapler validate "$app" >/dev/null || fail "$app is not notarized"
+xcrun notarytool history --keychain-profile "$profile" >/dev/null 2>&1 ||
+    fail "save the notarization credentials: xcrun notarytool store-credentials $profile --apple-id <email> --team-id 8Q6S7RTHBY"
 
+echo "Archiving Peasy $version ($build)…"
+work="build/$version"
+rm -rf "$work"
+xcodebuild -project Peasy.xcodeproj -scheme Peasy -configuration Release \
+    -archivePath "$work/Peasy.xcarchive" -allowProvisioningUpdates -quiet archive
+xcodebuild -exportArchive -archivePath "$work/Peasy.xcarchive" -exportPath "$work/export" \
+    -exportOptionsPlist scripts/ExportOptions.plist -allowProvisioningUpdates -quiet
+app="$work/export/Peasy.app"
+
+echo "Notarizing…"
+ditto -c -k --keepParent "$app" "$work/Peasy.zip"
+result=$(xcrun notarytool submit "$work/Peasy.zip" --keychain-profile "$profile" --wait --output-format json)
+status=$(plutil -extract status raw -o - - <<<"$result")
+if [ "$status" != "Accepted" ]; then
+    xcrun notarytool log "$(plutil -extract id raw -o - - <<<"$result")" --keychain-profile "$profile" >&2 || true
+    fail "notarization ended with $status"
+fi
+xcrun stapler staple -q "$app"
+
+echo "Updating appcast.xml…"
+[ -x "$sparkle/generate_appcast" ] || fail "Sparkle tools are missing in $sparkle"
 out="release/$version"
 rm -rf "$out"
 mkdir -p "$out"
