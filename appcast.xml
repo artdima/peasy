@@ -3,6 +3,18 @@
     <channel>
         <title>Peasy</title>
         <item>
+            <title>0.2.1</title>
+            <pubDate>Mon, 09 Nov 2026 08:37:08 +0100</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description sparkle:format="markdown"><![CDATA[- Peasy now comes as a disk image: open it and drag Peasy to Applications.
+- The panel stays under the sprout and fits the screen after you connect or disconnect a display.
+- The panel gets out of the way when Peasy checks for updates.
+]]></description>
+            <enclosure url="https://github.com/artdima/peasy/releases/download/v0.2.1/Peasy-0.2.1.zip" length="2557938" type="application/octet-stream" sparkle:edSignature="d8TKUOomSvbtZOYxma1UYxnRFA+7cP0Gw549PHUonMb+1bYK7LiMg0oK0Dr+5gzVLZPa1LK/AHsR+XQPjqEsDw=="/>
+        </item>
+        <item>
             <title>0.2.0</title>
             <pubDate>Mon, 09 Nov 2026 07:22:39 +0100</pubDate>
             <sparkle:version>2</sparkle:version>
