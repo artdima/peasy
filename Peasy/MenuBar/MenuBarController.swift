@@ -54,11 +54,6 @@ final class MenuBarController: NSObject {
             self?.collapse()
             showAbout()
         }
-        let checkForUpdates = actions.checkForUpdates
-        self.actions.checkForUpdates = { [weak self] in
-            self?.collapse()
-            checkForUpdates()
-        }
         model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
         model.onCommitEdit = { [weak self] id, title in self?.commitEdit(of: id, title: title) }
         model.onResetSize = { [weak self] in self?.resetSize() }

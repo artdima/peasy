@@ -9,6 +9,7 @@ final class Updater: NSObject {
     nonisolated static let notificationID = "update"
 
     private(set) var checksAutomatically = false
+    @ObservationIgnored var willCheckForUpdates: () -> Void = {}
 
     @ObservationIgnored private lazy var controller = SPUStandardUpdaterController(
         startingUpdater: false,
@@ -26,6 +27,7 @@ final class Updater: NSObject {
     }
 
     func checkForUpdates() {
+        willCheckForUpdates()
         NSApp.activate()
         controller.checkForUpdates(nil)
     }

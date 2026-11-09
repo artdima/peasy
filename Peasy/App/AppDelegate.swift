@@ -33,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             quit: { NSApp.terminate(nil) }
         )
         menuBarController = MenuBarController(model: panelModel, actions: actions, modelContainer: container)
+        updater.willCheckForUpdates = { [weak self] in self?.menuBarController?.collapse() }
         let quickAdd = QuickAddController(modelContainer: container, panelModel: panelModel)
         self.quickAdd = quickAdd
         hotKey.action = { quickAdd.toggle() }
