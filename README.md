@@ -24,7 +24,7 @@
 
 ## Install
 
-Download the latest release from [Releases](https://github.com/artdima/peasy/releases), unzip it and move Peasy to Applications. Peasy needs macOS 14 or later.
+Download the latest disk image from [Releases](https://github.com/artdima/peasy/releases), open it and drag Peasy to Applications. Peasy needs macOS 14 or later.
 
 ## Build
 
