@@ -20,6 +20,7 @@ enum StoreBridge {
             "color": .text(project.colorHex),
             "order": .number(project.order),
             "created": .date(project.createdAt),
+            "folder": .text(project.folder),
         ]
     }
 
@@ -34,6 +35,13 @@ enum StoreBridge {
             "created": .date(task.createdAt),
             "order": .number(task.order),
             SyncField.project: .uuid(task.project?.id),
+            "assignee": .text(task.assignee),
+            "agent": .text(task.agentState),
+            "claimed": .date(task.claimedAt),
+            "claimedBy": .text(task.claimedBy),
+            "note": .text(task.note),
+            "link": .text(task.link),
+            "origin": .text(task.origin),
         ]
     }
 
@@ -110,6 +118,9 @@ enum StoreBridge {
         if let created = fields["created"]?.dateValue, project.createdAt != created {
             project.createdAt = created
         }
+        if let folder = fields["folder"]?.textValue, project.folder != folder {
+            project.folder = folder
+        }
     }
 
     private static func update(_ task: TaskItem, with fields: [String: FieldValue], projects: [UUID: Project]) {
@@ -142,6 +153,27 @@ enum StoreBridge {
             if task.project?.id != project?.id {
                 task.project = project
             }
+        }
+        if let assignee = fields["assignee"]?.textValue, task.assignee != assignee {
+            task.assignee = assignee
+        }
+        if let agent = fields["agent"]?.textValue, task.agentState != agent {
+            task.agentState = agent
+        }
+        if let claimed = fields["claimed"], task.claimedAt != claimed.dateValue {
+            task.claimedAt = claimed.dateValue
+        }
+        if let claimedBy = fields["claimedBy"]?.textValue, task.claimedBy != claimedBy {
+            task.claimedBy = claimedBy
+        }
+        if let note = fields["note"]?.textValue, task.note != note {
+            task.note = note
+        }
+        if let url = fields["link"]?.textValue, task.link != url {
+            task.link = url
+        }
+        if let origin = fields["origin"]?.textValue, task.origin != origin {
+            task.origin = origin
         }
     }
 }

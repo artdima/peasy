@@ -102,4 +102,26 @@ struct FolderSyncTests {
             return
         }
     }
+
+    @Test func claudeFieldsTravelBetweenMacs() async throws {
+        let a = try makeMac("A")
+        let b = try makeMac("B")
+        let peasy = try #require(a.store.createProject(named: "Peasy"))
+        peasy.folder = "peasy-app"
+        let task = try #require(a.store.addTask("Update README", project: peasy, isToday: false))
+        a.store.assignToClaude(task)
+        a.store.setNote("Mention @claude", for: task)
+        task.link = "https://github.com/artdima/peasy"
+        task.origin = "Claude Code"
+        try a.container.mainContext.save()
+        await a.sync.syncNow()
+        await b.sync.syncNow()
+
+        let copy = try #require(b.store.allTasks().first { $0.id == task.id })
+        #expect(copy.isForClaude)
+        #expect(copy.note == "Mention @claude")
+        #expect(copy.link == "https://github.com/artdima/peasy")
+        #expect(copy.origin == "Claude Code")
+        #expect(copy.project?.folder == "peasy-app")
+    }
 }

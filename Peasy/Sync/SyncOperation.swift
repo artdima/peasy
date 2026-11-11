@@ -62,6 +62,10 @@ nonisolated enum FieldValue: Hashable, Codable, Sendable {
         textValue.flatMap(UUID.init(uuidString:))
     }
 
+    var isEmpty: Bool {
+        self == .null || self == .text("")
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {

@@ -37,6 +37,20 @@ struct ModelTests {
         #expect(try context.fetchCount(FetchDescriptor<Project>()) == 0)
         #expect(try context.fetchCount(FetchDescriptor<TaskItem>()) == 0)
     }
+
+    @Test func claimLastsTwoHoursWithoutAnUpdate() throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let task = TaskItem(title: "Tests", order: 0)
+        container.mainContext.insert(task)
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        task.assignee = TaskItem.claude
+        task.agentState = TaskItem.AgentState.working.rawValue
+        task.claimedAt = now.addingTimeInterval(-60 * 60)
+        #expect(task.isClaimed(now: now))
+
+        task.claimedAt = now.addingTimeInterval(-3 * 60 * 60)
+        #expect(!task.isClaimed(now: now))
+    }
 }
 
 struct CloudKitSchemaTests {

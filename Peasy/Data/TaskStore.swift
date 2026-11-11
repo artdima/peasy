@@ -110,6 +110,30 @@ struct TaskStore {
     func toggle(_ task: TaskItem) {
         task.isDone.toggle()
         task.completedAt = task.isDone ? Date() : nil
+        if task.isDone {
+            clearAgentWork(on: task)
+        }
+        save()
+    }
+
+    func assignToClaude(_ task: TaskItem) {
+        guard !task.isForClaude else { return }
+        task.assignee = TaskItem.claude
+        clearAgentWork(on: task)
+        save()
+    }
+
+    func takeBack(_ task: TaskItem) {
+        guard task.isForClaude else { return }
+        task.assignee = ""
+        clearAgentWork(on: task)
+        save()
+    }
+
+    func setNote(_ note: String, for task: TaskItem) {
+        let note = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard task.note != note else { return }
+        task.note = note
         save()
     }
 
@@ -156,6 +180,9 @@ struct TaskStore {
     func rename(_ task: TaskItem, to title: String) {
         guard let title = Self.clean(title), title != task.title else { return }
         task.title = title
+        if task.agentStatus == .returned {
+            task.agentState = ""
+        }
         save()
     }
 
@@ -178,6 +205,18 @@ struct TaskStore {
             Ordering.renumber(allTasks())
         }
         save()
+    }
+
+    private func clearAgentWork(on task: TaskItem) {
+        if !task.agentState.isEmpty {
+            task.agentState = ""
+        }
+        if task.claimedAt != nil {
+            task.claimedAt = nil
+        }
+        if !task.claimedBy.isEmpty {
+            task.claimedBy = ""
+        }
     }
 
     private func save() {

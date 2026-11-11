@@ -185,4 +185,22 @@ struct SyncEngineTests {
             #expect(decoded == operation)
         }
     }
+
+    @Test func fieldANewVersionAddsKeepsAValueSetOnAnotherMac() {
+        var a = engine("A")
+        var b = engine("B")
+        let created = a.capture([taskKey: ["title": .text("Ship")]], deletedLocally: false, now: start).operations
+        var storeB = applying(b.merge(created), to: [:])
+
+        let assigned = a.capture(
+            [taskKey: ["title": .text("Ship"), "assignee": .text("claude")]],
+            deletedLocally: false,
+            now: start.addingTimeInterval(1)
+        ).operations
+        storeB[taskKey]?["assignee"] = .text("")
+        #expect(b.capture(storeB, deletedLocally: false, now: start.addingTimeInterval(2)).operations.isEmpty)
+
+        storeB = applying(b.merge(assigned), to: storeB)
+        #expect(storeB[taskKey]?["assignee"] == .text("claude"))
+    }
 }

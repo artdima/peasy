@@ -127,6 +127,54 @@ struct TaskStoreTests {
         #expect(Ordering.orders(count: 2, between: 3, and: nil) == [4, 5])
         #expect(Ordering.orders(count: 3, between: nil, and: nil) == [0, 1, 2])
     }
+
+    @Test func handingATaskToClaudeAndTakingItBack() throws {
+        let task = try #require(store.addTask("Update README", to: .all))
+        store.assignToClaude(task)
+        #expect(task.isForClaude)
+        #expect(task.agentStatus == .idle)
+
+        task.agentState = TaskItem.AgentState.working.rawValue
+        task.claimedAt = .now
+        task.claimedBy = "session"
+        store.takeBack(task)
+        #expect(!task.isForClaude)
+        #expect(task.agentStatus == .idle)
+        #expect(task.claimedAt == nil)
+        #expect(task.claimedBy.isEmpty)
+    }
+
+    @Test func finishingATaskEndsClaudesWorkButKeepsWhoItWasFor() throws {
+        let task = try #require(store.addTask("Write tests", to: .all))
+        store.assignToClaude(task)
+        task.agentState = TaskItem.AgentState.working.rawValue
+        task.claimedAt = .now
+        store.toggle(task)
+        #expect(task.isForClaude)
+        #expect(task.agentStatus == .idle)
+        #expect(task.claimedAt == nil)
+    }
+
+    @Test func editingAReturnedTaskClearsTheReturn() throws {
+        let task = try #require(store.addTask("New keys", to: .today))
+        task.agentState = TaskItem.AgentState.returned.rawValue
+        store.rename(task, to: "Switch to the new keys")
+        #expect(task.agentStatus == .idle)
+    }
+
+    @Test func notesAreTrimmed() throws {
+        let task = try #require(store.addTask("Ship", to: .all))
+        store.setNote("  Needs the signing key \n", for: task)
+        #expect(task.note == "Needs the signing key")
+    }
+
+    @Test func ownTasksLeaveOutClaudesTasks() throws {
+        store.addTask("Mine", to: .today)
+        let delegated = try #require(store.addTask("Claude's", to: .today))
+        store.assignToClaude(delegated)
+        #expect(TaskQueries.ownOpenTasks(in: .today, from: store.allTasks()).map(\.title) == ["Mine"])
+        #expect(store.openTasks(in: .today).count == 2)
+    }
 }
 
 @MainActor

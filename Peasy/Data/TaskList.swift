@@ -44,6 +44,10 @@ enum TaskQueries {
         self.tasks(in: list, from: tasks, now: now).filter { !$0.isDone }
     }
 
+    static func ownOpenTasks(in list: TaskList, from tasks: [TaskItem], now: Date = .now) -> [TaskItem] {
+        openTasks(in: list, from: tasks, now: now).filter { !$0.isForClaude }
+    }
+
     static func completedTasks(in list: TaskList, from tasks: [TaskItem], now: Date = .now) -> [TaskItem] {
         self.tasks(in: list, from: tasks, now: now)
             .filter(\.isDone)

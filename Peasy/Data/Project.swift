@@ -8,6 +8,7 @@ final class Project {
     var colorHex: String = "#0A84FF"
     var order: Double = 0
     var createdAt: Date = Date()
+    var folder: String = ""
 
     @Relationship(deleteRule: .cascade, inverse: \TaskItem.project)
     var tasks: [TaskItem]? = []

@@ -88,9 +88,13 @@ nonisolated struct SyncEngine {
 
         for key in present.keys.sorted() {
             guard let fields = present[key] else { continue }
+            let isKnownRecord = state.fields[key] != nil
             var known = state.fields[key] ?? [:]
             for name in fields.keys.sorted() {
                 guard let value = fields[name], known[name]?.value != value else { continue }
+                if isKnownRecord, known[name] == nil, value.isEmpty {
+                    continue
+                }
                 if isUnresolvedLink(key: key, field: name, value: value, known: known[name]?.value, snapshot: snapshot) {
                     continue
                 }
