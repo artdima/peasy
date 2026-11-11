@@ -13,9 +13,14 @@ nonisolated struct MCPToolCall {
     let arguments: [String: Any]
     /// The version from `params._meta`, which only 2026-07-28 clients send.
     let version: String?
+    let meta: [String: Any]
 
     var isModern: Bool {
         version.map { MCPProtocol.modernVersions.contains($0) } ?? false
+    }
+
+    var session: MCPSession {
+        MCPSession(meta: meta)
     }
 }
 
@@ -103,7 +108,8 @@ nonisolated enum MCPProtocol {
                 return .reply(MCPReply(body: error(id: id, code: invalidParams, message: "Unknown tool: \(name)"), httpStatus: 200))
             }
             let arguments = params["arguments"] as? [String: Any] ?? [:]
-            return .callTool(MCPToolCall(id: id, name: name, arguments: arguments, version: version))
+            let meta = params["_meta"] as? [String: Any] ?? [:]
+            return .callTool(MCPToolCall(id: id, name: name, arguments: arguments, version: version, meta: meta))
         default:
             let notFound = error(id: id, code: methodNotFound, message: "Method not found: \(method)")
             return .reply(MCPReply(body: notFound, httpStatus: isModern ? 404 : 200))

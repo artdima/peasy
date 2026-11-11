@@ -238,6 +238,59 @@ struct MCPTests {
         #expect(await MCPBridge.reply(to: notification) == nil)
     }
 
+    @Test func workspaceComesFromClaudeCodeOrTheFolderItStartsIn() {
+        let home = "/Users/dima"
+        let project = "/Users/dima/Projects/peasy"
+        #expect(MCPSession.workspace(environment: ["CLAUDE_PROJECT_DIR": project + "/"], currentDirectory: "/", home: home) == project)
+        #expect(MCPSession.workspace(environment: [:], currentDirectory: project, home: home) == project)
+        #expect(MCPSession.workspace(environment: ["CLAUDE_PROJECT_DIR": "peasy"], currentDirectory: project, home: home) == project)
+        for directory in ["/", home, "/Users/dima/Library/Containers/com.artdima.Peasy/Data", ""] {
+            #expect(MCPSession.workspace(environment: [:], currentDirectory: directory, home: home) == nil)
+        }
+    }
+
+    @Test func bridgeTellsTheAppWhoIsCalling() async throws {
+        let state = MCPBridgeState(id: "s1", workspace: "/Users/dima/Projects/peasy")
+        let clientInfo: [String: Any] = ["name": "claude-code", "title": "Claude Code"]
+        let initializeParams: [String: Any] = ["protocolVersion": "2025-06-18", "clientInfo": clientInfo]
+        let initialize: [String: Any] = ["jsonrpc": "2.0", "id": 1, "method": "initialize", "params": initializeParams]
+        _ = await state.observe(try JSONSerialization.data(withJSONObject: initialize))
+
+        let spoofedMeta: [String: Any] = [MCPSession.workspaceKey: "/elsewhere", MCPSession.sessionKey: "other"]
+        let params: [String: Any] = ["name": "list_tasks", "arguments": [:] as [String: Any], "_meta": spoofedMeta]
+        let body = try JSONSerialization.data(withJSONObject: ["jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": params] as [String: Any])
+        let session = await state.observe(body)
+        #expect(session == MCPSession(id: "s1", workspace: "/Users/dima/Projects/peasy", client: "Claude Code"))
+
+        guard case .callTool(let call) = MCPProtocol.route(try #require(MCPSession.adding(session, to: body))) else {
+            Issue.record("Expected a tool call")
+            return
+        }
+        #expect(call.session == session)
+
+        let anywhere = MCPSession(id: "s2")
+        guard case .callTool(let elsewhere) = MCPProtocol.route(try #require(MCPSession.adding(anywhere, to: body))) else {
+            Issue.record("Expected a tool call")
+            return
+        }
+        #expect(elsewhere.session == anywhere)
+    }
+
+    @Test func modernClientsNameThemselvesInEveryRequest() throws {
+        var meta = modern
+        meta[MCPSession.clientInfoKey] = ["name": "claude-ai"]
+        let params: [String: Any] = ["name": "list_tasks", "arguments": [:] as [String: Any], "_meta": meta]
+        let body = try JSONSerialization.data(withJSONObject: ["jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": params] as [String: Any])
+        #expect(MCPSession.clientName(in: body) == "claude-ai")
+
+        guard case .callTool(let call) = MCPProtocol.route(body) else {
+            Issue.record("Expected a tool call")
+            return
+        }
+        #expect(call.session.client == "claude-ai")
+        #expect(call.session.workspace == nil)
+    }
+
     @Test func stdinIsCutOnlyAtLineFeeds() {
         let first = "{\"query\":\"a\u{2028}b\u{85}c\"}"
         let input = Data((first + "\r\n \n{\"id\":1}").utf8)

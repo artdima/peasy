@@ -23,12 +23,15 @@ nonisolated enum MCPBridge {
         exit(0)
     }
 
-    static func reply(to body: Data) async -> Data? {
+    static let sharedState = MCPBridgeState()
+
+    static func reply(to body: Data, state: MCPBridgeState = sharedState) async -> Data? {
+        let session = await state.observe(body)
         switch MCPProtocol.route(body) {
         case .reply(let reply):
             return reply.body
         case .callTool(let call):
-            return await forward(body, call)
+            return await forward(MCPSession.adding(session, to: body) ?? body, call)
         }
     }
 
