@@ -14,6 +14,10 @@ struct TaskStore {
         projects().first { $0.id == id }
     }
 
+    func project(forWorkspace workspace: String?) -> Project? {
+        ProjectMatch.project(for: workspace, in: projects())
+    }
+
     func allTasks() -> [TaskItem] {
         (try? context.fetch(FetchDescriptor<TaskItem>())) ?? []
     }

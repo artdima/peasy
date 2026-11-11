@@ -175,6 +175,30 @@ struct TaskStoreTests {
         #expect(TaskQueries.ownOpenTasks(in: .today, from: store.allTasks()).map(\.title) == ["Mine"])
         #expect(store.openTasks(in: .today).count == 2)
     }
+
+    @Test func claudeCodeFolderFindsItsProject() throws {
+        let peasy = try #require(store.createProject(named: "Peasy"))
+        let book = try #require(store.createProject(named: "My Book"))
+        let work = try #require(store.createProject(named: "Работа"))
+        work.folder = "backend-api"
+
+        #expect(store.project(forWorkspace: "/Users/dima/Projects/MY/peasy") === peasy)
+        #expect(store.project(forWorkspace: "/Users/dima/Projects/my_book") === book)
+        #expect(store.project(forWorkspace: "/Users/dima/work/Backend-API") === work)
+        #expect(store.project(forWorkspace: "/Users/dima/work/Работа") == nil)
+        #expect(store.project(forWorkspace: "/Users/dima/Projects/verbarius") == nil)
+        #expect(store.project(forWorkspace: nil) == nil)
+        #expect(store.project(forWorkspace: "/") == nil)
+    }
+
+    @Test func aFolderThatFitsTwoProjectsMatchesNone() throws {
+        let first = try #require(store.createProject(named: "Site"))
+        store.createProject(named: "site")
+        #expect(store.project(forWorkspace: "/Users/dima/site") == nil)
+
+        first.folder = "site"
+        #expect(store.project(forWorkspace: "/Users/dima/site") === first)
+    }
 }
 
 @MainActor
