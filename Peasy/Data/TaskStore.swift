@@ -141,6 +141,72 @@ struct TaskStore {
         save()
     }
 
+    func setLink(_ link: String, for task: TaskItem) {
+        guard task.link != link else { return }
+        task.link = link
+        save()
+    }
+
+    @discardableResult
+    func addTask(
+        _ title: String,
+        project: Project?,
+        date: Date?,
+        hasTime: Bool,
+        note: String,
+        link: String,
+        origin: String
+    ) -> TaskItem? {
+        guard let title = Self.clean(title) else { return nil }
+        let lastOrder = allTasks().map(\.order).max() ?? -1
+        let task = TaskItem(title: title, order: lastOrder + 1, date: date)
+        context.insert(task)
+        task.project = project
+        task.hasTime = date != nil && hasTime
+        task.note = note
+        task.link = link
+        task.origin = origin
+        save()
+        return task
+    }
+
+    func claim(_ task: TaskItem, by session: String, at time: Date) {
+        task.agentState = TaskItem.AgentState.working.rawValue
+        task.claimedAt = time
+        task.claimedBy = session
+        save()
+    }
+
+    func release(_ task: TaskItem) {
+        clearAgentWork(on: task)
+        save()
+    }
+
+    func finish(_ task: TaskItem, note: String?, at time: Date) {
+        if let note, task.note != note {
+            task.note = note
+        }
+        if !task.isDone {
+            task.isDone = true
+            task.completedAt = time
+        }
+        clearAgentWork(on: task)
+        save()
+    }
+
+    func handBack(_ task: TaskItem, note: String, at time: Date) {
+        task.assignee = ""
+        task.agentState = TaskItem.AgentState.returned.rawValue
+        task.claimedAt = nil
+        task.claimedBy = ""
+        task.note = note
+        if !task.isDue(on: time) {
+            task.date = Calendar.current.startOfDay(for: time)
+            task.hasTime = false
+        }
+        save()
+    }
+
     func setToday(_ task: TaskItem, _ isToday: Bool, now: Date = .now) {
         if isToday {
             moveToToday(task, now: now)

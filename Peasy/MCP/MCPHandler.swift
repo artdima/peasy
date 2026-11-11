@@ -22,7 +22,7 @@ final class MCPHandler {
         guard let container = container() else {
             return MCPProtocol.toolFailure("Peasy is still opening its tasks. Try again in a moment.")
         }
-        let tools = PeasyTools(store: TaskStore(context: container.mainContext), now: DayClock.shared.today)
+        let tools = PeasyTools(store: TaskStore(context: container.mainContext), now: DayClock.shared.today, session: call.session)
         do {
             return MCPProtocol.toolSuccess(try tools.call(call.name, arguments: call.arguments))
         } catch {

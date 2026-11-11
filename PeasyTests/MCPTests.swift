@@ -9,6 +9,7 @@ struct MCPTests {
     let store: TaskStore
     let handler: MCPHandler
     let modern: [String: Any] = ["io.modelcontextprotocol/protocolVersion": "2026-07-28"]
+    let claudeCode = MCPSession(id: "s1", workspace: "/Users/dima/Projects/peasy", client: "Claude Code")
 
     init() throws {
         let container = try Persistence.makeContainer(inMemory: true)
@@ -27,6 +28,28 @@ struct MCPTests {
         let params: [String: Any] = ["name": tool, "arguments": arguments, "_meta": modern]
         let response = try send(["jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": params])
         return try #require(response["result"] as? [String: Any])
+    }
+
+    private func call(_ tool: String, _ arguments: [String: Any] = [:], as session: MCPSession) throws -> [String: Any] {
+        var meta = modern
+        meta[MCPSession.sessionKey] = session.id
+        meta[MCPSession.workspaceKey] = session.workspace
+        meta[MCPSession.clientKey] = session.client
+        let params: [String: Any] = ["name": tool, "arguments": arguments, "_meta": meta]
+        let response = try send(["jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": params])
+        return try #require(response["result"] as? [String: Any])
+    }
+
+    private func output(_ result: [String: Any]) -> [String: Any] {
+        result["structuredContent"] as? [String: Any] ?? [:]
+    }
+
+    private func task(in result: [String: Any]) -> [String: Any] {
+        output(result)["task"] as? [String: Any] ?? [:]
+    }
+
+    private func failed(_ result: [String: Any]) -> Bool {
+        result["isError"] as? Bool == true
     }
 
     private func titles(_ result: [String: Any]) -> [String] {
@@ -68,7 +91,7 @@ struct MCPTests {
         let response = try send(["jsonrpc": "2.0", "id": 5, "method": "tools/list", "params": ["_meta": modern]])
         let result = try #require(response["result"] as? [String: Any])
         let names = (result["tools"] as? [[String: Any]])?.compactMap { $0["name"] as? String }
-        #expect(names == ["list_projects", "list_tasks", "set_task_status"])
+        #expect(names == ["list_projects", "list_tasks", "add_task", "update_task"])
         #expect(result["resultType"] as? String == "complete")
         #expect(result["ttlMs"] as? Int != nil)
     }
@@ -142,6 +165,137 @@ struct MCPTests {
         let params: [String: Any] = ["name": "delete_everything", "arguments": [:] as [String: Any]]
         let unknown = try send(["jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": params])
         #expect((unknown["error"] as? [String: Any])?["code"] as? Int == -32602)
+    }
+
+    @Test func claudeAddsTasksForTheUserToTheFoldersProject() throws {
+        let peasy = try #require(store.createProject(named: "Peasy"))
+        let arguments: [String: Any] = [
+            "title": "Add STRIPE_KEY to CI",
+            "note": "Release builds fail without it",
+            "link": "https://github.com/artdima/peasy/settings/secrets",
+        ]
+        let added = try call("add_task", arguments, as: claudeCode)
+        #expect(!failed(added))
+        #expect(task(in: added)["assignee"] as? String == "me")
+        let stored = try #require(store.allTasks().first)
+        #expect(stored.project === peasy)
+        #expect(!stored.isForClaude)
+        #expect(stored.origin == "Claude Code")
+        #expect(stored.note == "Release builds fail without it")
+        #expect(stored.date == nil)
+
+        let again = try call("add_task", ["title": "add stripe_key to ci"], as: claudeCode)
+        #expect(output(again)["duplicate"] as? Bool == true)
+        #expect(store.allTasks().count == 1)
+
+        _ = try call("add_task", ["title": "Check the build on a device", "date": "tomorrow"], as: claudeCode)
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: DayClock.shared.today)
+        #expect(store.allTasks().first { $0.title == "Check the build on a device" }?.date == tomorrow)
+    }
+
+    @Test func addTaskChecksWhatClaudeSends() throws {
+        #expect(failed(try call("add_task", ["title": "  "], as: claudeCode)))
+        #expect(failed(try call("add_task", ["title": String(repeating: "a", count: 201)], as: claudeCode)))
+        #expect(failed(try call("add_task", ["title": "Open it", "link": "javascript:alert(1)"], as: claudeCode)))
+        #expect(failed(try call("add_task", ["title": "Plan", "date": "someday"], as: claudeCode)))
+        #expect(failed(try call("add_task", ["title": "Plan", "project": "Nowhere"], as: claudeCode)))
+        #expect(store.allTasks().isEmpty)
+    }
+
+    @Test func claudeAddsAtMostTwentyTasksAnHour() throws {
+        for index in 1...PeasyTools.agentTasksPerHour {
+            #expect(!failed(try call("add_task", ["title": "Task \(index)"], as: claudeCode)))
+        }
+        #expect(failed(try call("add_task", ["title": "One more"], as: claudeCode)))
+        #expect(store.allTasks().count == PeasyTools.agentTasksPerHour)
+    }
+
+    @Test func claudeTakesAndFinishesATaskTheUserHandedOver() throws {
+        let handed = try #require(store.addTask("Cover update_task with tests", to: .all))
+        store.assignToClaude(handed)
+        let id = handed.id.uuidString
+
+        let taken = try call("update_task", ["task_id": id, "status": "working"], as: claudeCode)
+        #expect(task(in: taken)["state"] as? String == "working")
+        #expect(handed.claimedBy == "s1")
+
+        let other = MCPSession(id: "s2", workspace: claudeCode.workspace, client: "Claude Code")
+        #expect(failed(try call("update_task", ["task_id": id, "status": "working"], as: other)))
+        #expect(!failed(try call("update_task", ["task_id": id, "status": "working"], as: claudeCode)))
+
+        let report: [String: Any] = [
+            "task_id": id,
+            "status": "done",
+            "note": "Added six tests",
+            "link": "https://github.com/artdima/peasy/pull/12",
+        ]
+        #expect(!failed(try call("update_task", report, as: claudeCode)))
+        #expect(handed.isDone)
+        #expect(handed.isForClaude)
+        #expect(handed.note == "Added six tests")
+        #expect(handed.link == "https://github.com/artdima/peasy/pull/12")
+        #expect(handed.claimedAt == nil)
+    }
+
+    @Test func claudeHandsBackWhatItCannotFinish() throws {
+        let handed = try #require(store.addTask("Switch to the new keys", to: .all))
+        store.schedule(handed, on: Calendar.current.date(byAdding: .day, value: 3, to: .now), hasTime: false)
+        store.assignToClaude(handed)
+        let id = handed.id.uuidString
+        _ = try call("update_task", ["task_id": id, "status": "working"], as: claudeCode)
+
+        #expect(failed(try call("update_task", ["task_id": id, "status": "blocked"], as: claudeCode)))
+        let question: [String: Any] = ["task_id": id, "status": "blocked", "note": "Keep the old token or issue a new one?"]
+        let returned = try call("update_task", question, as: claudeCode)
+        #expect(task(in: returned)["state"] as? String == "returned")
+        #expect(!handed.isForClaude)
+        #expect(handed.agentStatus == .returned)
+        #expect(handed.note == "Keep the old token or issue a new one?")
+        #expect(store.openTasks(in: .today).contains { $0.id == handed.id })
+    }
+
+    @Test func claudeOnlyWorksOnTasksItWasGiven() throws {
+        let own = try #require(store.addTask("Call mom", to: .today))
+        let id = own.id.uuidString
+        #expect(failed(try call("update_task", ["task_id": id, "status": "working"], as: claudeCode)))
+        #expect(failed(try call("update_task", ["task_id": id, "status": "blocked", "note": "Why?"], as: claudeCode)))
+        #expect(failed(try call("update_task", ["task_id": id], as: claudeCode)))
+        #expect(failed(try call("update_task", ["task_id": id, "status": "paused"], as: claudeCode)))
+        #expect(own.agentStatus == .idle)
+        #expect(!own.isDone)
+    }
+
+    @Test func stoppingWorkLetsAnotherSessionTakeTheTask() throws {
+        let handed = try #require(store.addTask("Update the README", to: .all))
+        store.assignToClaude(handed)
+        let id = handed.id.uuidString
+        _ = try call("update_task", ["task_id": id, "status": "working"], as: claudeCode)
+
+        let released = try call("update_task", ["task_id": id, "status": "open"], as: claudeCode)
+        #expect(task(in: released)["state"] as? String == "waiting")
+        #expect(!failed(try call("update_task", ["task_id": id, "status": "working"], as: MCPSession(id: "s2"))))
+    }
+
+    @Test func listsDefaultToTheFoldersProjectAndFilterByAssignee() throws {
+        let peasy = try #require(store.createProject(named: "Peasy"))
+        let home = try #require(store.createProject(named: "Home"))
+        store.addTask("Record the demo", project: peasy, isToday: false)
+        let readme = try #require(store.addTask("Update the README", project: peasy, isToday: false))
+        store.assignToClaude(readme)
+        store.addTask("Buy milk", project: home, isToday: true)
+
+        #expect(titles(try call("list_tasks", as: claudeCode)) == ["Record the demo", "Update the README"])
+        #expect(titles(try call("list_tasks", ["assignee": "claude"], as: claudeCode)) == ["Update the README"])
+        #expect(titles(try call("list_tasks", ["assignee": "me", "list": "all"], as: claudeCode)) == ["Record the demo", "Buy milk"])
+        #expect(titles(try call("list_tasks")) == ["Buy milk"])
+
+        let projects = output(try call("list_projects", as: claudeCode))
+        #expect(projects["workspace"] as? String == "peasy")
+        let listed = try #require(projects["projects"] as? [[String: Any]])
+        let current = try #require(listed.first { $0["current"] as? Bool == true })
+        #expect(current["name"] as? String == "Peasy")
+        #expect(current["open_tasks"] as? Int == 2)
+        #expect(current["claude_tasks"] as? Int == 1)
     }
 
     @Test func requestsAreParsedOnlyWhenComplete() throws {
@@ -228,7 +382,7 @@ struct MCPTests {
             return try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
         }
         let list = try await reply(["jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": ["_meta": modern]])
-        #expect(((list["result"] as? [String: Any])?["tools"] as? [[String: Any]])?.count == 3)
+        #expect(((list["result"] as? [String: Any])?["tools"] as? [[String: Any]])?.count == 4)
 
         let params: [String: Any] = ["name": "delete_everything", "arguments": [:] as [String: Any]]
         let unknown = try await reply(["jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": params])
