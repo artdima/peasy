@@ -1,8 +1,23 @@
 import Foundation
 
+nonisolated enum MCPAccess: String, CaseIterable, Sendable {
+    case off
+    case read
+    case full
+
+    var title: String {
+        switch self {
+        case .off: String(localized: "Off")
+        case .read: String(localized: "Read Only")
+        case .full: String(localized: "Full Access")
+        }
+    }
+}
+
 /// Read by the app and by `Peasy --mcp`, which share one sandbox container and so one defaults domain.
 nonisolated struct MCPSettings: Sendable {
     static let enabledKey = "claudeAccessEnabled"
+    static let accessKey = "claudeAccess"
     static let tokenKey = "claudeAccessToken"
     static let portKey = "claudeAccessPort"
     static let bridgeArgument = "--mcp"
@@ -13,18 +28,34 @@ nonisolated struct MCPSettings: Sendable {
         UInt16(47_000 + Int(getuid() % 1_000))
     }
 
-    let isEnabled: Bool
+    let access: MCPAccess
     let port: UInt16
     let token: String
+
+    var isEnabled: Bool {
+        access != .off
+    }
 
     static func current(in defaults: UserDefaults = .standard) -> MCPSettings {
         let stored = defaults.integer(forKey: portKey)
         let port = (1024...65535).contains(stored) ? UInt16(stored) : defaultPort
         return MCPSettings(
-            isEnabled: defaults.bool(forKey: enabledKey),
+            access: storedAccess(in: defaults),
             port: port,
             token: defaults.string(forKey: tokenKey) ?? ""
         )
+    }
+
+    static func storedAccess(in defaults: UserDefaults = .standard) -> MCPAccess {
+        if let access = defaults.string(forKey: accessKey).flatMap(MCPAccess.init(rawValue:)) {
+            return access
+        }
+        return defaults.bool(forKey: enabledKey) ? .full : .off
+    }
+
+    static func migrate(in defaults: UserDefaults = .standard) {
+        guard defaults.string(forKey: accessKey) == nil else { return }
+        defaults.set(storedAccess(in: defaults).rawValue, forKey: accessKey)
     }
 
     /// The secret both processes sign with; only this container can read it.

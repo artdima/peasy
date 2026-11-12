@@ -20,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.processInfo.isRunningTests else { return }
+        MCPSettings.migrate()
         sync.onStoreReloadNeeded = { [weak self] in self?.reloadStore() }
         sync.start()
         let container = openStore()

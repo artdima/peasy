@@ -5,6 +5,9 @@ import SwiftData
 final class MCPHandler {
     private let container: () -> ModelContainer?
     var onEvent: (AgentEvent) -> Void = { _ in }
+    var access: () -> MCPAccess = { MCPSettings.current().access }
+
+    static let changingTools: Set<String> = ["add_task", "update_task", "set_task_status"]
 
     init(container: @escaping () -> ModelContainer?) {
         self.container = container
@@ -20,6 +23,9 @@ final class MCPHandler {
     }
 
     private func run(_ call: MCPToolCall) -> [String: Any] {
+        if access() == .read, Self.changingTools.contains(call.name) {
+            return MCPProtocol.toolFailure("Claude can only read tasks in Peasy. Ask the user to choose Full Access in Peasy Settings → General → Claude access.")
+        }
         guard let container = container() else {
             return MCPProtocol.toolFailure("Peasy is still opening its tasks. Try again in a moment.")
         }

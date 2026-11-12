@@ -3,11 +3,41 @@ import SwiftUI
 
 struct ClaudeAccessCard: View {
     var failure: MCPServer.Failure?
-    @AppStorage(MCPSettings.enabledKey) private var isOn = false
+    @AppStorage(MCPSettings.accessKey) private var access = MCPAccess.off
+    @AppStorage(ClaudeNotifications.needsHelpKey) private var notifiesNeedsHelp = true
+    @AppStorage(ClaudeNotifications.finishedKey) private var notifiesFinished = false
+
+    private var isOn: Bool {
+        access != .off
+    }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            accessCard
+            if access == .full {
+                SettingsCard(note: "Shown as soon as Claude hands a task back or finishes one you gave it.") {
+                    SettingsToggleRow(title: "Claude needs help", subtitle: nil, isOn: $notifiesNeedsHelp, minHeight: 44)
+                    SettingsToggleRow(title: "Claude finished a task", subtitle: nil, isOn: $notifiesFinished, minHeight: 44, separated: true)
+                }
+            }
+        }
+        .onChange(of: access) { _, access in
+            UserDefaults.standard.set(access != .off, forKey: MCPSettings.enabledKey)
+        }
+    }
+
+    private var accessCard: some View {
         SettingsCard(note: note) {
-            SettingsToggleRow(title: "Claude access", subtitle: "Read tasks and mark them done", isOn: $isOn, minHeight: 44)
+            SettingsRow(minHeight: 44) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Claude access")
+                        .settingsTitle()
+                    Text(subtitle)
+                        .settingsSubtitle()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                SettingsPopUp(options: MCPAccess.allCases.map { ($0, $0.title) }, selection: $access)
+            }
             if isOn, let warning {
                 Text(warning)
                     .font(.system(size: 11.5))
@@ -32,6 +62,14 @@ struct ClaudeAccessCard: View {
         }
     }
 
+    private var subtitle: LocalizedStringKey {
+        switch access {
+        case .off: "Claude can't see your tasks"
+        case .read: "Reads your tasks"
+        case .full: "Reads tasks, adds and updates them"
+        }
+    }
+
     private var warning: LocalizedStringKey? {
         if MCPSettings.isTranslocated {
             return "Move Peasy to Applications and open it from there: macOS is running a temporary copy that Claude won’t find after a restart."
@@ -51,7 +89,7 @@ struct ClaudeAccessCard: View {
         if isOn {
             return "Peasy has to be running. In Claude Desktop paste the config in Settings → Developer → Edit Config and restart it; for Claude Code run the command in Terminal."
         }
-        return "Lets Claude list your tasks and mark them done through MCP, on this Mac only."
+        return "Lets Claude read your tasks through MCP and, with full access, add tasks for you and work on the ones you hand over. On this Mac only."
     }
 }
 

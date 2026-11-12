@@ -16,6 +16,7 @@ struct MCPTests {
         self.container = container
         store = TaskStore(context: container.mainContext)
         handler = MCPHandler { container }
+        handler.access = { .full }
     }
 
     private func send(_ message: [String: Any]) throws -> [String: Any] {
@@ -223,6 +224,35 @@ struct MCPTests {
             .finished(taskID: shipped.id, title: "Ship", note: "Shipped"),
             .handedBack(taskID: keys.id, title: "New keys", question: "Which key?"),
         ])
+    }
+
+    @Test func readOnlyAccessLetsClaudeOnlyRead() throws {
+        handler.access = { .read }
+        let task = try #require(store.addTask("Ship", to: .today))
+        #expect(titles(try call("list_tasks", as: claudeCode)) == ["Ship"])
+        #expect(failed(try call("add_task", ["title": "Add a secret"], as: claudeCode)))
+        #expect(failed(try call("update_task", ["task_id": task.id.uuidString, "status": "done"], as: claudeCode)))
+        #expect(failed(try call("set_task_status", ["task_id": task.id.uuidString, "done": true])))
+        #expect(store.allTasks().count == 1)
+        #expect(!task.isDone)
+    }
+
+    @Test func claudeAccessMovesFromTheOldSwitch() throws {
+        let suite = "MCPSettingsTests"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        #expect(MCPSettings.storedAccess(in: defaults) == .off)
+
+        defaults.set(true, forKey: MCPSettings.enabledKey)
+        #expect(MCPSettings.current(in: defaults).access == .full)
+        MCPSettings.migrate(in: defaults)
+        #expect(defaults.string(forKey: MCPSettings.accessKey) == "full")
+
+        defaults.set(MCPAccess.read.rawValue, forKey: MCPSettings.accessKey)
+        MCPSettings.migrate(in: defaults)
+        #expect(MCPSettings.current(in: defaults).access == .read)
+        #expect(MCPSettings.current(in: defaults).isEnabled)
+        defaults.removePersistentDomain(forName: suite)
     }
 
     @Test func addTaskChecksWhatClaudeSends() throws {
