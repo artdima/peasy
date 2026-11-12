@@ -58,6 +58,7 @@ struct TaskSection: View {
     private var taskCount: Text {
         let claude = openTasks.filter(\.isForClaude).count
         let own = openTasks.count - claude
-        return claude > 0 ? Text("\(own) tasks · \(claude) with Claude") : Text("\(own) tasks")
+        let count = Text("\(own) tasks")
+        return claude > 0 ? count + Text(verbatim: " · ") + Text("\(claude) with Claude") : count
     }
 }

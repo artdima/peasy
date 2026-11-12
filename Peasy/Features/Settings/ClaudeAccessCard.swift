@@ -64,7 +64,7 @@ struct ClaudeAccessCard: View {
 
     private var subtitle: LocalizedStringKey {
         switch access {
-        case .off: "Claude can't see your tasks"
+        case .off: "Claude can’t see your tasks"
         case .read: "Reads your tasks"
         case .full: "Reads tasks, adds and updates them"
         }

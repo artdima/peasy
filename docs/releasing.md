@@ -24,8 +24,9 @@ SPARKLE=$(echo ~/Library/Developer/Xcode/DerivedData/Peasy-*/SourcePackages/arti
 ## Every release
 
 1. Raise `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`. Sparkle compares the build number, so it has to grow every time. Write the notes in `docs/releases/<version>.md`, commit and push.
-2. Run `scripts/release.sh`. It archives Peasy, exports it with Developer ID, notarizes and staples it, zips it into `release/<version>/` and adds it to `appcast.xml`. Next to the zip it puts a signed and notarized disk image for people who download Peasy by hand.
-3. Publish the GitHub release `v<version>` with the disk image and the zip, then push `appcast.xml` to `main`. The script prints both commands.
+2. If the release adds fields to `TaskItem` or `Project`, run a debug build signed with the iCloud container once, so the fields reach the CloudKit Development schema. Then in [CloudKit Console](https://icloud.developer.apple.com) open `iCloud.com.artdima.Peasy`, choose Deploy Schema Changes and compare the fields of `CD_TaskItem` and `CD_Project` in Development and Production: the dialog can show no changes when there are some. Production only accepts additions, so a field can't be renamed or removed afterwards.
+3. Run `scripts/release.sh`. It archives Peasy, exports it with Developer ID, notarizes and staples it, zips it into `release/<version>/` and adds it to `appcast.xml`. Next to the zip it puts a signed and notarized disk image for people who download Peasy by hand.
+4. Publish the GitHub release `v<version>` with the disk image and the zip, then push `appcast.xml` to `main`. The script prints both commands.
 
 The disk image window shows `scripts/dmg/background.png` and `background@2x.png`, 660×400 and 1320×800. The script joins them into one TIFF, so a new background needs both sizes. Peasy sits at (170, 194), Applications at (490, 194).
 

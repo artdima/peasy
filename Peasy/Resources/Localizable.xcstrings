@@ -543,16 +543,6 @@
         }
       }
     },
-    "Lets Claude list your tasks and mark them done through MCP, on this Mac only." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude сможет смотреть задачи и отмечать их выполненными через MCP — только на этом Mac."
-          }
-        }
-      }
-    },
     "Light" : {
       "localizations" : {
         "ru" : {
@@ -966,16 +956,6 @@
         }
       }
     },
-    "Read tasks and mark them done" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Читать задачи и отмечать выполненными"
-          }
-        }
-      }
-    },
     "Remove Date" : {
       "localizations" : {
         "ru" : {
@@ -1352,6 +1332,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вчера"
+          }
+        }
+      }
+    },
+    "Hand to Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отдать Claude"
+          }
+        }
+      }
+    },
+    "Take Back from Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Забрать у Claude"
+          }
+        }
+      }
+    },
+    "Note…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заметка…"
+          }
+        }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заметка"
+          }
+        }
+      }
+    },
+    "Open Link" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть ссылку"
+          }
+        }
+      }
+    },
+    "Claude asks:" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude спрашивает:"
+          }
+        }
+      }
+    },
+    "working %lld min" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "в работе %lld мин"
+          }
+        }
+      }
+    },
+    "%lld with Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld у Claude"
+          }
+        }
+      }
+    },
+    "@claude hands it to Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@claude — отдать Claude"
+          }
+        }
+      }
+    },
+    "Claude needs help" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude нужна помощь"
+          }
+        }
+      }
+    },
+    "Claude finished" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude закончил"
+          }
+        }
+      }
+    },
+    "Claude finished a task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude закончил задачу"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключен"
+          }
+        }
+      }
+    },
+    "Read Only" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Только чтение"
+          }
+        }
+      }
+    },
+    "Full Access" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Полный доступ"
+          }
+        }
+      }
+    },
+    "Claude can’t see your tasks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude не видит ваши задачи"
+          }
+        }
+      }
+    },
+    "Reads your tasks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Читает задачи"
+          }
+        }
+      }
+    },
+    "Reads tasks, adds and updates them" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Читает задачи, добавляет и обновляет их"
+          }
+        }
+      }
+    },
+    "Lets Claude read your tasks through MCP and, with full access, add tasks for you and work on the ones you hand over. On this Mac only." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude читает задачи через MCP, а с полным доступом добавляет задачи для вас и берётся за те, что вы ему отдали. Только на этом Mac."
+          }
+        }
+      }
+    },
+    "Shown as soon as Claude hands a task back or finishes one you gave it." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приходят сразу, как только Claude вернёт задачу или закончит ту, что вы ему отдали."
           }
         }
       }
