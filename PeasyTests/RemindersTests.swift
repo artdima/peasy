@@ -24,4 +24,26 @@ struct RemindersTests {
         #expect(requests.map(\.content.title) == ["Timed"])
         #expect(requests.first?.identifier == "task.\(timed.id.uuidString)")
     }
+
+    @Test func claudeNotificationsFollowTheirSwitches() throws {
+        let suite = "ClaudeNotificationsTests"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        let id = UUID()
+
+        let help = try #require(ClaudeNotifications.request(for: .handedBack(taskID: id, title: "New keys", question: "Which key?"), defaults: defaults))
+        #expect(help.content.body == "New keys: Which key?")
+        #expect(help.content.userInfo[ClaudeNotifications.taskIDKey] as? String == id.uuidString)
+        #expect(help.trigger == nil)
+
+        let finished = AgentEvent.finished(taskID: id, title: "Ship", note: "Shipped")
+        #expect(ClaudeNotifications.request(for: finished, defaults: defaults) == nil)
+        defaults.set(true, forKey: ClaudeNotifications.finishedKey)
+        #expect(ClaudeNotifications.request(for: finished, defaults: defaults)?.content.body == "Ship: Shipped")
+
+        defaults.set(false, forKey: ClaudeNotifications.needsHelpKey)
+        #expect(ClaudeNotifications.request(for: .handedBack(taskID: id, title: "New keys", question: "?"), defaults: defaults) == nil)
+        #expect(ClaudeNotifications.request(for: .added(colorHex: "#0A84FF"), defaults: defaults) == nil)
+        defaults.removePersistentDomain(forName: suite)
+    }
 }

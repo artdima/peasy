@@ -22,7 +22,6 @@ final class QuickAddController {
     private var modelContainer: ModelContainer?
     private let panelModel: PanelViewModel
     private var observers: [NSObjectProtocol] = []
-    private var confirmationTask: Task<Void, Never>?
     private var isShown = false
 
     init(modelContainer: ModelContainer, panelModel: PanelViewModel) {
@@ -134,14 +133,7 @@ final class QuickAddController {
         if typed.isForClaude || state.isForClaude {
             store.assignToClaude(task)
         }
-        let colorHex = task.project?.colorHex ?? ProjectPalette.noProject
         hide()
-        panelModel.addedConfirmation = colorHex
-        confirmationTask?.cancel()
-        confirmationTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(1.8))
-            guard !Task.isCancelled, let self else { return }
-            panelModel.addedConfirmation = nil
-        }
+        panelModel.confirmAdded(colorHex: task.project?.colorHex ?? ProjectPalette.noProject)
     }
 }

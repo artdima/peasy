@@ -9,6 +9,7 @@ final class Reminders: NSObject {
 
     var tasks: () -> [TaskItem] = { [] }
     var onOpen: () -> Void = {}
+    var onOpenTask: (UUID) -> Void = { _ in }
     var onOpenUpdate: () -> Void = {}
 
     private static let prefix = "task."
@@ -75,11 +76,16 @@ extension Reminders: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse
     ) async {
         let isUpdate = response.notification.request.identifier == Updater.notificationID
+        let taskID = (response.notification.request.content.userInfo[ClaudeNotifications.taskIDKey] as? String)
+            .flatMap(UUID.init(uuidString:))
         await MainActor.run {
             if isUpdate {
                 self.onOpenUpdate()
             } else {
                 self.onOpen()
+                if let taskID {
+                    self.onOpenTask(taskID)
+                }
             }
         }
     }

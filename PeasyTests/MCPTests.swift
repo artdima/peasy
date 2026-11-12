@@ -200,6 +200,31 @@ struct MCPTests {
         #expect(stored.title == "Review the PR @claude")
     }
 
+    @Test func claudesWorkRaisesEventsForTheMenuBarAndNotifications() throws {
+        let log = EventLog()
+        handler.onEvent = { log.events.append($0) }
+        _ = try call("add_task", ["title": "Add a secret"], as: claudeCode)
+        _ = try call("add_task", ["title": "Add a secret"], as: claudeCode)
+
+        let shipped = try #require(store.addTask("Ship", to: .all))
+        store.assignToClaude(shipped)
+        _ = try call("update_task", ["task_id": shipped.id.uuidString, "status": "done", "note": "Shipped"], as: claudeCode)
+        _ = try call("update_task", ["task_id": shipped.id.uuidString, "status": "done"], as: claudeCode)
+
+        let keys = try #require(store.addTask("New keys", to: .all))
+        store.assignToClaude(keys)
+        _ = try call("update_task", ["task_id": keys.id.uuidString, "status": "blocked", "note": "Which key?"], as: claudeCode)
+
+        let own = try #require(store.addTask("Call mom", to: .all))
+        _ = try call("update_task", ["task_id": own.id.uuidString, "status": "done"], as: claudeCode)
+
+        #expect(log.events == [
+            .added(colorHex: ProjectPalette.noProject),
+            .finished(taskID: shipped.id, title: "Ship", note: "Shipped"),
+            .handedBack(taskID: keys.id, title: "New keys", question: "Which key?"),
+        ])
+    }
+
     @Test func addTaskChecksWhatClaudeSends() throws {
         #expect(failed(try call("add_task", ["title": "  "], as: claudeCode)))
         #expect(failed(try call("add_task", ["title": String(repeating: "a", count: 201)], as: claudeCode)))
@@ -467,4 +492,8 @@ struct MCPTests {
         }
         #expect(lines == [Data(first.utf8), Data("{\"id\":1}".utf8)])
     }
+}
+
+private final class EventLog {
+    var events: [AgentEvent] = []
 }

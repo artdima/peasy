@@ -7,7 +7,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let panelModel = PanelViewModel()
     private let sync = SyncMonitor()
     private lazy var folderSync = FolderSync()
-    private lazy var mcpServer = MCPServer(handler: MCPHandler { [weak self] in self?.container })
+    private lazy var mcpHandler = MCPHandler { [weak self] in self?.container }
+    private lazy var mcpServer = MCPServer(handler: mcpHandler)
     private let updater = Updater()
     private lazy var settingsWindow = SettingsWindowController(sync: sync, folderSync: folderSync, claudeAccess: mcpServer, updater: updater)
     private var container: ModelContainer?
@@ -40,6 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKey.register(Shortcut.current)
         startReminders()
         updater.start()
+        mcpHandler.onEvent = { [weak self] event in self?.handle(event) }
         updateMCPServer()
         observers.append(NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
@@ -97,6 +99,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         reminders.onOpen = { [weak self] in
             self?.menuBarController?.expand()
         }
+        reminders.onOpenTask = { [weak self] id in
+            self?.reveal(id)
+        }
         reminders.onOpenUpdate = { [weak self] in
             self?.updater.checkForUpdates()
         }
@@ -125,6 +130,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             folderSync.attach(container)
             folderSync.refreshCloudAccount(isActive: sync.isActive)
         }
+    }
+
+    private func handle(_ event: AgentEvent) {
+        switch event {
+        case .added(let colorHex):
+            panelModel.confirmAdded(colorHex: colorHex, byClaude: true)
+        case .finished, .handedBack:
+            ClaudeNotifications.post(event)
+        }
+    }
+
+    private func reveal(_ id: UUID) {
+        guard let container else { return }
+        let store = TaskStore(context: container.mainContext)
+        guard let task = store.allTasks().first(where: { $0.id == id }) else { return }
+        let list: TaskList
+        if !task.isDone, task.isDue(on: .now) {
+            list = .today
+        } else {
+            list = task.project.map { TaskList.project($0.id) } ?? .all
+        }
+        UserDefaults.standard.set(list.storageValue, forKey: TaskList.storageKey)
+        panelModel.selectedTaskID = id
     }
 
     /// Claude reaches the tasks only while the user has it turned on in Settings.

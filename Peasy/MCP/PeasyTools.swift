@@ -25,6 +25,7 @@ struct PeasyTools {
     let now: Date
     var time: Date = .now
     var session = MCPSession(id: "")
+    var onEvent: (AgentEvent) -> Void = { _ in }
 
     func call(_ name: String, arguments: [String: Any]) throws -> [String: Any] {
         switch name {
@@ -115,6 +116,7 @@ struct PeasyTools {
         ) else {
             throw ToolError("title is required.")
         }
+        onEvent(.added(colorHex: task.project?.colorHex ?? ProjectPalette.noProject))
         return ["task": describe(task), "duplicate": false]
     }
 
@@ -158,9 +160,14 @@ struct PeasyTools {
                 store.setNote(note, for: task)
             }
         case "done":
+            let wasOpen = !task.isDone
             store.finish(task, note: note, at: time)
+            if wasOpen, task.isForClaude {
+                onEvent(.finished(taskID: task.id, title: task.title, note: task.note))
+            }
         case "blocked":
             store.handBack(task, note: note ?? "", at: time)
+            onEvent(.handedBack(taskID: task.id, title: task.title, question: task.note))
         case "open":
             if task.isDone {
                 store.toggle(task)

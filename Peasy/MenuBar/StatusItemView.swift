@@ -5,7 +5,7 @@ import SwiftUI
 enum StatusItemMode: Equatable {
     case plain
     case indicator(remaining: Int)
-    case added(colorHex: String)
+    case added(colorHex: String, byClaude: Bool)
 }
 
 /// What the status item shows: the sprout and how many of today's tasks are left.
@@ -22,7 +22,7 @@ struct StatusItemView: View {
 
     private var mode: StatusItemMode {
         if let added = model.addedConfirmation {
-            return .added(colorHex: added)
+            return .added(colorHex: added.colorHex, byClaude: added.byClaude)
         }
         guard showsIndicator else { return .plain }
         let remaining = TaskQueries.ownOpenTasks(in: .today, from: tasks, now: DayClock.shared.today).count
@@ -63,9 +63,13 @@ struct StatusItemLabel: View {
                         .monospacedDigit()
                 }
             }
-        case .added(let colorHex):
+        case .added(let colorHex, let byClaude):
             HStack(spacing: 5) {
-                CheckBadge(colorHex: colorHex, size: 16)
+                if byClaude {
+                    ClaudeBadge(size: 16)
+                } else {
+                    CheckBadge(colorHex: colorHex, size: 16)
+                }
                 Text("Added")
             }
         }
@@ -88,6 +92,21 @@ struct CheckBadge: View {
             .frame(width: size, height: size)
             .overlay {
                 Glyph(kind: .checkBold, size: (size * 4 / 7).rounded())
+                    .foregroundStyle(.black)
+            }
+            .accessibilityHidden(true)
+    }
+}
+
+struct ClaudeBadge: View {
+    let size: CGFloat
+
+    var body: some View {
+        Circle()
+            .fill(PanelStyle.claude)
+            .frame(width: size, height: size)
+            .overlay {
+                Glyph(kind: .sparkle, size: (size * 9 / 16).rounded(), filled: true)
                     .foregroundStyle(.black)
             }
             .accessibilityHidden(true)

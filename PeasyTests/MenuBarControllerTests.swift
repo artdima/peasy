@@ -182,4 +182,12 @@ struct MenuBarControllerTests {
         try await activate(other)
         #expect(!controller.isExpanded)
     }
+
+    @Test func confirmationSaysWhoAddedTheTask() {
+        let model = PanelViewModel()
+        model.confirmAdded(colorHex: "#0A84FF", byClaude: true)
+        #expect(model.addedConfirmation == PanelViewModel.AddedConfirmation(colorHex: "#0A84FF", byClaude: true))
+        model.confirmAdded(colorHex: "#FF9F0A")
+        #expect(model.addedConfirmation?.byClaude == false)
+    }
 }

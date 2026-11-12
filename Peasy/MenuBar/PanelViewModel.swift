@@ -23,6 +23,11 @@ final class PanelViewModel {
         case note
     }
 
+    struct AddedConfirmation: Equatable {
+        var colorHex: String
+        var byClaude = false
+    }
+
     struct CommandEvent: Equatable {
         let id: Int
         let command: Command
@@ -41,7 +46,8 @@ final class PanelViewModel {
     var schedulingTaskID: UUID?
     var scheduleDraft = ScheduleDraft()
     var scheduleAnchor: CGRect = .zero
-    var addedConfirmation: String?
+    var addedConfirmation: AddedConfirmation?
+    @ObservationIgnored private var confirmationTask: Task<Void, Never>?
 
     @ObservationIgnored var onResize: (CGSize, Bool) -> Void = { _, _ in }
     @ObservationIgnored var onResetSize: () -> Void = {}
@@ -59,6 +65,16 @@ final class PanelViewModel {
 
     func focusNewTask() {
         newTaskFocusRequest += 1
+    }
+
+    func confirmAdded(colorHex: String, byClaude: Bool = false) {
+        addedConfirmation = AddedConfirmation(colorHex: colorHex, byClaude: byClaude)
+        confirmationTask?.cancel()
+        confirmationTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1.8))
+            guard !Task.isCancelled else { return }
+            self?.addedConfirmation = nil
+        }
     }
 
     /// The anchor is the calendar button's frame in the panel's SwiftUI space.

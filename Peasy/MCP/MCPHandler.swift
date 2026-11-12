@@ -4,6 +4,7 @@ import SwiftData
 /// Answers one JSON-RPC message against the live store.
 final class MCPHandler {
     private let container: () -> ModelContainer?
+    var onEvent: (AgentEvent) -> Void = { _ in }
 
     init(container: @escaping () -> ModelContainer?) {
         self.container = container
@@ -22,7 +23,12 @@ final class MCPHandler {
         guard let container = container() else {
             return MCPProtocol.toolFailure("Peasy is still opening its tasks. Try again in a moment.")
         }
-        let tools = PeasyTools(store: TaskStore(context: container.mainContext), now: DayClock.shared.today, session: call.session)
+        let tools = PeasyTools(
+            store: TaskStore(context: container.mainContext),
+            now: DayClock.shared.today,
+            session: call.session,
+            onEvent: onEvent
+        )
         do {
             return MCPProtocol.toolSuccess(try tools.call(call.name, arguments: call.arguments))
         } catch {
