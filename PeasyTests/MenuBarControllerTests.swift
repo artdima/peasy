@@ -116,6 +116,25 @@ struct MenuBarControllerTests {
         #expect(task.title == "Draft, edited")
     }
 
+    @Test func aNoteIsSavedLikeATitle() throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
+        defer { controller.shutdown() }
+        let store = TaskStore(context: container.mainContext)
+        let task = try #require(store.addTask("Ship", to: .all))
+
+        model.startEditingNote(task)
+        #expect(model.editingField == .note)
+        #expect(model.editingDraft.isEmpty)
+        model.editingDraft = "  Needs the signing key "
+        model.commitEditing()
+
+        #expect(task.note == "Needs the signing key")
+        #expect(task.title == "Ship")
+    }
+
     @Test func panelSurvivesReloadingTheStore() async throws {
         let first = try Persistence.makeContainer(inMemory: true)
         let model = PanelViewModel()

@@ -24,6 +24,7 @@ enum PanelStyle {
     static let keyBorder = Color.themed(white: 0.18, black: 0.16)
     static let overdue = Color.themed(dark: "#FF5D4F", light: "#FF3B30")
     static let green = Color(hex: "#34C759")
+    static let claude = Color.themed(dark: "#F0875F", light: "#C4532C")
 
     /// The light panel surface.
     static let lightInk = Color(red: 0.965, green: 0.965, blue: 0.975)

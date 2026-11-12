@@ -30,7 +30,7 @@ struct TaskSection: View {
                     .lineLimit(1)
                 Spacer(minLength: 0)
                 if !openTasks.isEmpty {
-                    Text("\(openTasks.count) tasks")
+                    taskCount
                         .font(.system(size: 15))
                         .foregroundStyle(PanelStyle.tertiary)
                 }
@@ -53,5 +53,11 @@ struct TaskSection: View {
             }
             .padding(.top, 6)
         }
+    }
+
+    private var taskCount: Text {
+        let claude = openTasks.filter(\.isForClaude).count
+        let own = openTasks.count - claude
+        return claude > 0 ? Text("\(own) tasks · \(claude) with Claude") : Text("\(own) tasks")
     }
 }

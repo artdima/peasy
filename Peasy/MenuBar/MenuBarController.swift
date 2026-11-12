@@ -55,7 +55,7 @@ final class MenuBarController: NSObject {
             showAbout()
         }
         model.onResize = { [weak self] size, finished in self?.resize(to: size, finished: finished) }
-        model.onCommitEdit = { [weak self] id, title in self?.commitEdit(of: id, title: title) }
+        model.onCommitEdit = { [weak self] id, field, text in self?.commitEdit(of: id, field: field, text: text) }
         model.onResetSize = { [weak self] in self?.resetSize() }
         schedulePicker.onResignKey = { [weak self] in self?.model.schedulingTaskID = nil }
 
@@ -429,11 +429,16 @@ final class MenuBarController: NSObject {
         panel.makeFirstResponder(field)
     }
 
-    private func commitEdit(of id: UUID, title: String) {
+    private func commitEdit(of id: UUID, field: PanelViewModel.EditingField, text: String) {
         guard let modelContainer else { return }
         let store = TaskStore(context: modelContainer.mainContext)
         guard let task = store.allTasks().first(where: { $0.id == id }) else { return }
-        store.rename(task, to: title)
+        switch field {
+        case .title:
+            store.rename(task, to: text)
+        case .note:
+            store.setNote(text, for: task)
+        }
     }
 
     private func collapseFromOutside() {

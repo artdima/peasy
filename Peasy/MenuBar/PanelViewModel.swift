@@ -18,6 +18,11 @@ final class PanelViewModel {
         case focusNewTask
     }
 
+    enum EditingField: Equatable {
+        case title
+        case note
+    }
+
     struct CommandEvent: Equatable {
         let id: Int
         let command: Command
@@ -27,8 +32,9 @@ final class PanelViewModel {
     var headerHeight = PanelGeometry.headerHeight
     var selectedTaskID: UUID?
     private(set) var editingTaskID: UUID?
+    private(set) var editingField = EditingField.title
     var editingDraft = ""
-    @ObservationIgnored var onCommitEdit: (UUID, String) -> Void = { _, _ in }
+    @ObservationIgnored var onCommitEdit: (UUID, EditingField, String) -> Void = { _, _, _ in }
     var projectEditor: ProjectEditor?
     var projectPendingDeletion: UUID?
     private(set) var lastCommand: CommandEvent?
@@ -64,7 +70,15 @@ final class PanelViewModel {
 
     func startEditing(_ task: TaskItem) {
         selectedTaskID = task.id
+        editingField = .title
         editingDraft = task.title
+        editingTaskID = task.id
+    }
+
+    func startEditingNote(_ task: TaskItem) {
+        selectedTaskID = task.id
+        editingField = .note
+        editingDraft = task.note
         editingTaskID = task.id
     }
 
@@ -73,7 +87,7 @@ final class PanelViewModel {
     func commitEditing() {
         guard let id = editingTaskID else { return }
         editingTaskID = nil
-        onCommitEdit(id, editingDraft)
+        onCommitEdit(id, editingField, editingDraft)
     }
 
     func cancelEditing() {

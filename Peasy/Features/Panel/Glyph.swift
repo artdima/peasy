@@ -5,6 +5,7 @@ struct Glyph: View {
         case power, plus, chevron, check, checkBold, calendar, copy, returnKey, refresh, cloud, folder, spinner, gear
         case sun, sofa, nextWeek
         case sliders, sidebar, menuBarTab, cloudTab
+        case sparkle, link
     }
 
     let kind: Kind
@@ -51,6 +52,8 @@ extension Glyph.Kind {
         case .returnKey: 1.8
         case .refresh, .cloud, .folder, .spinner: 1.5
         case .sliders, .sidebar, .menuBarTab, .cloudTab: 1.5
+        case .sparkle: nil
+        case .link: 1.6
         }
     }
 }
@@ -202,6 +205,19 @@ struct GlyphShape: Shape {
             path.addSVGArc(to: CGPoint(x: 4.9, y: 9.3), radius: 5.1, largeArc: false, sweep: false)
             path.addSVGArc(to: CGPoint(x: 5.8, y: 15.5), radius: 3.2, largeArc: false, sweep: false)
             path.closeSubpath()
+        case .sparkle:
+            path.move(to: CGPoint(x: 6, y: 0))
+            path.addCurve(to: CGPoint(x: 12, y: 6), control1: CGPoint(x: 6.5, y: 3.3), control2: CGPoint(x: 8.7, y: 5.5))
+            path.addCurve(to: CGPoint(x: 6, y: 12), control1: CGPoint(x: 8.7, y: 6.5), control2: CGPoint(x: 6.5, y: 8.7))
+            path.addCurve(to: CGPoint(x: 0, y: 6), control1: CGPoint(x: 5.5, y: 8.7), control2: CGPoint(x: 3.3, y: 6.5))
+            path.addCurve(to: CGPoint(x: 6, y: 0), control1: CGPoint(x: 3.3, y: 5.5), control2: CGPoint(x: 5.5, y: 3.3))
+            path.closeSubpath()
+        case .link:
+            path.move(to: CGPoint(x: 3, y: 9))
+            path.addLine(to: CGPoint(x: 9, y: 3))
+            path.move(to: CGPoint(x: 4.5, y: 3))
+            path.addLine(to: CGPoint(x: 9, y: 3))
+            path.addLine(to: CGPoint(x: 9, y: 7.5))
         case .gear:
             let center = CGPoint(x: 8, y: 8)
             let teeth = 8

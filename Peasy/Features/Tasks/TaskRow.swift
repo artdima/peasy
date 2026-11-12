@@ -15,19 +15,24 @@ struct TaskRow: View {
     @FocusState private var isEditorFocused: Bool
 
     private var isEditing: Bool { model.editingTaskID == task.id }
+    private var isEditingTitle: Bool { isEditing && model.editingField == .title }
+    private var isEditingNote: Bool { isEditing && model.editingField == .note }
     private var isSelected: Bool { model.selectedTaskID == task.id }
     private var isScheduling: Bool { model.schedulingTaskID == task.id }
     private var showsDateButton: Bool { isHovered || isScheduling }
     private var showsCopyButton: Bool { isHovered && !isEditing }
+    private var showsLinkButton: Bool { isHovered && !isEditing && !task.link.isEmpty }
 
     var body: some View {
         let wraps = isMultiline && !isEditing
-        HStack(alignment: wraps ? .top : .center, spacing: 14) {
-            CheckRing(color: accent, isOn: task.isDone || isChecking, action: toggle)
+        let showsNote = !isEditingTitle && (isEditingNote || noteText != nil)
+        let topAligned = wraps || showsNote
+        HStack(alignment: topAligned ? .top : .center, spacing: 14) {
+            CheckRing(color: accent, isOn: task.isDone || isChecking, mark: agentMark, action: toggle)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
-                .padding(.top, wraps ? 7 : 0)
+                .padding(.top, topAligned ? 7 : 0)
 
-            if isEditing {
+            if isEditingTitle {
                 TextField("Task", text: $model.editingDraft)
                     .textFieldStyle(.plain)
                     .font(.system(size: 15))
@@ -43,26 +48,43 @@ struct TaskRow: View {
                         }
                     }
             } else {
-                Text(task.title)
-                    .font(.system(size: 15))
-                    .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
-                    .lineLimit(wraps ? nil : 1)
-                    .lineSpacing(wraps ? 3 : 0)
-                    .truncationMode(.tail)
-                    .fixedSize(horizontal: false, vertical: wraps)
-                    .padding(.vertical, wraps ? 10 : 0)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .onTapGesture(count: 2, perform: startEditing)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(task.title)
+                        .font(.system(size: 15))
+                        .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
+                        .lineLimit(wraps ? nil : 1)
+                        .lineSpacing(wraps ? 3 : 0)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: wraps)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .onTapGesture(count: 2, perform: startEditing)
+
+                    if isEditingNote {
+                        noteEditor
+                    } else if let noteText {
+                        noteLine(noteText)
+                            .onTapGesture(count: 2, perform: startEditingNote)
+                    }
+                }
+                .padding(.vertical, topAligned ? 10 : 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             if !task.isDone {
                 HStack(spacing: 6) {
-                    if let meta {
-                        meta
-                            .font(.system(size: 14))
-                            .foregroundStyle(PanelStyle.tertiary)
-                            .lineLimit(1)
-                            .padding(.trailing, showsDateButton ? 0 : 2)
+                    if task.isForClaude || meta != nil {
+                        TimelineView(.everyMinute) { context in
+                            if let meta = metaText(now: context.date) {
+                                meta
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(PanelStyle.tertiary)
+                                    .lineLimit(1)
+                                    .padding(.trailing, showsDateButton ? 0 : 2)
+                            }
+                        }
+                    }
+                    if showsLinkButton {
+                        linkButton
                     }
                     if showsCopyButton {
                         copyButton
@@ -79,10 +101,15 @@ struct TaskRow: View {
                         }
                 }
                 .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
-                .padding(.top, wraps ? 8 : 0)
+                .padding(.top, topAligned ? 8 : 0)
             } else if showsCopyButton {
-                copyButton
-                    .padding(.top, wraps ? 8 : 0)
+                HStack(spacing: 6) {
+                    if showsLinkButton {
+                        linkButton
+                    }
+                    copyButton
+                }
+                .padding(.top, topAligned ? 8 : 0)
             }
         }
         .padding(.leading, 4)
@@ -113,6 +140,26 @@ struct TaskRow: View {
                 Button("Date and Time…", action: openSchedule)
             }
             Button("Edit", action: startEditing)
+            Button("Note…", action: startEditingNote)
+            Divider()
+            if !task.isDone {
+                if task.isForClaude {
+                    Button("Take Back from Claude") {
+                        withAnimation(.snappy) {
+                            store.takeBack(task)
+                        }
+                    }
+                } else {
+                    Button("Hand to Claude") {
+                        withAnimation(.snappy) {
+                            store.assignToClaude(task)
+                        }
+                    }
+                }
+            }
+            if !task.link.isEmpty {
+                Button("Open Link", action: openLink)
+            }
             Button("Copy Text", action: copyTitle)
             Divider()
             Button("Delete", role: .destructive, action: delete)
@@ -121,6 +168,11 @@ struct TaskRow: View {
 
     private var accent: Color {
         Color(hex: task.project?.colorHex ?? ProjectPalette.noProject)
+    }
+
+    private var agentMark: CheckRing.Mark {
+        guard task.isForClaude, !task.isDone else { return .own }
+        return task.isClaimed() ? .working : .waiting
     }
 
     private var meta: Text? {
@@ -143,8 +195,87 @@ struct TaskRow: View {
         }
     }
 
+    private func agentMeta(now: Date) -> Text? {
+        guard task.isForClaude, !task.isDone else { return nil }
+        guard task.isClaimed(now: now), let since = task.claimedAt else {
+            return Text(verbatim: "Claude")
+        }
+        let minutes = max(1, Int(now.timeIntervalSince(since) / 60))
+        return Text(verbatim: "Claude · ") + Text("working \(minutes) min").foregroundStyle(PanelStyle.claude)
+    }
+
+    private func metaText(now: Date) -> Text? {
+        let parts = [meta, agentMeta(now: now)].compactMap { $0 }
+        guard let first = parts.first else { return nil }
+        return parts.dropFirst().reduce(first) { $0 + Text(verbatim: " · ") + $1 }
+    }
+
+    private var noteText: Text? {
+        guard !task.note.isEmpty else { return nil }
+        let note = Text(verbatim: task.note)
+        if task.agentStatus == .returned {
+            return Text("Claude asks:").foregroundStyle(PanelStyle.claude) + Text(verbatim: " ") + note
+        }
+        if task.isFromAgent || (task.isForClaude && task.isDone) {
+            let prefix = Text(verbatim: "Claude:")
+            return (task.isDone ? prefix : prefix.foregroundStyle(PanelStyle.claude)) + Text(verbatim: " ") + note
+        }
+        return note
+    }
+
+    private var showsNoteMark: Bool {
+        task.agentStatus == .returned || task.isFromAgent || (task.isForClaude && task.isDone)
+    }
+
+    private func noteLine(_ text: Text) -> some View {
+        HStack(spacing: 5) {
+            if showsNoteMark {
+                Glyph(kind: .sparkle, size: 9, filled: true)
+                    .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.claude)
+            }
+            text
+                .font(.system(size: 12.5))
+                .foregroundStyle(PanelStyle.tertiary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        }
+        .help(task.note)
+    }
+
+    private var noteEditor: some View {
+        TextField("Note", text: $model.editingDraft, axis: .vertical)
+            .textFieldStyle(.plain)
+            .font(.system(size: 12.5))
+            .lineLimit(1...4)
+            .focused($isEditorFocused)
+            .onSubmit(model.commitEditing)
+            .onExitCommand(perform: model.cancelEditing)
+            .onAppear {
+                isEditorFocused = true
+            }
+            .onChange(of: isEditorFocused) { _, focused in
+                if !focused, isEditing {
+                    model.commitEditing()
+                }
+            }
+    }
+
+    private var linkButton: some View {
+        RowActionButton(glyph: .link, label: "Open Link", help: task.link, action: openLink)
+    }
+
     private var copyButton: some View {
         RowActionButton(glyph: isCopied ? .check : .copy, label: isCopied ? LocalizedStringKey("Copied") : "Copy Text", action: copyTitle)
+    }
+
+    private func openLink() {
+        guard let url = URL(string: task.link),
+              let scheme = url.scheme?.lowercased(),
+              PeasyTools.linkSchemes.contains(scheme)
+        else { return }
+        if !NSWorkspace.shared.open(url), url.isFileURL {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
     }
 
     private func copyTitle() {
@@ -183,6 +314,10 @@ struct TaskRow: View {
         model.startEditing(task)
     }
 
+    private func startEditingNote() {
+        model.startEditingNote(task)
+    }
+
     private func delete() {
         if isSelected {
             model.selectedTaskID = nil
@@ -194,8 +329,15 @@ struct TaskRow: View {
 }
 
 struct CheckRing: View {
+    enum Mark {
+        case own
+        case waiting
+        case working
+    }
+
     let color: Color
     let isOn: Bool
+    var mark: Mark = .own
     let action: () -> Void
 
     @State private var isHovered = false
@@ -205,8 +347,22 @@ struct CheckRing: View {
             ZStack {
                 Circle()
                     .fill(color.opacity(isOn ? 1 : isHovered ? 0.24 : 0))
-                Circle()
-                    .strokeBorder(color, lineWidth: 2)
+                switch mark {
+                case .own:
+                    Circle()
+                        .strokeBorder(color, lineWidth: 2)
+                case .waiting:
+                    Circle()
+                        .strokeBorder(color, style: StrokeStyle(lineWidth: 2, dash: [3, 2.4]))
+                case .working:
+                    Circle()
+                        .strokeBorder(color.opacity(0.35), lineWidth: 2)
+                    WorkingArc()
+                }
+                if mark != .own, !isOn {
+                    Glyph(kind: .sparkle, size: 9, filled: true)
+                        .foregroundStyle(PanelStyle.claude)
+                }
                 Glyph(kind: .check, size: 12)
                     .foregroundStyle(.black)
                     .opacity(isOn ? 1 : 0)
@@ -222,10 +378,28 @@ struct CheckRing: View {
     }
 }
 
+private struct WorkingArc: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isSpinning = false
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.3)
+            .stroke(PanelStyle.claude, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .padding(1)
+            .rotationEffect(.degrees(isSpinning ? 360 : 0))
+            .animation(reduceMotion ? nil : .linear(duration: 1.6).repeatForever(autoreverses: false), value: isSpinning)
+            .onAppear {
+                isSpinning = !reduceMotion
+            }
+    }
+}
+
 struct RowActionButton: View {
     let glyph: Glyph.Kind
     let label: LocalizedStringKey
     var isActive = false
+    var help: String?
     let action: () -> Void
 
     @State private var isHovered = false
@@ -240,7 +414,7 @@ struct RowActionButton: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
-        .help(label)
+        .help(help.map { Text(verbatim: $0) } ?? Text(label))
         .accessibilityLabel(label)
     }
 }

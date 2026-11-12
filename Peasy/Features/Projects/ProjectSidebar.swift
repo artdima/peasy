@@ -109,7 +109,7 @@ struct ProjectSidebar: View {
     }
 
     private func count(in list: TaskList) -> Int {
-        TaskQueries.openTasks(in: list, from: tasks, now: DayClock.shared.today).count
+        TaskQueries.ownOpenTasks(in: list, from: tasks, now: DayClock.shared.today).count
     }
 
     private func moveProject(withID id: String?, before target: Project?) -> Bool {

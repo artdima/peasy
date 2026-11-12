@@ -46,6 +46,10 @@ extension TaskItem {
         AgentState(rawValue: agentState) ?? .idle
     }
 
+    var isFromAgent: Bool {
+        !origin.isEmpty
+    }
+
     func isClaimed(now: Date = .now) -> Bool {
         guard isForClaude, !isDone, agentStatus == .working, let claimedAt else { return false }
         return now.timeIntervalSince(claimedAt) < Self.claimLifetime

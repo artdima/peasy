@@ -25,7 +25,7 @@ struct StatusItemView: View {
             return .added(colorHex: added)
         }
         guard showsIndicator else { return .plain }
-        let remaining = TaskQueries.openTasks(in: .today, from: tasks, now: DayClock.shared.today).count
+        let remaining = TaskQueries.ownOpenTasks(in: .today, from: tasks, now: DayClock.shared.today).count
         return .indicator(remaining: remaining)
     }
 }
