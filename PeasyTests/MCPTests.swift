@@ -193,6 +193,13 @@ struct MCPTests {
         #expect(store.allTasks().first { $0.title == "Check the build on a device" }?.date == tomorrow)
     }
 
+    @Test func aMentionFromClaudeDoesNotHandTheTaskToClaude() throws {
+        _ = try call("add_task", ["title": "Review the PR @claude"], as: claudeCode)
+        let stored = try #require(store.allTasks().first)
+        #expect(!stored.isForClaude)
+        #expect(stored.title == "Review the PR @claude")
+    }
+
     @Test func addTaskChecksWhatClaudeSends() throws {
         #expect(failed(try call("add_task", ["title": "  "], as: claudeCode)))
         #expect(failed(try call("add_task", ["title": String(repeating: "a", count: 201)], as: claudeCode)))

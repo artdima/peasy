@@ -129,7 +129,11 @@ final class QuickAddController {
         guard let modelContainer else { return }
         let store = TaskStore(context: modelContainer.mainContext)
         let project = state.projectID.flatMap { store.project(id: $0) }
-        guard let task = store.addTask(state.title, project: project, isToday: state.isToday) else { return }
+        let typed = ClaudeMention.parse(state.title)
+        guard let task = store.addTask(typed.title, project: project, isToday: state.isToday) else { return }
+        if typed.isForClaude || state.isForClaude {
+            store.assignToClaude(task)
+        }
         let colorHex = task.project?.colorHex ?? ProjectPalette.noProject
         hide()
         panelModel.addedConfirmation = colorHex

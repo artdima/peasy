@@ -101,6 +101,16 @@ struct TaskStore {
     }
 
     @discardableResult
+    func addTypedTask(_ text: String, to list: TaskList) -> TaskItem? {
+        let typed = ClaudeMention.parse(text)
+        guard let task = addTask(typed.title, to: list) else { return nil }
+        if typed.isForClaude {
+            assignToClaude(task)
+        }
+        return task
+    }
+
+    @discardableResult
     func addTask(_ title: String, project: Project?, isToday: Bool) -> TaskItem? {
         guard let title = Self.clean(title) else { return nil }
         let lastOrder = allTasks().map(\.order).max() ?? -1

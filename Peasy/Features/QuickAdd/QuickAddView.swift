@@ -8,12 +8,24 @@ final class QuickAddState {
     var title = ""
     var projectID: UUID?
     var isToday = true
+    var isForClaude = false
     private(set) var focusRequest = 0
+
+    var assignsToClaude: Bool {
+        get { isForClaude || ClaudeMention.parse(title).isForClaude }
+        set {
+            isForClaude = newValue
+            if !newValue {
+                title = ClaudeMention.parse(title).title
+            }
+        }
+    }
 
     func reset(projectID: UUID?) {
         title = ""
         self.projectID = projectID
         isToday = true
+        isForClaude = false
         focusRequest += 1
     }
 }
@@ -45,8 +57,17 @@ struct QuickAddView: View {
         let isReady = !state.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                Circle()
-                    .strokeBorder(color, lineWidth: 1.5)
+                ZStack {
+                    if state.assignsToClaude {
+                        Circle()
+                            .strokeBorder(color, style: StrokeStyle(lineWidth: 1.5, dash: [3, 2.4]))
+                        Glyph(kind: .sparkle, size: 9, filled: true)
+                            .foregroundStyle(PanelStyle.claude)
+                    } else {
+                        Circle()
+                            .strokeBorder(color, lineWidth: 1.5)
+                    }
+                }
                     .frame(width: 20, height: 20)
                     .frame(width: 30, height: 30)
                     .accessibilityHidden(true)
@@ -106,6 +127,7 @@ struct QuickAddView: View {
                         .frame(width: 1, height: 16)
                         .padding(.leading, 6)
                     TodayChip(isOn: $state.isToday)
+                    ClaudeChip(isOn: $state.assignsToClaude)
                 }
             }
             .padding(.leading, 30)
@@ -192,6 +214,37 @@ struct TodayChip: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+}
+
+struct ClaudeChip: View {
+    @Binding var isOn: Bool
+
+    @State private var isHovered = false
+
+    var body: some View {
+        let tint = isOn ? PanelStyle.claude : (isHovered ? PanelStyle.primary : PanelStyle.secondary)
+        Button {
+            isOn.toggle()
+        } label: {
+            HStack(spacing: 6) {
+                Glyph(kind: .sparkle, size: 10, filled: true)
+                FittedText(string: "Claude", size: 12, weight: .medium)
+            }
+            .foregroundStyle(tint)
+            .padding(.horizontal, 10)
+            .frame(height: 28)
+            .background(PanelStyle.claude.opacity(isOn ? 0.16 : 0), in: Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(isOn ? .clear : Color.themed(white: 0.16, black: 0.14))
+            }
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .accessibilityLabel("Hand to Claude")
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 }

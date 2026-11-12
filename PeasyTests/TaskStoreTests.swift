@@ -199,6 +199,21 @@ struct TaskStoreTests {
         first.folder = "site"
         #expect(store.project(forWorkspace: "/Users/dima/site") === first)
     }
+
+    @Test func typingAtClaudeHandsTheNewTaskToClaude() throws {
+        let parsed = ClaudeMention.parse("Update README @claude")
+        #expect(parsed.title == "Update README")
+        #expect(parsed.isForClaude)
+        #expect(ClaudeMention.parse("@Claude  fix the build").title == "fix the build")
+        #expect(!ClaudeMention.parse("Email bob@claude.ai").isForClaude)
+
+        let task = try #require(store.addTypedTask("Update README @claude", to: .all))
+        #expect(task.title == "Update README")
+        #expect(task.isForClaude)
+        #expect(store.addTypedTask("@claude", to: .all) == nil)
+        let plain = try #require(store.addTypedTask("Plain", to: .all))
+        #expect(!plain.isForClaude)
+    }
 }
 
 @MainActor

@@ -32,6 +32,18 @@ struct NewTaskField: View {
                     model.draft = ""
                     isFocused = true
                 }
+            if model.draft.isEmpty, isFocused {
+                Text("@claude hands it to Claude")
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(PanelStyle.tertiary)
+                    .lineLimit(1)
+                    .accessibilityHidden(true)
+            }
+            if ClaudeMention.parse(model.draft).isForClaude {
+                Glyph(kind: .sparkle, size: 10, filled: true)
+                    .foregroundStyle(PanelStyle.claude)
+                    .accessibilityHidden(true)
+            }
             if !model.draft.trimmingCharacters(in: .whitespaces).isEmpty {
                 Text(verbatim: "↩")
                     .font(.system(size: 11))

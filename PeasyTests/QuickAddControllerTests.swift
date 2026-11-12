@@ -25,4 +25,19 @@ struct QuickAddControllerTests {
         try await Task.sleep(for: .milliseconds(400))
         #expect(!panel.isVisible)
     }
+
+    @Test func claudeChipFollowsTheMention() {
+        let state = QuickAddState()
+        state.title = "Fix the build @claude"
+        #expect(state.assignsToClaude)
+
+        state.assignsToClaude = false
+        #expect(state.title == "Fix the build")
+        #expect(!state.assignsToClaude)
+
+        state.assignsToClaude = true
+        #expect(state.isForClaude)
+        state.reset(projectID: nil)
+        #expect(!state.assignsToClaude)
+    }
 }

@@ -48,7 +48,7 @@ struct TaskSection: View {
 
             NewTaskField(model: model, placeholder: list == .today ? "New task for today" : "New task") { title in
                 withAnimation(.snappy) {
-                    _ = store.addTask(title, to: list)
+                    _ = store.addTypedTask(title, to: list)
                 }
             }
             .padding(.top, 6)
