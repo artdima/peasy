@@ -9,7 +9,7 @@
 - **Menu bar panel.** Opens under the sprout with a click. Next to the sprout, how many tasks are left today.
 - **Today, All and projects.** Today gathers everything planned for today or earlier. Each project has its own color.
 - **Dates and reminders.** Pick a day and an optional time. Overdue tasks stay in Today, marked in red.
-- **Quick add.** ⌃⌥N in any app opens a small window for a new task.
+- **Quick add.** ⌃⌥N in any app, or + next to Settings in the panel, opens a small window for a new task.
 - **Keyboard.** ↑/↓ to select, Space to complete, Return to edit, ⌘N for a new task.
 - **Sync.** iCloud across your Macs, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
 - **Tasks with Claude.** Claude Code adds the tasks only you can do, like adding a secret or checking a build on a device, and works on the ones you hand to it. A built-in MCP server connects Claude Desktop and Claude Code.

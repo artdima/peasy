@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Glyph: View {
     enum Kind {
-        case power, plus, chevron, check, checkBold, calendar, copy, returnKey, refresh, cloud, folder, spinner, gear
+        case power, plus, chevron, check, checkBold, calendar, copy, returnKey, refresh, cloud, folder, spinner, gear, newTask
         case sun, sofa, nextWeek
         case sliders, sidebar, menuBarTab, cloudTab, claudeTab
         case sparkle, link
@@ -31,7 +31,7 @@ struct Glyph: View {
 extension Glyph.Kind {
     var viewBox: CGFloat {
         switch self {
-        case .power, .gear: 16
+        case .power, .gear, .newTask: 16
         case .chevron: 10
         case .returnKey, .refresh, .sun, .sofa, .nextWeek: 14
         case .cloud, .folder: 18
@@ -42,7 +42,7 @@ extension Glyph.Kind {
 
     var strokeWidth: CGFloat? {
         switch self {
-        case .power, .gear: 1.4
+        case .power, .gear, .newTask: 1.4
         case .plus: 1.6
         case .chevron: 1.5
         case .check: 1.8
@@ -225,6 +225,11 @@ struct GlyphShape: Shape {
             path.move(to: CGPoint(x: 4.5, y: 3))
             path.addLine(to: CGPoint(x: 9, y: 3))
             path.addLine(to: CGPoint(x: 9, y: 7.5))
+        case .newTask:
+            path.move(to: CGPoint(x: 8, y: 2.5))
+            path.addLine(to: CGPoint(x: 8, y: 13.5))
+            path.move(to: CGPoint(x: 2.5, y: 8))
+            path.addLine(to: CGPoint(x: 13.5, y: 8))
         case .gear:
             let center = CGPoint(x: 8, y: 8)
             let teeth = 8

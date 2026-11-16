@@ -18,7 +18,7 @@ struct PanelContentView: View {
         let now = DayClock.shared.today
         let openTasks = TaskQueries.openTasks(in: list, from: tasks, now: now)
         VStack(spacing: 0) {
-            PanelHeader(onOpenSettings: actions.openSettings, onQuit: actions.quit)
+            PanelHeader(onNewTask: actions.newTask, onOpenSettings: actions.openSettings, onQuit: actions.quit)
                 .frame(height: model.headerHeight)
 
             switch layout {

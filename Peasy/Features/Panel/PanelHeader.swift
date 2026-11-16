@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PanelHeader: View {
+    let onNewTask: () -> Void
     let onOpenSettings: () -> Void
     let onQuit: () -> Void
 
@@ -10,6 +11,11 @@ struct PanelHeader: View {
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(PanelStyle.heading)
             Spacer()
+            IconButton(label: "New task") {
+                onNewTask()
+            } icon: {
+                Glyph(kind: .newTask, size: 18)
+            }
             IconButton(label: "Settings") {
                 onOpenSettings()
             } icon: {

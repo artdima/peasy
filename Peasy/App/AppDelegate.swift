@@ -31,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let actions = PanelActions(
             showAbout: { Self.showAbout() },
             checkForUpdates: { [weak self] in self?.updater.checkForUpdates() },
+            newTask: { [weak self] in self?.showQuickAdd() },
             openSettings: { [weak self] in self?.settingsWindow.show() },
             quit: { NSApp.terminate(nil) }
         )
@@ -154,6 +155,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         UserDefaults.standard.set(list.storageValue, forKey: TaskList.storageKey)
         panelModel.selectedTaskID = id
+    }
+
+    private func showQuickAdd() {
+        menuBarController?.collapse()
+        quickAdd?.show()
     }
 
     /// Claude reaches the tasks only while the user has it turned on in Settings.
