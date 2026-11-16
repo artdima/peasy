@@ -11,12 +11,12 @@ enum ProjectMatch {
         return byName.count == 1 ? byName[0] : nil
     }
 
-    static func folderName(of workspace: String) -> String? {
+    nonisolated static func folderName(of workspace: String) -> String? {
         let name = (workspace as NSString).lastPathComponent
         return name.isEmpty || name == "/" ? nil : name
     }
 
-    static func key(_ text: String) -> String {
+    nonisolated static func key(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
             .filter { !$0.isWhitespace && $0 != "-" && $0 != "_" }
     }
