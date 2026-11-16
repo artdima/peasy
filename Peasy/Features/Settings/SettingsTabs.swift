@@ -5,6 +5,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case panel
     case menuBar
     case icloud
+    case claude
 
     static let storageKey = "settingsTab"
 
@@ -16,6 +17,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .panel: String(localized: "Panel")
         case .menuBar: String(localized: "Menu bar")
         case .icloud: String(localized: "Sync")
+        case .claude: "Claude"
         }
     }
 
@@ -30,6 +32,8 @@ enum SettingsTab: String, CaseIterable, Identifiable {
             Glyph(kind: .menuBarTab, size: 20)
         case .icloud:
             Glyph(kind: .cloudTab, size: 20)
+        case .claude:
+            Glyph(kind: .claudeTab, size: 20)
         }
     }
 }

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-struct ClaudeAccessCard: View {
+struct ClaudePane: View {
     var failure: MCPServer.Failure?
     @AppStorage(MCPSettings.accessKey) private var access = MCPAccess.off
     @AppStorage(ClaudeNotifications.needsHelpKey) private var notifiesNeedsHelp = true
@@ -14,6 +14,9 @@ struct ClaudeAccessCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             accessCard
+            if isOn, !MCPSettings.isTranslocated {
+                connectCard
+            }
             if access == .full {
                 SettingsCard(note: "Shown as soon as Claude hands a task back or finishes one you gave it.") {
                     SettingsToggleRow(title: "Claude needs help", subtitle: nil, isOn: $notifiesNeedsHelp, minHeight: 44)
@@ -27,7 +30,7 @@ struct ClaudeAccessCard: View {
     }
 
     private var accessCard: some View {
-        SettingsCard(note: note) {
+        SettingsCard(note: accessNote) {
             SettingsRow(minHeight: 44) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Claude access")
@@ -45,19 +48,22 @@ struct ClaudeAccessCard: View {
                     .padding(.horizontal, 14)
                     .padding(.bottom, 10)
             }
-            if isOn, !MCPSettings.isTranslocated {
-                SettingsRow(minHeight: 44, separated: true) {
-                    Text("Claude Desktop")
-                        .settingsTitle()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    CopyButton(title: "Copy Config", text: MCPSettings.desktopConfig)
-                }
-                SettingsRow(minHeight: 44, separated: true) {
-                    Text("Claude Code")
-                        .settingsTitle()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    CopyButton(title: "Copy Command", text: MCPSettings.claudeCodeCommand)
-                }
+        }
+    }
+
+    private var connectCard: some View {
+        SettingsCard(note: "Peasy has to be running. For Claude Desktop add the config to claude_desktop_config.json in ~/Library/Application Support/Claude and restart Claude; for Claude Code run the command in Terminal.") {
+            SettingsRow(minHeight: 44) {
+                Text("Claude Desktop")
+                    .settingsTitle()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                CopyButton(title: "Copy Config", text: MCPSettings.desktopConfig)
+            }
+            SettingsRow(minHeight: 44, separated: true) {
+                Text("Claude Code")
+                    .settingsTitle()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                CopyButton(title: "Copy Command", text: MCPSettings.claudeCodeCommand)
             }
         }
     }
@@ -68,6 +74,10 @@ struct ClaudeAccessCard: View {
         case .read: "Reads your tasks"
         case .full: "Reads tasks, adds and updates them"
         }
+    }
+
+    private var accessNote: LocalizedStringKey? {
+        isOn ? nil : "Lets Claude read your tasks through MCP and, with full access, add tasks for you and work on the ones you hand over. On this Mac only."
     }
 
     private var warning: LocalizedStringKey? {
@@ -83,13 +93,6 @@ struct ClaudeAccessCard: View {
         case nil:
             return nil
         }
-    }
-
-    private var note: LocalizedStringKey {
-        if isOn {
-            return "Peasy has to be running. In Claude Desktop paste the config in Settings → Developer → Edit Config and restart it; for Claude Code run the command in Terminal."
-        }
-        return "Lets Claude read your tasks through MCP and, with full access, add tasks for you and work on the ones you hand over. On this Mac only."
     }
 }
 

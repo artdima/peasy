@@ -36,9 +36,9 @@ Updates come through Sparkle, see [docs/releasing.md](docs/releasing.md).
 
 ## Connect Claude
 
-Under **Claude access** in Settings → General choose **Full Access**, or **Read Only** if Claude should only see your tasks. Then:
+Under **Claude access** in Settings → Claude choose **Full Access**, or **Read Only** if Claude should only see your tasks. Then:
 
-- **Claude Desktop:** click Copy Config, paste it in Settings → Developer → Edit Config and restart Claude.
+- **Claude Desktop:** click Copy Config, add its `peasy` entry under `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude.
 - **Claude Code:** click Copy Command and run it in Terminal.
 
 Peasy has to be running while Claude uses it.

@@ -51,7 +51,7 @@ nonisolated enum MCPBridge {
     private static func forward(_ body: Data, _ call: MCPToolCall) async -> Data {
         let settings = MCPSettings.current()
         guard settings.isEnabled, !settings.token.isEmpty else {
-            return failure("Claude access is turned off in Peasy. Ask the user to turn it on in Peasy Settings → General → Claude access.", for: call)
+            return failure("Claude access is turned off in Peasy. Ask the user to turn it on in Peasy Settings → Claude.", for: call)
         }
         let signature = MCPSignature(token: settings.token)
         let nonce = MCPSignature.makeNonce()
@@ -72,7 +72,7 @@ nonisolated enum MCPBridge {
         do {
             exchange = try await session.data(for: request)
         } catch {
-            return failure("Peasy isn't running or can't take requests. Ask the user to open Peasy and check Settings → General → Claude access.", for: call)
+            return failure("Peasy isn't running or can't take requests. Ask the user to open Peasy and check Settings → Claude.", for: call)
         }
         let (data, response) = exchange
         let http = response as? HTTPURLResponse

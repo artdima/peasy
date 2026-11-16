@@ -47,6 +47,7 @@ struct SettingsView: View {
             case .panel: panelPane
             case .menuBar: menuBarPane
             case .icloud: SyncSection(sync: sync, folderSync: folderSync)
+            case .claude: ClaudePane(failure: claudeAccess?.failure)
             }
         }
         .padding(EdgeInsets(top: 20, leading: 24, bottom: 24, trailing: 24))
@@ -83,7 +84,6 @@ struct SettingsView: View {
                         .padding(.bottom, 10)
                 }
             }
-            ClaudeAccessCard(failure: claudeAccess?.failure)
             updatesCard
         }
     }

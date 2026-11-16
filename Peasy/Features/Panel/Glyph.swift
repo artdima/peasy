@@ -4,7 +4,7 @@ struct Glyph: View {
     enum Kind {
         case power, plus, chevron, check, checkBold, calendar, copy, returnKey, refresh, cloud, folder, spinner, gear
         case sun, sofa, nextWeek
-        case sliders, sidebar, menuBarTab, cloudTab
+        case sliders, sidebar, menuBarTab, cloudTab, claudeTab
         case sparkle, link
     }
 
@@ -35,7 +35,7 @@ extension Glyph.Kind {
         case .chevron: 10
         case .returnKey, .refresh, .sun, .sofa, .nextWeek: 14
         case .cloud, .folder: 18
-        case .sliders, .sidebar, .menuBarTab, .cloudTab: 20
+        case .sliders, .sidebar, .menuBarTab, .cloudTab, .claudeTab: 20
         default: 12
         }
     }
@@ -51,7 +51,7 @@ extension Glyph.Kind {
         case .sun, .sofa, .nextWeek: 1.3
         case .returnKey: 1.8
         case .refresh, .cloud, .folder, .spinner: 1.5
-        case .sliders, .sidebar, .menuBarTab, .cloudTab: 1.5
+        case .sliders, .sidebar, .menuBarTab, .cloudTab, .claudeTab: 1.5
         case .sparkle: nil
         case .link: 1.6
         }
@@ -204,6 +204,13 @@ struct GlyphShape: Shape {
             path.addSVGArc(to: CGPoint(x: 14.75, y: 8.54), radius: 3.5, largeArc: false, sweep: false)
             path.addSVGArc(to: CGPoint(x: 4.9, y: 9.3), radius: 5.1, largeArc: false, sweep: false)
             path.addSVGArc(to: CGPoint(x: 5.8, y: 15.5), radius: 3.2, largeArc: false, sweep: false)
+            path.closeSubpath()
+        case .claudeTab:
+            path.move(to: CGPoint(x: 10, y: 2.75))
+            path.addCurve(to: CGPoint(x: 17.25, y: 10), control1: CGPoint(x: 10.6, y: 6.7), control2: CGPoint(x: 13.3, y: 9.4))
+            path.addCurve(to: CGPoint(x: 10, y: 17.25), control1: CGPoint(x: 13.3, y: 10.6), control2: CGPoint(x: 10.6, y: 13.3))
+            path.addCurve(to: CGPoint(x: 2.75, y: 10), control1: CGPoint(x: 9.4, y: 13.3), control2: CGPoint(x: 6.7, y: 10.6))
+            path.addCurve(to: CGPoint(x: 10, y: 2.75), control1: CGPoint(x: 6.7, y: 9.4), control2: CGPoint(x: 9.4, y: 6.7))
             path.closeSubpath()
         case .sparkle:
             path.move(to: CGPoint(x: 6, y: 0))
