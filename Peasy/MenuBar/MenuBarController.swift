@@ -346,12 +346,12 @@ final class MenuBarController: NSObject {
         installPanel()
     }
 
+    /// The whole screen, not just the room left of the sprout: on a crowded menu bar the
+    /// sprout can sit far left, and the placement slides a wider panel right.
     private var sizeLimit: CGSize {
         let frame = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
-        let item = statusItemFrame()
         let margin = PanelGeometry.screenMargin
-        let rightEdge = min(item.maxX + PanelGeometry.overhang, frame.maxX - margin)
-        return CGSize(width: rightEdge - frame.minX - margin, height: frame.height - PanelGeometry.gap - 40)
+        return CGSize(width: frame.width - 2 * margin, height: frame.height - PanelGeometry.gap - 40)
     }
 
     private func resize(to size: CGSize, finished: Bool) {
@@ -371,7 +371,7 @@ final class MenuBarController: NSObject {
     private func resetSize() {
         layout.resetSize()
         model.hasCustomSize = false
-        resize(to: layout.defaultSize, finished: true)
+        resize(to: layout.defaultSize, finished: false)
     }
 
     // MARK: - Mouse and keyboard
