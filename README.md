@@ -12,7 +12,7 @@
 - **Quick add.** ⌃⌥N in any app, or + next to Settings in the panel, opens a small window for a new task.
 - **Keyboard.** ↑/↓ to select, Space to complete, Return to edit, ⌘N for a new task.
 - **Sync.** iCloud across your Macs, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
-- **Tasks with Claude.** Claude Code adds the tasks only you can do, like adding a secret or checking a build on a device, and works on the ones you hand to it. A built-in MCP server connects Claude Desktop and Claude Code.
+- **Tasks with Claude.** Claude adds the tasks only you can do and works on the ones you hand to it, see [below](#tasks-with-claude).
 - **Updates.** Peasy checks for new versions and installs them in a click.
 - **English and Russian**, dark and light themes.
 
@@ -21,6 +21,39 @@
   <br>
   <sub>Quick add: ⌃⌥N in any app, type, press Return.</sub>
 </p>
+
+## Tasks with Claude
+
+Peasy shares your list with Claude through a built-in MCP server, and it works both ways.
+
+- **Claude asks you.** When Claude reaches a step only you can do, like adding a secret, reviewing a pull request or checking a build on a device, it adds a task for you with a note on why and a link to where you do it.
+- **You hand work to Claude.** Write `@claude` in a task's title or choose **Hand to Claude** in its menu, then ask Claude to take your Peasy tasks. Claude marks the task as in progress, finishes it with a note of what it did, or hands it back with a question.
+
+<p align="center">
+  <img src="docs/claude-tasks.png" width="720" alt="Peasy panel with a task Claude added, a question from Claude, a task waiting for Claude, one Claude is working on and one it finished">
+</p>
+
+What you see in the list:
+
+- **A spark and “Claude:” under a task.** Claude added it for you, or this is its report on a finished task. The arrow opens the link.
+- **“Claude asks:”** Claude handed the task back. Write your answer in the note with **Note…** in the task's menu and hand it to Claude again.
+- **A dashed ring.** The task waits for Claude.
+- **A spinning arc and “working 12 min”.** Claude is on it.
+
+Claude Code works in the project named like its folder, so in a repository called `peasy` it adds and takes tasks in the Peasy project. In Claude Desktop, name the project when you ask. Only you hand tasks to Claude: a task Claude adds is always yours, even with `@claude` in its title. Claude's tasks don't count in the sprout's number, and Peasy notifies you when Claude needs help and, if you turn it on, when it finishes a task.
+
+### Connect Claude
+
+In Settings → Claude choose **Full Access**, or **Read Only** if Claude should only see your tasks. Then:
+
+- **Claude Desktop:** click Copy Config, add its `peasy` entry under `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude.
+- **Claude Code:** click Copy Command and run it in Terminal.
+
+<p align="center">
+  <img src="docs/claude-settings.png" width="560" alt="The Claude tab in Peasy Settings: Full Access, connected to Claude Code and Claude Desktop, notification switches">
+</p>
+
+Peasy has to be running while Claude uses it, and the Connection row shows which Claude apps are connected. After updating Peasy, restart Claude Desktop and your Claude Code sessions so they get the new tools.
 
 ## Install
 
@@ -33,22 +66,6 @@ You need Xcode 26 or later. Open `Peasy.xcodeproj` and run.
 iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements` and in `CloudSync.containerIdentifier`. Without the container, Peasy keeps tasks on the Mac.
 
 Updates come through Sparkle, see [docs/releasing.md](docs/releasing.md).
-
-## Connect Claude
-
-Under **Claude access** in Settings → Claude choose **Full Access**, or **Read Only** if Claude should only see your tasks. Then:
-
-- **Claude Desktop:** click Copy Config, add its `peasy` entry under `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude.
-- **Claude Code:** click Copy Command and run it in Terminal.
-
-Peasy has to be running while Claude uses it. Settings → Claude shows which Claude apps are connected.
-
-### Working with Claude
-
-- Claude Code finds the project named like its folder, so in a repository called `peasy` it works with the Peasy project.
-- When Claude reaches a step only you can do, it adds a task for you with a note and a link. It shows a spark in the list.
-- To hand a task to Claude, write `@claude` in its title or choose **Hand to Claude** in its menu. Then ask Claude Code to take your Peasy tasks. It marks a task as in progress, finishes it with a note of what it did, or hands it back with a question.
-- Peasy notifies you when Claude needs help and, if you turn it on in Settings, when it finishes a task. Claude's tasks don't count in the sprout's number.
 
 ## License
 
