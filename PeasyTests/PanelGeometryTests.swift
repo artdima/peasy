@@ -6,6 +6,15 @@ struct PanelGeometryTests {
     let screen = CGRect(x: 0, y: 0, width: 1512, height: 982)
     let size = CGSize(width: 760, height: 540)
 
+    @MainActor
+    @Test func eachEdgeResizesItsOwnSide() {
+        let start = CGPoint(x: 400, y: 300)
+        let mouse = CGPoint(x: 360, y: 230)
+        #expect(ResizeEdge.left.size(from: size, dragFrom: start, to: mouse) == CGSize(width: 800, height: 540))
+        #expect(ResizeEdge.bottom.size(from: size, dragFrom: start, to: mouse) == CGSize(width: 760, height: 610))
+        #expect(ResizeEdge.bottomLeft.size(from: size, dragFrom: start, to: mouse) == CGSize(width: 800, height: 610))
+    }
+
     @Test func panelFloatsUnderTheStatusItem() {
         let item = CGRect(x: 1200, y: screen.maxY - 38, width: 50, height: 38)
         let frame = PanelPlacement(item: item, screen: screen, panelSize: size).frame

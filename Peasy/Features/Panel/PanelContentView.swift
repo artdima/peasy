@@ -29,8 +29,14 @@ struct PanelContentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .overlay(alignment: .leading) {
+            ResizeGrip(model: model, edge: .left)
+        }
+        .overlay(alignment: .bottom) {
+            ResizeGrip(model: model, edge: .bottom)
+        }
         .overlay(alignment: .bottomLeading) {
-            ResizeGrip(model: model)
+            ResizeGrip(model: model, edge: .bottomLeft)
         }
         .foregroundStyle(PanelStyle.primary)
         .contentShape(Rectangle())
