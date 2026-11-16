@@ -122,6 +122,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         folderSync.detach()
         menuBarController?.unloadStore()
         quickAdd?.unloadStore()
+        // A second CloudKit container on the same store fails to register its export activity.
+        container = nil
         Task { [weak self] in
             await Task.yield()
             guard let self else { return }
