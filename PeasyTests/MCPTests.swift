@@ -507,6 +507,48 @@ struct MCPTests {
         #expect(call.session.workspace == nil)
     }
 
+    @Test func bridgesCountAsConnectedWhileTheyAnnounceThemselves() throws {
+        let start = Date.now
+        let desktop = MCPSession(id: "d1", client: "claude-ai")
+        _ = handler.handle(MCPProtocol.presence(connected: true, session: claudeCode))
+        let reply = handler.handle(MCPProtocol.presence(connected: true, session: desktop))
+        #expect(reply.body == nil)
+        #expect(reply.httpStatus == 202)
+        #expect(handler.connections.clients() == ["Claude Code", "Claude Desktop"])
+
+        _ = handler.handle(MCPProtocol.presence(connected: false, session: desktop))
+        #expect(handler.connections.clients() == ["Claude Code"])
+        #expect(handler.connections.clients(at: start.addingTimeInterval(ClaudeConnections.lifetime + 1)).isEmpty)
+
+        MCPServer(handler: handler).stop()
+        #expect(handler.connections.clients().isEmpty)
+    }
+
+    @Test func aToolCallAlsoShowsWhoIsConnected() throws {
+        _ = try call("list_projects", as: claudeCode)
+        #expect(handler.connections.clients() == ["Claude Code"])
+    }
+
+    @Test func clientsGetNamesPeopleKnow() {
+        #expect(MCPSession(id: "1", client: "claude-code").clientTitle == "Claude Code")
+        #expect(MCPSession(id: "1", client: "claude-ai").clientTitle == "Claude Desktop")
+        #expect(MCPSession(id: "1", client: "Cursor").clientTitle == "Cursor")
+        #expect(MCPSession(id: "1").clientTitle == "Claude")
+    }
+
+    @Test func presenceComesOnlyFromTheBridge() async throws {
+        let body = MCPProtocol.presence(connected: true, session: claudeCode)
+        let presence = try #require(MCPProtocol.presence(in: body))
+        #expect(presence.session == claudeCode)
+        #expect(presence.connected)
+        #expect(await MCPBridge.reply(to: body) == nil)
+
+        let state = MCPBridgeState(id: "s1", workspace: nil)
+        #expect(await state.beginPresence())
+        #expect(await !state.beginPresence())
+        #expect(await state.isPresent)
+    }
+
     @Test func stdinIsCutOnlyAtLineFeeds() {
         let first = "{\"query\":\"a\u{2028}b\u{85}c\"}"
         let input = Data((first + "\r\n \n{\"id\":1}").utf8)

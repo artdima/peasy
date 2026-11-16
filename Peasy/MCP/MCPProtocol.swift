@@ -50,6 +50,8 @@ nonisolated enum MCPProtocol {
 
     static let cacheLifetime = 3_600_000
 
+    static let presenceMethod = "com.artdima.peasy/presence"
+
     static var serverInfo: [String: Any] {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         return ["name": "peasy", "title": "Peasy", "version": version]
@@ -203,6 +205,22 @@ nonisolated enum MCPProtocol {
 
     static func encode(_ object: Any) -> Data {
         (try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes])) ?? Data("{}".utf8)
+    }
+
+    static func presence(connected: Bool, session: MCPSession) -> Data {
+        let message: [String: Any] = ["jsonrpc": "2.0", "method": presenceMethod, "params": ["connected": connected]]
+        let body = encode(message)
+        return MCPSession.adding(session, to: body) ?? body
+    }
+
+    static func presence(in body: Data) -> (session: MCPSession, connected: Bool)? {
+        guard let message = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any],
+              message["method"] as? String == presenceMethod,
+              message["id"] == nil,
+              let params = message["params"] as? [String: Any],
+              let connected = params["connected"] as? Bool
+        else { return nil }
+        return (MCPSession(meta: params["_meta"] as? [String: Any] ?? [:]), connected)
     }
 
     static func encodeString(_ object: Any) -> String {

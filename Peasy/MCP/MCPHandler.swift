@@ -6,6 +6,7 @@ final class MCPHandler {
     private let container: () -> ModelContainer?
     var onEvent: (AgentEvent) -> Void = { _ in }
     var access: () -> MCPAccess = { MCPSettings.current().access }
+    let connections = ClaudeConnections()
 
     static let changingTools: Set<String> = ["add_task", "update_task", "set_task_status"]
 
@@ -14,11 +15,15 @@ final class MCPHandler {
     }
 
     func handle(_ body: Data) -> MCPReply {
+        if let presence = MCPProtocol.presence(in: body) {
+            connections.update(presence.session, connected: presence.connected)
+        }
         switch MCPProtocol.route(body) {
         case .reply(let reply):
-            reply
+            return reply
         case .callTool(let call):
-            MCPReply(body: MCPProtocol.toolResult(run(call), for: call), httpStatus: 200)
+            connections.update(call.session, connected: true)
+            return MCPReply(body: MCPProtocol.toolResult(run(call), for: call), httpStatus: 200)
         }
     }
 

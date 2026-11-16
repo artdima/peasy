@@ -41,7 +41,7 @@ Under **Claude access** in Settings → Claude choose **Full Access**, or **Read
 - **Claude Desktop:** click Copy Config, add its `peasy` entry under `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude.
 - **Claude Code:** click Copy Command and run it in Terminal.
 
-Peasy has to be running while Claude uses it.
+Peasy has to be running while Claude uses it. Settings → Claude shows which Claude apps are connected.
 
 ### Working with Claude
 

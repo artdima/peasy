@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ClaudePane: View {
     var failure: MCPServer.Failure?
+    var connections: ClaudeConnections?
     @AppStorage(MCPSettings.accessKey) private var access = MCPAccess.off
     @AppStorage(ClaudeNotifications.needsHelpKey) private var notifiesNeedsHelp = true
     @AppStorage(ClaudeNotifications.finishedKey) private var notifiesFinished = false
@@ -41,6 +42,11 @@ struct ClaudePane: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 SettingsPopUp(options: MCPAccess.allCases.map { ($0, $0.title) }, selection: $access)
             }
+            if isOn, !MCPSettings.isTranslocated {
+                TimelineView(.periodic(from: .now, by: 10)) { context in
+                    connectionRow(clients: connections?.clients(at: context.date) ?? [])
+                }
+            }
             if isOn, let warning {
                 Text(warning)
                     .font(.system(size: 11.5))
@@ -68,6 +74,36 @@ struct ClaudePane: View {
         }
     }
 
+    private func connectionRow(clients: [String]) -> some View {
+        let status: ConnectionStatus = failure != nil ? .unavailable : clients.isEmpty ? .waiting : .connected
+        return SettingsRow(minHeight: 44, separated: true) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Connection")
+                    .settingsTitle()
+                switch status {
+                case .connected:
+                    Text(verbatim: ListFormatter.localizedString(byJoining: clients))
+                        .settingsSubtitle()
+                case .waiting:
+                    Text("Restart Claude after adding Peasy to it")
+                        .settingsSubtitle()
+                case .unavailable:
+                    EmptyView()
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(status.color)
+                    .frame(width: 7, height: 7)
+                Text(status.title)
+                    .font(.system(size: 12))
+                    .foregroundStyle(PanelStyle.secondary)
+            }
+            .accessibilityElement(children: .combine)
+        }
+    }
+
     private var subtitle: LocalizedStringKey {
         switch access {
         case .off: "Claude can’t see your tasks"
@@ -92,6 +128,28 @@ struct ClaudePane: View {
             return "Peasy couldn’t open port \(port): \(reason). Turn Claude access off and on to try again."
         case nil:
             return nil
+        }
+    }
+}
+
+private enum ConnectionStatus {
+    case connected
+    case waiting
+    case unavailable
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .connected: "Connected"
+        case .waiting: "Not connected"
+        case .unavailable: "Unavailable"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .connected: PanelStyle.green
+        case .waiting: PanelStyle.tertiary
+        case .unavailable: .red
         }
     }
 }

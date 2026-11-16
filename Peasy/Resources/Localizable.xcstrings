@@ -333,6 +333,26 @@
         }
       }
     },
+    "Connected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключено"
+          }
+        }
+      }
+    },
+    "Connection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключение"
+          }
+        }
+      }
+    },
     "Copied" : {
       "localizations" : {
         "ru" : {
@@ -736,6 +756,16 @@
         }
       }
     },
+    "Not connected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не подключено"
+          }
+        }
+      }
+    },
     "Not signed in to iCloud" : {
       "localizations" : {
         "ru" : {
@@ -1016,6 +1046,16 @@
         }
       }
     },
+    "Restart Claude after adding Peasy to it" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустите Claude, когда добавите в него Peasy"
+          }
+        }
+      }
+    },
     "Settings" : {
       "localizations" : {
         "ru" : {
@@ -1262,6 +1302,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Завтра"
+          }
+        }
+      }
+    },
+    "Unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недоступно"
           }
         }
       }

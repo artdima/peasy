@@ -102,6 +102,10 @@ final class MCPServer {
         self.handler = handler
     }
 
+    var claudeConnections: ClaudeConnections {
+        handler.connections
+    }
+
     /// A port that failed is tried again only after `stop()`, not on every defaults change.
     func start(port: UInt16, token: String) {
         if self.listener != nil || failure != nil, self.port == port, self.token == token { return }
@@ -148,6 +152,7 @@ final class MCPServer {
         listener?.cancel()
         listener = nil
         port = nil
+        handler.connections.removeAll()
         if failure != nil {
             failure = nil
         }

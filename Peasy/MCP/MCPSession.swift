@@ -24,6 +24,15 @@ nonisolated struct MCPSession: Sendable, Equatable {
         client = meta[Self.clientKey] as? String ?? Self.name(ofClient: meta[Self.clientInfoKey])
     }
 
+    var clientTitle: String {
+        guard let client, !client.isEmpty else { return "Claude" }
+        switch client.lowercased() {
+        case "claude-code": return "Claude Code"
+        case "claude-ai": return "Claude Desktop"
+        default: return client
+        }
+    }
+
     static func workspace(
         environment: [String: String] = ProcessInfo.processInfo.environment,
         currentDirectory: String = FileManager.default.currentDirectoryPath,
@@ -82,6 +91,11 @@ nonisolated struct MCPSession: Sendable, Equatable {
 /// What one `Peasy --mcp` process knows about its Claude session across requests.
 actor MCPBridgeState {
     private var session: MCPSession
+    private(set) var isPresent = false
+
+    var current: MCPSession {
+        session
+    }
 
     init(id: String = UUID().uuidString, workspace: String? = MCPSession.workspace()) {
         session = MCPSession(id: id, workspace: workspace)
@@ -92,5 +106,10 @@ actor MCPBridgeState {
             session.client = client
         }
         return session
+    }
+
+    func beginPresence() -> Bool {
+        defer { isPresent = true }
+        return !isPresent
     }
 }

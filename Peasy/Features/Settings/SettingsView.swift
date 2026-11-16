@@ -47,7 +47,7 @@ struct SettingsView: View {
             case .panel: panelPane
             case .menuBar: menuBarPane
             case .icloud: SyncSection(sync: sync, folderSync: folderSync)
-            case .claude: ClaudePane(failure: claudeAccess?.failure)
+            case .claude: ClaudePane(failure: claudeAccess?.failure, connections: claudeAccess?.claudeConnections)
             }
         }
         .padding(EdgeInsets(top: 20, leading: 24, bottom: 24, trailing: 24))

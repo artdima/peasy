@@ -3,8 +3,12 @@ import Foundation
 /// `Peasy --mcp`: the stdio server Claude Desktop and Claude Code launch. It answers
 /// discovery itself and hands tool calls to the running app, which owns the store.
 nonisolated enum MCPBridge {
+    /// Beats let a restarted Peasy see the bridge again and drop one that died without a goodbye.
+    static let presenceInterval: Duration = .seconds(60)
+
     static func run() async {
         let output = StandardOutput()
+        let beat = Task { await MCPBridge.keepAnnouncing() }
         await withDiscardingTaskGroup { group in
             var lines = LineBuffer()
             do {
@@ -19,6 +23,10 @@ nonisolated enum MCPBridge {
             if let line = lines.finish() {
                 group.addTask { await MCPBridge.respond(to: line, through: output) }
             }
+        }
+        beat.cancel()
+        if await sharedState.isPresent {
+            await announce(connected: false)
         }
         exit(0)
     }
@@ -38,6 +46,25 @@ nonisolated enum MCPBridge {
     private static func respond(to line: Data, through output: StandardOutput) async {
         guard let answer = await reply(to: line) else { return }
         await output.write(answer)
+        if await sharedState.beginPresence() {
+            await announce(connected: true)
+        }
+    }
+
+    private static func keepAnnouncing() async {
+        while (try? await Task.sleep(for: presenceInterval)) != nil {
+            if await sharedState.isPresent {
+                await announce(connected: true)
+            }
+        }
+    }
+
+    private static func announce(connected: Bool) async {
+        let settings = MCPSettings.current()
+        guard settings.isEnabled, !settings.token.isEmpty else { return }
+        let body = MCPProtocol.presence(connected: connected, session: await sharedState.current)
+        let signed = signedRequest(body, settings: settings, method: MCPProtocol.presenceMethod, version: nil)
+        _ = try? await session.data(for: signed.request)
     }
 
     private static let session: URLSession = {
@@ -54,19 +81,10 @@ nonisolated enum MCPBridge {
             return failure("Claude access is turned off in Peasy. Ask the user to turn it on in Peasy Settings → Claude.", for: call)
         }
         let signature = MCPSignature(token: settings.token)
-        let nonce = MCPSignature.makeNonce()
-        let timestamp = String(Int(Date().timeIntervalSince1970))
-        var request = URLRequest(url: settings.endpoint)
-        request.httpMethod = "POST"
-        request.httpBody = body
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json, text/event-stream", forHTTPHeaderField: "Accept")
-        request.setValue(call.version ?? MCPProtocol.legacyVersions[0], forHTTPHeaderField: "MCP-Protocol-Version")
-        request.setValue("tools/call", forHTTPHeaderField: "Mcp-Method")
+        let signed = signedRequest(body, settings: settings, method: "tools/call", version: call.version)
+        let nonce = signed.nonce
+        var request = signed.request
         request.setValue(call.name, forHTTPHeaderField: "Mcp-Name")
-        request.setValue(timestamp, forHTTPHeaderField: MCPSignature.timestampHeader)
-        request.setValue(nonce, forHTTPHeaderField: MCPSignature.nonceHeader)
-        request.setValue(signature.signRequest(body, timestamp: timestamp, nonce: nonce), forHTTPHeaderField: MCPSignature.signatureHeader)
 
         let exchange: (Data, URLResponse)
         do {
@@ -85,6 +103,28 @@ nonisolated enum MCPBridge {
             return failure("The reply on port \(settings.port) didn't come from Peasy (HTTP \(status)), so it was ignored. Ask the user to quit whatever else uses that port, or to turn Claude access off and on.", for: call)
         }
         return data
+    }
+
+    private static func signedRequest(
+        _ body: Data,
+        settings: MCPSettings,
+        method: String,
+        version: String?
+    ) -> (request: URLRequest, nonce: String) {
+        let nonce = MCPSignature.makeNonce()
+        let timestamp = String(Int(Date().timeIntervalSince1970))
+        var request = URLRequest(url: settings.endpoint)
+        request.httpMethod = "POST"
+        request.httpBody = body
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json, text/event-stream", forHTTPHeaderField: "Accept")
+        request.setValue(version ?? MCPProtocol.legacyVersions[0], forHTTPHeaderField: "MCP-Protocol-Version")
+        request.setValue(method, forHTTPHeaderField: "Mcp-Method")
+        request.setValue(timestamp, forHTTPHeaderField: MCPSignature.timestampHeader)
+        request.setValue(nonce, forHTTPHeaderField: MCPSignature.nonceHeader)
+        let signature = MCPSignature(token: settings.token).signRequest(body, timestamp: timestamp, nonce: nonce)
+        request.setValue(signature, forHTTPHeaderField: MCPSignature.signatureHeader)
+        return (request, nonce)
     }
 
     private static func failure(_ message: String, for call: MCPToolCall) -> Data {
