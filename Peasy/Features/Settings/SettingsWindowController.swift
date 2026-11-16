@@ -47,10 +47,17 @@ final class SettingsWindowController {
                 self?.fitWindow(toHeight: height)
             }
         })
-        let size = view.fittingSize
+        let fitting = view.fittingSize
+        let size = CGSize(width: fitting.width, height: fitting.height.rounded(.up))
         view.sizingOptions = []
-        window.contentView = view
-        window.setContentSize(CGSize(width: size.width, height: size.height.rounded(.up)))
+        // As the window's own content view, the hosting view also animates the window size and
+        // fights fitWindow until AppKit gives up on the constraint passes and throws.
+        let container = NSView(frame: CGRect(origin: .zero, size: size))
+        view.frame = container.bounds
+        view.autoresizingMask = [.width, .height]
+        container.addSubview(view)
+        window.contentView = container
+        window.setContentSize(size)
         window.center()
 
         themeObserver = NotificationCenter.default.addObserver(
