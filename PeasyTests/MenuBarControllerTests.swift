@@ -135,6 +135,23 @@ struct MenuBarControllerTests {
         #expect(task.title == "Ship")
     }
 
+    @Test func aMentionTypedWhileEditingHandsTheTaskToClaude() throws {
+        let container = try Persistence.makeContainer(inMemory: true)
+        let model = PanelViewModel()
+        let actions = PanelActions(showAbout: {}, openSettings: {}, quit: {})
+        let controller = MenuBarController(model: model, actions: actions, modelContainer: container)
+        defer { controller.shutdown() }
+        let store = TaskStore(context: container.mainContext)
+        let task = try #require(store.addTask("Ship", to: .all))
+
+        model.startEditing(task)
+        model.editingDraft = "Ship 0.3.0 @claude"
+        model.commitEditing()
+
+        #expect(task.title == "Ship 0.3.0")
+        #expect(task.isForClaude)
+    }
+
     @Test func panelSurvivesReloadingTheStore() async throws {
         let first = try Persistence.makeContainer(inMemory: true)
         let model = PanelViewModel()

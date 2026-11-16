@@ -214,6 +214,29 @@ struct TaskStoreTests {
         let plain = try #require(store.addTypedTask("Plain", to: .all))
         #expect(!plain.isForClaude)
     }
+
+    @Test func typingAtClaudeWhileEditingHandsTheTaskToClaude() throws {
+        let task = try #require(store.addTask("Update README", to: .all))
+        store.renameTypedTask(task, to: "Update the README @claude")
+        #expect(task.title == "Update the README")
+        #expect(task.isForClaude)
+
+        let kept = try #require(store.addTask("Fix the build", to: .all))
+        store.renameTypedTask(kept, to: "@Claude")
+        #expect(kept.title == "Fix the build")
+        #expect(kept.isForClaude)
+
+        let done = try #require(store.addTask("Shipped", to: .all))
+        store.toggle(done)
+        store.renameTypedTask(done, to: "Shipped @claude")
+        #expect(done.title == "Shipped")
+        #expect(!done.isForClaude)
+
+        let fromClaude = try #require(store.addTask("Rotate the keys @claude", to: .all))
+        store.renameTypedTask(fromClaude, to: "Rotate the API keys @claude")
+        #expect(fromClaude.title == "Rotate the API keys @claude")
+        #expect(!fromClaude.isForClaude)
+    }
 }
 
 @MainActor

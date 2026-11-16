@@ -435,7 +435,7 @@ final class MenuBarController: NSObject {
         guard let task = store.allTasks().first(where: { $0.id == id }) else { return }
         switch field {
         case .title:
-            store.rename(task, to: text)
+            store.renameTypedTask(task, to: text)
         case .note:
             store.setNote(text, for: task)
         }

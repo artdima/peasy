@@ -266,6 +266,19 @@ struct TaskStore {
         save()
     }
 
+    /// Only a mention the user adds counts; one Claude wrote into the title stays text.
+    func renameTypedTask(_ task: TaskItem, to text: String) {
+        let typed = ClaudeMention.parse(text)
+        guard typed.isForClaude, !ClaudeMention.parse(task.title).isForClaude else {
+            rename(task, to: text)
+            return
+        }
+        rename(task, to: typed.title)
+        if !task.isDone {
+            assignToClaude(task)
+        }
+    }
+
     func delete(_ task: TaskItem) {
         SyncLedger.hasLocalDeletions = true
         context.delete(task)
