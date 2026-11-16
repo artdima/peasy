@@ -10,7 +10,6 @@ struct TaskRow: View {
     @AppStorage(PanelSettings.multilineTasksKey) private var isMultiline = false
     @State private var isHovered = false
     @State private var isChecking = false
-    @State private var isCopied = false
     @State private var dateButtonFrame: CGRect = .zero
     @FocusState private var isEditorFocused: Bool
 
@@ -20,7 +19,6 @@ struct TaskRow: View {
     private var isSelected: Bool { model.selectedTaskID == task.id }
     private var isScheduling: Bool { model.schedulingTaskID == task.id }
     private var showsDateButton: Bool { isHovered || isScheduling }
-    private var showsCopyButton: Bool { isHovered && !isEditing }
     private var showsLinkButton: Bool { isHovered && !isEditing && !task.link.isEmpty }
 
     var body: some View {
@@ -86,9 +84,6 @@ struct TaskRow: View {
                     if showsLinkButton {
                         linkButton
                     }
-                    if showsCopyButton {
-                        copyButton
-                    }
                     if showsDateButton {
                         RowActionButton(glyph: .calendar, label: "Date and Time", isActive: isScheduling, action: openSchedule)
                     }
@@ -102,14 +97,9 @@ struct TaskRow: View {
                 }
                 .frame(minWidth: 24, minHeight: 24, alignment: .trailing)
                 .padding(.top, topAligned ? 8 : 0)
-            } else if showsCopyButton {
-                HStack(spacing: 6) {
-                    if showsLinkButton {
-                        linkButton
-                    }
-                    copyButton
-                }
-                .padding(.top, topAligned ? 8 : 0)
+            } else if showsLinkButton {
+                linkButton
+                    .padding(.top, topAligned ? 8 : 0)
             }
         }
         .padding(.leading, 4)
@@ -264,10 +254,6 @@ struct TaskRow: View {
         RowActionButton(glyph: .link, label: "Open Link", help: task.link, action: openLink)
     }
 
-    private var copyButton: some View {
-        RowActionButton(glyph: isCopied ? .check : .copy, label: isCopied ? LocalizedStringKey("Copied") : "Copy Text", action: copyTitle)
-    }
-
     private func openLink() {
         guard let url = URL(string: task.link),
               let scheme = url.scheme?.lowercased(),
@@ -281,11 +267,6 @@ struct TaskRow: View {
     private func copyTitle() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(task.title, forType: .string)
-        isCopied = true
-        Task {
-            try? await Task.sleep(for: .seconds(1.2))
-            isCopied = false
-        }
     }
 
     private func openSchedule() {
