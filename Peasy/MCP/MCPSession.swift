@@ -26,10 +26,12 @@ nonisolated struct MCPSession: Sendable, Equatable {
 
     var clientTitle: String {
         guard let client, !client.isEmpty else { return "Claude" }
-        switch client.lowercased() {
+        let name = client.lowercased()
+        switch name {
         case "claude-code": return "Claude Code"
         case "claude-ai": return "Claude Desktop"
-        default: return client
+        // Agent sessions in the Claude app name themselves local-agent-mode-<server>.
+        default: return name.hasPrefix("local-agent-mode") ? "Claude Desktop" : client
         }
     }
 

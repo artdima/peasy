@@ -112,7 +112,7 @@ struct PeasyTools {
             hasTime: schedule?.hasTime ?? false,
             note: note,
             link: link,
-            origin: session.client ?? "Claude"
+            origin: session.clientTitle
         ) else {
             throw ToolError("title is required.")
         }

@@ -532,6 +532,7 @@ struct MCPTests {
     @Test func clientsGetNamesPeopleKnow() {
         #expect(MCPSession(id: "1", client: "claude-code").clientTitle == "Claude Code")
         #expect(MCPSession(id: "1", client: "claude-ai").clientTitle == "Claude Desktop")
+        #expect(MCPSession(id: "1", client: "local-agent-mode-peasy").clientTitle == "Claude Desktop")
         #expect(MCPSession(id: "1", client: "Cursor").clientTitle == "Cursor")
         #expect(MCPSession(id: "1").clientTitle == "Claude")
     }
