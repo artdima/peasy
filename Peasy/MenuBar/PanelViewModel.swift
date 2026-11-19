@@ -119,8 +119,3 @@ final class PanelViewModel {
         projectPendingDeletion = nil
     }
 }
-
-struct ScheduleDraft: Equatable {
-    var date: Date?
-    var hasTime = false
-}

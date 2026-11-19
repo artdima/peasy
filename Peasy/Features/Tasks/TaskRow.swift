@@ -23,10 +23,10 @@ struct TaskRow: View {
 
     var body: some View {
         let wraps = isMultiline && !isEditing
-        let showsNote = !isEditingTitle && (isEditingNote || noteText != nil)
+        let showsNote = !isEditingTitle && (isEditingNote || task.noteLabel != nil)
         let topAligned = wraps || showsNote
         HStack(alignment: topAligned ? .top : .center, spacing: 14) {
-            CheckRing(color: accent, isOn: task.isDone || isChecking, mark: agentMark, action: toggle)
+            CheckRing(color: accent, isOn: task.isDone || isChecking, mark: task.ringMark, action: toggle)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
                 .padding(.top, topAligned ? 7 : 0)
 
@@ -59,7 +59,7 @@ struct TaskRow: View {
 
                     if isEditingNote {
                         noteEditor
-                    } else if let noteText {
+                    } else if let noteText = task.noteLabel {
                         noteLine(noteText)
                             .onTapGesture(count: 2, perform: startEditingNote)
                     }
@@ -160,11 +160,6 @@ struct TaskRow: View {
         Color(hex: task.project?.colorHex ?? ProjectPalette.noProject)
     }
 
-    private var agentMark: CheckRing.Mark {
-        guard task.isForClaude, !task.isDone else { return .own }
-        return task.isClaimed() ? .working : .waiting
-    }
-
     private var meta: Text? {
         let now = DayClock.shared.today
         let date = isScheduling ? model.scheduleDraft.date : task.date
@@ -185,41 +180,15 @@ struct TaskRow: View {
         }
     }
 
-    private func agentMeta(now: Date) -> Text? {
-        guard task.isForClaude, !task.isDone else { return nil }
-        guard task.isClaimed(now: now), let since = task.claimedAt else {
-            return Text(verbatim: "Claude")
-        }
-        let minutes = max(1, Int(now.timeIntervalSince(since) / 60))
-        return Text(verbatim: "Claude · ") + Text("working \(minutes) min").foregroundStyle(PanelStyle.claude)
-    }
-
     private func metaText(now: Date) -> Text? {
-        let parts = [meta, agentMeta(now: now)].compactMap { $0 }
+        let parts = [meta, task.agentLabel(now: now)].compactMap { $0 }
         guard let first = parts.first else { return nil }
         return parts.dropFirst().reduce(first) { $0 + Text(verbatim: " · ") + $1 }
     }
 
-    private var noteText: Text? {
-        guard !task.note.isEmpty else { return nil }
-        let note = Text(verbatim: task.note)
-        if task.agentStatus == .returned {
-            return Text("Claude asks:").foregroundStyle(PanelStyle.claude) + Text(verbatim: " ") + note
-        }
-        if task.isFromAgent || (task.isForClaude && task.isDone) {
-            let prefix = Text(verbatim: "Claude:")
-            return (task.isDone ? prefix : prefix.foregroundStyle(PanelStyle.claude)) + Text(verbatim: " ") + note
-        }
-        return note
-    }
-
-    private var showsNoteMark: Bool {
-        task.agentStatus == .returned || task.isFromAgent || (task.isForClaude && task.isDone)
-    }
-
     private func noteLine(_ text: Text) -> some View {
         HStack(spacing: 5) {
-            if showsNoteMark {
+            if task.showsNoteMark {
                 Glyph(kind: .sparkle, size: 9, filled: true)
                     .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.claude)
             }
@@ -306,73 +275,6 @@ struct TaskRow: View {
         withAnimation(.snappy) {
             store.delete(task)
         }
-    }
-}
-
-struct CheckRing: View {
-    enum Mark {
-        case own
-        case waiting
-        case working
-    }
-
-    let color: Color
-    let isOn: Bool
-    var mark: Mark = .own
-    let action: () -> Void
-
-    @State private var isHovered = false
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(color.opacity(isOn ? 1 : isHovered ? 0.24 : 0))
-                switch mark {
-                case .own:
-                    Circle()
-                        .strokeBorder(color, lineWidth: 2)
-                case .waiting:
-                    Circle()
-                        .strokeBorder(color, style: StrokeStyle(lineWidth: 2, dash: [3, 2.4]))
-                case .working:
-                    Circle()
-                        .strokeBorder(color.opacity(0.35), lineWidth: 2)
-                    WorkingArc()
-                }
-                if mark != .own, !isOn {
-                    Glyph(kind: .sparkle, size: 9, filled: true)
-                        .foregroundStyle(PanelStyle.claude)
-                }
-                Glyph(kind: .check, size: 12)
-                    .foregroundStyle(.black)
-                    .opacity(isOn ? 1 : 0)
-                    .scaleEffect(isOn ? 1 : 0.6)
-            }
-            .frame(width: 22, height: 22)
-            .frame(width: 30, height: 30)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onHover { isHovered = $0 }
-        .animation(.easeOut(duration: 0.18), value: isOn)
-    }
-}
-
-private struct WorkingArc: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isSpinning = false
-
-    var body: some View {
-        Circle()
-            .trim(from: 0, to: 0.3)
-            .stroke(PanelStyle.claude, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-            .padding(1)
-            .rotationEffect(.degrees(isSpinning ? 360 : 0))
-            .animation(reduceMotion ? nil : .linear(duration: 1.6).repeatForever(autoreverses: false), value: isSpinning)
-            .onAppear {
-                isSpinning = !reduceMotion
-            }
     }
 }
 

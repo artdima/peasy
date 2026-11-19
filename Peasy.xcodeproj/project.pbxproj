@@ -173,6 +173,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				8F3A1C422EA9000100D4E001 /* PeasyiOS */,
+				8F3A1C492EA9000100D4E001 /* Shared */,
 			);
 			name = PeasyiOS;
 			packageProductDependencies = (

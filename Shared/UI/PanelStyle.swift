@@ -1,5 +1,13 @@
-import AppKit
 import SwiftUI
+#if os(macOS)
+import AppKit
+
+typealias PlatformColor = NSColor
+#else
+import UIKit
+
+typealias PlatformColor = UIColor
+#endif
 
 /// Colors of the panel and the windows around it. Each one resolves against the
 /// appearance it is drawn in, so the theme is chosen by setting a window's appearance.
@@ -15,10 +23,10 @@ enum PanelStyle {
     static let hover = Color.themed(white: 0.06, black: 0.045)
     static let strongHover = Color.themed(white: 0.1, black: 0.07)
     static let pressed = Color.themed(white: 0.21, black: 0.1)
-    static let selection = Color.themed(dark: NSColor(hex: "#3D5CCC"), light: NSColor.black.withAlphaComponent(0.075))
+    static let selection = Color.themed(dark: PlatformColor(hex: "#3D5CCC"), light: PlatformColor.black.withAlphaComponent(0.075))
     static let pillSelection = selection
     static let selectedPrimary = Color.themed(dark: "#FFFFFF", light: "#1D1D1F")
-    static let selectedTertiary = Color.themed(dark: NSColor.white.withAlphaComponent(0.85), light: NSColor(hex: "#6E6E73"))
+    static let selectedTertiary = Color.themed(dark: PlatformColor.white.withAlphaComponent(0.85), light: PlatformColor(hex: "#6E6E73"))
     static let nameField = Color.themed(white: 0.12, black: 0.075)
     static let pillNameField = Color.themed(white: 0.13, black: 0.075)
     static let keyBorder = Color.themed(white: 0.18, black: 0.16)
@@ -32,34 +40,50 @@ enum PanelStyle {
 
 extension Color {
     init(hex: String) {
-        self.init(nsColor: NSColor(hex: hex))
+        self.init(platformColor: PlatformColor(hex: hex))
     }
 
     static func themed(dark: String, light: String) -> Color {
-        themed(dark: NSColor(hex: dark), light: NSColor(hex: light))
+        themed(dark: PlatformColor(hex: dark), light: PlatformColor(hex: light))
     }
 
     /// A white overlay in dark mode, a black one in light mode.
     static func themed(white: CGFloat, black: CGFloat) -> Color {
-        themed(dark: NSColor.white.withAlphaComponent(white), light: NSColor.black.withAlphaComponent(black))
+        themed(dark: PlatformColor.white.withAlphaComponent(white), light: PlatformColor.black.withAlphaComponent(black))
     }
 
-    static func themed(dark: NSColor, light: NSColor) -> Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
+    static func themed(dark: PlatformColor, light: PlatformColor) -> Color {
+        #if os(macOS)
+        return Color(nsColor: NSColor(name: nil) { appearance in
             appearance.bestMatch(from: [.darkAqua, .aqua]) == .aqua ? light : dark
         })
+        #else
+        return Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? dark : light
+        })
+        #endif
+    }
+
+    private init(platformColor: PlatformColor) {
+        #if os(macOS)
+        self.init(nsColor: platformColor)
+        #else
+        self.init(uiColor: platformColor)
+        #endif
     }
 }
 
-extension NSColor {
+extension PlatformColor {
     convenience init(hex: String) {
         let value = UInt64(hex.trimmingCharacters(in: CharacterSet(charactersIn: "#")), radix: 16) ?? 0
-        self.init(
-            srgbRed: CGFloat((value >> 16) & 0xFF) / 255,
-            green: CGFloat((value >> 8) & 0xFF) / 255,
-            blue: CGFloat(value & 0xFF) / 255,
-            alpha: 1
-        )
+        let red = CGFloat((value >> 16) & 0xFF) / 255
+        let green = CGFloat((value >> 8) & 0xFF) / 255
+        let blue = CGFloat(value & 0xFF) / 255
+        #if os(macOS)
+        self.init(srgbRed: red, green: green, blue: blue, alpha: 1)
+        #else
+        self.init(red: red, green: green, blue: blue, alpha: 1)
+        #endif
     }
 }
 

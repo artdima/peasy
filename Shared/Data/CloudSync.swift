@@ -6,6 +6,7 @@ enum CloudSync {
     static let enabledKey = "iCloudSyncEnabled"
 
     static let isEntitled: Bool = {
+        #if os(macOS)
         guard let task = SecTaskCreateFromSelf(nil),
               let value = SecTaskCopyValueForEntitlement(
                   task,
@@ -14,6 +15,10 @@ enum CloudSync {
               ) as? [String]
         else { return false }
         return value.contains(containerIdentifier)
+        #else
+        // iOS has no API to read the app's own entitlements; the iOS target is always signed with the container.
+        return true
+        #endif
     }()
 
     static func isEnabled(in defaults: UserDefaults = .standard) -> Bool {

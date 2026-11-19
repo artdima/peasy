@@ -6,7 +6,7 @@ import UserNotifications
 @MainActor
 @Observable
 final class Updater: NSObject {
-    nonisolated static let notificationID = "update"
+    nonisolated static let notificationID = Reminders.updateID
 
     private(set) var checksAutomatically = false
     @ObservationIgnored var willCheckForUpdates: () -> Void = {}

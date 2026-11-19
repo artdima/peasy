@@ -6,6 +6,7 @@ import UserNotifications
 @MainActor
 final class Reminders: NSObject {
     static let shared = Reminders()
+    nonisolated static let updateID = "update"
 
     var tasks: () -> [TaskItem] = { [] }
     var onOpen: () -> Void = {}
@@ -75,7 +76,7 @@ extension Reminders: UNUserNotificationCenterDelegate {
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        let isUpdate = response.notification.request.identifier == Updater.notificationID
+        let isUpdate = response.notification.request.identifier == Self.updateID
         let taskID = (response.notification.request.content.userInfo[ClaudeNotifications.taskIDKey] as? String)
             .flatMap(UUID.init(uuidString:))
         await MainActor.run {

@@ -1,8 +1,12 @@
-import AppKit
 import CloudKit
 import CryptoKit
 import Observation
 import SwiftData
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 enum FolderSyncStatus: Equatable {
     case off
@@ -108,6 +112,7 @@ final class FolderSync {
         container = nil
     }
 
+    #if os(macOS)
     func chooseFolder() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
@@ -119,7 +124,7 @@ final class FolderSync {
         NSApp.activate()
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
-            let bookmark = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+            let bookmark = try url.bookmarkData(options: Self.bookmarkCreation, includingResourceValuesForKeys: nil, relativeTo: nil)
             defaults.set(bookmark, forKey: Self.bookmarkKey)
         } catch {
             status = .failed(error.localizedDescription)
@@ -127,6 +132,7 @@ final class FolderSync {
         }
         activate(url)
     }
+    #endif
 
     /// Starts syncing through `url`, or through its `Peasy` subfolder when it isn't one already.
     func activate(_ url: URL) {
@@ -331,12 +337,12 @@ final class FolderSync {
     private func resolveBookmark() -> URL? {
         guard let bookmark = defaults.data(forKey: Self.bookmarkKey) else { return nil }
         var isStale = false
-        guard let url = try? URL(resolvingBookmarkData: bookmark, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale) else {
+        guard let url = try? URL(resolvingBookmarkData: bookmark, options: Self.bookmarkResolution, relativeTo: nil, bookmarkDataIsStale: &isStale) else {
             status = .noAccess
             return nil
         }
         if isStale, url.startAccessingSecurityScopedResource() {
-            if let fresh = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            if let fresh = try? url.bookmarkData(options: Self.bookmarkCreation, includingResourceValuesForKeys: nil, relativeTo: nil) {
                 defaults.set(fresh, forKey: Self.bookmarkKey)
             }
             url.stopAccessingSecurityScopedResource()
@@ -364,7 +370,15 @@ final class FolderSync {
         return "\(FileManager.default.displayName(atPath: parent.path)) › \(name)"
     }
 
+    #if os(macOS)
     private static let deviceName = Host.current().localizedName ?? "Mac"
+    private static let bookmarkCreation: URL.BookmarkCreationOptions = .withSecurityScope
+    private static let bookmarkResolution: URL.BookmarkResolutionOptions = .withSecurityScope
+    #else
+    private static let deviceName = UIDevice.current.name
+    private static let bookmarkCreation: URL.BookmarkCreationOptions = []
+    private static let bookmarkResolution: URL.BookmarkResolutionOptions = []
+    #endif
 }
 
 extension FolderSync {
