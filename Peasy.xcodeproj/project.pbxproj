@@ -55,6 +55,11 @@
 			path = PeasyiOS;
 			sourceTree = "<group>";
 		};
+		8F3A1C492EA9000100D4E001 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +94,7 @@
 				8F3A1C1A2EA9000100D4E001 /* Peasy */,
 				8F3A1C312EA9000100D4E001 /* PeasyTests */,
 				8F3A1C422EA9000100D4E001 /* PeasyiOS */,
+				8F3A1C492EA9000100D4E001 /* Shared */,
 				8F3A1C192EA9000100D4E001 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -120,6 +126,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				8F3A1C1A2EA9000100D4E001 /* Peasy */,
+				8F3A1C492EA9000100D4E001 /* Shared */,
 			);
 			name = Peasy;
 			packageProductDependencies = (
