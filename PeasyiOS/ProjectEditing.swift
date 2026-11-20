@@ -7,7 +7,6 @@ enum ProjectEdit: Equatable {
     case deleting(Project)
 }
 
-/// Rename, color, order and delete, shared by the project pills and the iPad sidebar.
 struct ProjectMenu: View {
     let project: Project
     let projects: [Project]

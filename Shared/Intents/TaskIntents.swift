@@ -17,6 +17,7 @@ nonisolated struct AddTaskIntent: AppIntent {
         guard let title = SharedStore.write({ $0.addTypedTask(text, to: .today)?.title }) ?? nil else {
             throw TaskIntentError.storeUnavailable
         }
+        await SharedStore.rescheduleRemindersOutsideApp()
         return .result(dialog: "Added to Today: \(title)")
     }
 }
@@ -42,11 +43,11 @@ nonisolated struct ToggleTaskIntent: AppIntent {
                 store.toggle(task)
             }
         }
+        await SharedStore.rescheduleRemindersOutsideApp()
         return .result()
     }
 }
 
-/// Runs in the app, which shows the new task sheet as it comes forward.
 nonisolated struct NewTaskIntent: AppIntent {
     static let title: LocalizedStringResource = "New task"
     static let description = IntentDescription("Opens Peasy with a new task.")

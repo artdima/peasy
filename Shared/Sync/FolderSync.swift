@@ -128,7 +128,6 @@ final class FolderSync {
     }
     #endif
 
-    /// Remembers a folder the user picked and starts syncing through it.
     func useFolder(_ url: URL) {
         let isAccessing = url.startAccessingSecurityScopedResource()
         defer {

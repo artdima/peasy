@@ -35,14 +35,18 @@ final class Reminders: NSObject {
         refreshTask = Task {
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
-            let center = UNUserNotificationCenter.current()
-            let stale = await center.pendingNotificationRequests()
-                .map(\.identifier)
-                .filter { $0.hasPrefix(Self.prefix) }
-            center.removePendingNotificationRequests(withIdentifiers: stale)
-            for request in requests {
-                try? await center.add(request)
-            }
+            await Self.replacePending(with: requests)
+        }
+    }
+
+    static func replacePending(with requests: [UNNotificationRequest]) async {
+        let center = UNUserNotificationCenter.current()
+        let stale = await center.pendingNotificationRequests()
+            .map(\.identifier)
+            .filter { $0.hasPrefix(prefix) }
+        center.removePendingNotificationRequests(withIdentifiers: stale)
+        for request in requests {
+            try? await center.add(request)
         }
     }
 

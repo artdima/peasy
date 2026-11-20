@@ -1,7 +1,6 @@
 import Foundation
 
-/// Claude works through Peasy on the Mac, so the iPhone learns what it did only from
-/// the changes sync brings in. Each look compares Claude's tasks with the previous one.
+/// Claude works through Peasy on the Mac, so the iPhone learns what it did only from synced changes.
 final class ClaudeWatch {
     struct Look {
         var events: [AgentEvent] = []
@@ -16,7 +15,6 @@ final class ClaudeWatch {
 
     private var known: [UUID: State]?
 
-    /// The first look only takes stock.
     func look(at tasks: [TaskItem]) -> Look {
         let current = Dictionary(
             tasks.map { ($0.id, State(isForClaude: $0.isForClaude, isDone: $0.isDone, agentStatus: $0.agentStatus)) },

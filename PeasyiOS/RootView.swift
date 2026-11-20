@@ -45,7 +45,6 @@ struct RootView: View {
         }
     }
 
-    /// On the iPad the sidebar takes over the pills and the toolbar the header buttons.
     private func content(list: TaskList, store: TaskStore, isSplit: Bool) -> some View {
         let now = DayClock.shared.today
         let openTasks = TaskQueries.openTasks(in: list, from: tasks, now: now)

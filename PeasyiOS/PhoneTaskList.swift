@@ -1,8 +1,7 @@
 import Observation
 import SwiftUI
 
-/// What a hardware keyboard does in the list: ↑/↓ pick a task, Space ticks it off,
-/// Return edits it. The rows carry out the requests so they animate as on a tap.
+/// The rows carry out the requests, so a key animates the same as a tap.
 @Observable
 final class TaskKeyboard {
     var selectedID: UUID?

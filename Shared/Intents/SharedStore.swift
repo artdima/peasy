@@ -4,8 +4,6 @@ import Observation
 import SwiftData
 import WidgetKit
 
-/// The store as intents and widgets reach it: the app's own container when they run
-/// in the app, and a local one without CloudKit in the widget extension.
 enum SharedStore {
     static var appContainer: ModelContainer?
 
@@ -27,6 +25,12 @@ enum SharedStore {
         }
         WidgetCenter.shared.reloadAllTimelines()
         return result
+    }
+
+    /// The app reschedules reminders after every save; the widget extension has to do it itself.
+    static func rescheduleRemindersOutsideApp() async {
+        guard appContainer == nil, let requests = read({ Reminders.requests(for: $0.allTasks(), now: .now) }) else { return }
+        await Reminders.replacePending(with: requests)
     }
 
     /// The app's context keeps the objects it has loaded, so it has to reopen the
