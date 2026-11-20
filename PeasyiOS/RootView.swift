@@ -31,7 +31,7 @@ struct RootView: View {
             .padding(.horizontal, 20)
             .padding(.top, 2)
 
-            ListPills(projects: projects, tasks: tasks, selection: selection)
+            ListPills(projects: projects, tasks: tasks, store: store, selection: selection)
                 .padding(.top, 14)
 
             PhoneTaskList(
