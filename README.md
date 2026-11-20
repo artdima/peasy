@@ -41,7 +41,7 @@ What you see in the list:
 - **A dashed ring.** The task waits for Claude.
 - **A spinning arc and “working 12 min”.** Claude is on it.
 
-On the iPhone you hand tasks to Claude and answer its questions the same way; Claude picks them up through Peasy on your Mac once iCloud brings them over.
+On the iPhone you hand tasks to Claude and answer its questions the same way; Claude picks them up through Peasy on your Mac once iCloud brings them over. The iPhone lets you know when Claude needs help and, if you turn it on in Settings, when it finishes a task.
 
 Claude Code works in the project named like its folder, so in a repository called `peasy` it adds and takes tasks in the Peasy project. In Claude Desktop, name the project when you ask. Only you hand tasks to Claude: a task Claude adds is always yours, even with `@claude` in its title. Claude's tasks don't count in the sprout's number, and Peasy notifies you when Claude needs help and, if you turn it on, when it finishes a task.
 

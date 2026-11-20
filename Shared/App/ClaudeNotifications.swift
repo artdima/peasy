@@ -34,11 +34,13 @@ nonisolated enum ClaudeNotifications {
         return UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
     }
 
-    static func post(_ event: AgentEvent) {
+    static func post(_ event: AgentEvent, asksPermission: Bool = true) {
         Task {
             guard let request = request(for: event) else { return }
             let center = UNUserNotificationCenter.current()
-            guard (try? await center.requestAuthorization(options: [.alert, .sound])) == true else { return }
+            if asksPermission {
+                guard (try? await center.requestAuthorization(options: [.alert, .sound])) == true else { return }
+            }
             try? await center.add(request)
         }
     }

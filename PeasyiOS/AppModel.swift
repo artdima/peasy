@@ -4,6 +4,7 @@ import CoreData
 import Foundation
 import Observation
 import SwiftData
+import UIKit
 import UserNotifications
 import WidgetKit
 
@@ -13,6 +14,7 @@ final class AppModel {
 
     let sync = SyncMonitor()
     let folderSync = FolderSync()
+    @ObservationIgnored private let claudeWatch = ClaudeWatch()
     private(set) var container: ModelContainer?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var pendingLink: AppLink?
@@ -77,6 +79,7 @@ final class AppModel {
         folderSync.attach(container)
         Reminders.shared.refresh()
         updateBadge()
+        watchClaude()
         if let pendingLink {
             self.pendingLink = nil
             show(pendingLink)
@@ -120,6 +123,7 @@ final class AppModel {
                     Reminders.shared.refresh()
                     self?.updateBadge()
                     self?.folderSync.scheduleSync()
+                    self?.watchClaude()
                     WidgetCenter.shared.reloadAllTimelines()
                 }
             })
@@ -135,6 +139,26 @@ final class AppModel {
                 self?.updateBadge()
             }
         })
+    }
+
+    /// Reads the store itself: the main context may not have merged an import yet.
+    private func watchClaude() {
+        guard let container else { return }
+        let look = claudeWatch.look(at: TaskStore(context: ModelContext(container)).allTasks())
+        for event in look.events {
+            ClaudeNotifications.post(event, asksPermission: false)
+        }
+        if look.handedToClaude, UIApplication.shared.applicationState == .active {
+            askForClaudeNotifications()
+        }
+    }
+
+    private func askForClaudeNotifications() {
+        guard ClaudeNotifications.isOn(ClaudeNotifications.needsHelpKey) || ClaudeNotifications.isOn(ClaudeNotifications.finishedKey) else { return }
+        Task {
+            guard await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .notDetermined else { return }
+            _ = await Reminders.shared.requestPermission()
+        }
     }
 
     private func show(_ link: AppLink) {

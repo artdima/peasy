@@ -27,6 +27,8 @@ struct SettingsSheet: View {
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
     @AppStorage(PhoneSettings.multilineTasksKey) private var multilineTasks = true
     @AppStorage(PhoneSettings.showsBadgeKey) private var showsBadge = true
+    @AppStorage(ClaudeNotifications.needsHelpKey) private var notifiesNeedsHelp = true
+    @AppStorage(ClaudeNotifications.finishedKey) private var notifiesFinished = false
     @AppStorage(FolderSync.deviceNameKey) private var deviceName = ""
     @State private var notificationStatus: UNAuthorizationStatus?
     @State private var isChoosingFolder = false
@@ -117,8 +119,12 @@ struct SettingsSheet: View {
                 Section {
                     Text("Claude works with your tasks through Peasy on your Mac. Tasks you hand to Claude here reach it through iCloud.")
                         .foregroundStyle(.secondary)
+                    Toggle("Claude needs help", isOn: $notifiesNeedsHelp)
+                    Toggle("Claude finished a task", isOn: $notifiesFinished)
                 } header: {
                     Text(verbatim: "Claude")
+                } footer: {
+                    Text("Notifications on this iPhone. If your Mac already tells you, turn them off here.")
                 }
 
                 Section {
@@ -149,11 +155,13 @@ struct SettingsSheet: View {
                 }
             }
             .onChange(of: showsBadge) { _, isOn in
-                guard isOn else { return }
-                Task {
-                    _ = await Reminders.shared.requestPermission()
-                    await refreshNotificationStatus()
-                }
+                askForNotifications(isOn)
+            }
+            .onChange(of: notifiesNeedsHelp) { _, isOn in
+                askForNotifications(isOn)
+            }
+            .onChange(of: notifiesFinished) { _, isOn in
+                askForNotifications(isOn)
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
@@ -208,6 +216,14 @@ struct SettingsSheet: View {
     private func open(_ string: String) {
         if let url = URL(string: string) {
             openURL(url)
+        }
+    }
+
+    private func askForNotifications(_ isOn: Bool) {
+        guard isOn else { return }
+        Task {
+            _ = await Reminders.shared.requestPermission()
+            await refreshNotificationStatus()
         }
     }
 

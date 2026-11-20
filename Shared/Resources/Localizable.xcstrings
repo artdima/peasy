@@ -2177,6 +2177,16 @@
           }
         }
       }
+    },
+    "Notifications on this iPhone. If your Mac already tells you, turn them off here." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомления на этом iPhone. Если вам уже сообщает Mac, выключите их здесь."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
