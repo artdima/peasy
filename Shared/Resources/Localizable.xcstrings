@@ -1655,6 +1655,36 @@
           }
         }
       }
+    },
+    "Date…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата…"
+          }
+        }
+      }
+    },
+    "Next week" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "След. неделя"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

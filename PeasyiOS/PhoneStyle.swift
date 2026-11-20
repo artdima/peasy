@@ -5,4 +5,6 @@ enum PhoneStyle {
     static let pill = Color.themed(white: 0.08, black: 0.05)
     static let control = Color.themed(white: 0.1, black: 0.06)
     static let sheet = Color.themed(dark: "#2C2C2E", light: "#FFFFFF")
+    static let accent = Color.themed(dark: "#7C9BFF", light: "#3D5CCC")
+    static let pastDay = Color.themed(dark: "#636366", light: "#AEAEB2")
 }

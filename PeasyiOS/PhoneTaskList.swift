@@ -8,12 +8,17 @@ struct PhoneTaskList: View {
     let store: TaskStore
 
     @State private var showsCompleted = false
+    @State private var schedulingTask: TaskItem?
+    @State private var scheduledTask: TaskItem?
+    @State private var scheduleDraft = ScheduleDraft()
 
     var body: some View {
         List {
             ForEach(openTasks) { task in
-                PhoneTaskRow(task: task, list: list, projects: projects, store: store)
-                    .taskRow()
+                PhoneTaskRow(task: task, list: list, projects: projects, store: store) {
+                    schedule(task)
+                }
+                .taskRow()
             }
             .onMove { source, destination in
                 withAnimation(.snappy) {
@@ -53,8 +58,10 @@ struct PhoneTaskList: View {
 
                 if showsCompleted {
                     ForEach(completedTasks) { task in
-                        PhoneTaskRow(task: task, list: list, projects: projects, store: store)
-                            .taskRow()
+                        PhoneTaskRow(task: task, list: list, projects: projects, store: store) {
+                            schedule(task)
+                        }
+                        .taskRow()
                     }
                 }
             }
@@ -64,6 +71,27 @@ struct PhoneTaskList: View {
         .scrollDismissesKeyboard(.interactively)
         .onChange(of: list) {
             showsCompleted = false
+        }
+        .sheet(item: $schedulingTask, onDismiss: commitSchedule) { task in
+            ScheduleSheet(title: task.title, draft: $scheduleDraft)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(24)
+                .presentationBackground(PhoneStyle.sheet)
+        }
+    }
+
+    private func schedule(_ task: TaskItem) {
+        scheduleDraft = ScheduleDraft(date: task.date, hasTime: task.hasTime)
+        scheduledTask = task
+        schedulingTask = task
+    }
+
+    private func commitSchedule() {
+        guard let task = scheduledTask else { return }
+        scheduledTask = nil
+        withAnimation(.snappy) {
+            store.schedule(task, on: scheduleDraft.date, hasTime: scheduleDraft.hasTime)
         }
     }
 }

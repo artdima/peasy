@@ -11,6 +11,7 @@ struct PhoneTaskRow: View {
     let list: TaskList
     let projects: [Project]
     let store: TaskStore
+    let onSchedule: () -> Void
 
     @Environment(\.openURL) private var openURL
     @State private var isChecking = false
@@ -130,6 +131,10 @@ struct PhoneTaskRow: View {
                     Label(task.isForClaude ? LocalizedStringKey("Take Back from Claude") : "Hand to Claude", systemImage: "sparkle")
                 }
                 .tint(Color(hex: "#B44A25"))
+                Button(action: onSchedule) {
+                    Label("Date", systemImage: "calendar")
+                }
+                .tint(Color(hex: "#0064D2"))
             }
         }
         .contextMenu {
@@ -138,6 +143,9 @@ struct PhoneTaskRow: View {
                 withAnimation(.snappy) {
                     store.setToday(task, !task.isDue(on: .now))
                 }
+            }
+            if !task.isDone {
+                Button("Date and Time…", action: onSchedule)
             }
             Button("Edit") {
                 startEditing(.title)

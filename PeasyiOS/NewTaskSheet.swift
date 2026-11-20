@@ -12,6 +12,7 @@ struct NewTaskSheet: View {
     @State private var projectID: UUID?
     @State private var schedule: ScheduleDraft
     @State private var isForClaude = false
+    @State private var showsSchedule = false
     @FocusState private var isTitleFocused: Bool
 
     init(projectID: UUID?) {
@@ -93,6 +94,7 @@ struct NewTaskSheet: View {
                 section("When") {
                     let tomorrow = ScheduleDates.adding(days: 1, to: today)
                     let weekend = ScheduleDates.weekend(after: today)
+                    let customDate = customDateLabel(today: today, quickDays: [today, tomorrow, weekend])
                     PhonePill(title: Text("Today"), isSelected: isPicked(today), action: { pick(today) }) {
                         SproutIcon()
                             .frame(width: 16, height: 16)
@@ -104,6 +106,10 @@ struct NewTaskSheet: View {
                     PhonePill(title: Text("This Weekend"), isSelected: isPicked(weekend), action: { pick(weekend) }) {
                         Glyph(kind: .sofa, size: 16)
                             .foregroundStyle(Color(hex: "#64D2FF"))
+                    }
+                    PhonePill(title: customDate ?? Text("Date…"), isSelected: customDate != nil, action: { showsSchedule = true }) {
+                        Glyph(kind: .calendar, size: 16)
+                            .foregroundStyle(Color(hex: "#BF5AF2"))
                     }
                 }
 
@@ -118,6 +124,13 @@ struct NewTaskSheet: View {
         .foregroundStyle(PanelStyle.primary)
         .onAppear {
             isTitleFocused = true
+        }
+        .sheet(isPresented: $showsSchedule) {
+            ScheduleSheet(title: title, draft: $schedule)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(24)
+                .presentationBackground(PhoneStyle.sheet)
         }
     }
 
@@ -161,6 +174,14 @@ struct NewTaskSheet: View {
     private func isPicked(_ day: Date) -> Bool {
         guard let date = schedule.date, !schedule.hasTime else { return false }
         return Calendar.current.isDate(date, inSameDayAs: day)
+    }
+
+    private func customDateLabel(today: Date, quickDays: [Date]) -> Text? {
+        guard let date = schedule.date else { return nil }
+        if !schedule.hasTime, quickDays.contains(where: { Calendar.current.isDate($0, inSameDayAs: date) }) {
+            return nil
+        }
+        return TaskScheduleLabel.text(date: date, hasTime: schedule.hasTime, isDone: false, inToday: false, now: today)
     }
 
     private func pick(_ day: Date) {
