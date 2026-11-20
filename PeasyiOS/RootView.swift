@@ -7,15 +7,13 @@ struct RootView: View {
     private var projects: [Project]
     @Query private var tasks: [TaskItem]
     @AppStorage(TaskList.storageKey) private var selectedListValue = TaskList.today.storageValue
-    @State private var draft = ""
-    @FocusState private var isDraftFocused: Bool
+    @State private var showsNewTask = false
 
     var body: some View {
         let store = TaskStore(context: modelContext)
         let list = selectedList
         let now = DayClock.shared.today
         let openTasks = TaskQueries.openTasks(in: list, from: tasks, now: now)
-        let placeholder: LocalizedStringKey = list == .today ? "New task for today" : "New task"
         VStack(alignment: .leading, spacing: 0) {
             header(now: now)
 
@@ -47,19 +45,40 @@ struct RootView: View {
         .foregroundStyle(PanelStyle.primary)
         .background(PhoneStyle.background)
         .safeAreaInset(edge: .bottom) {
-            TextField(placeholder, text: $draft)
-                .focused($isDraftFocused)
-                .onSubmit {
-                    store.addTypedTask(draft, to: list)
-                    draft = ""
-                    isDraftFocused = true
+            Button {
+                showsNewTask = true
+            } label: {
+                HStack(spacing: 10) {
+                    Glyph(kind: .plus, size: 18)
+                    Text("New task")
+                        .font(.body)
+                    Spacer(minLength: 8)
+                    Text("@claude — hand to Claude")
+                        .font(.footnote)
+                        .lineLimit(1)
                 }
+                .foregroundStyle(PanelStyle.secondary)
                 .padding(.horizontal, 14)
-                .frame(minHeight: 48)
+                .frame(maxWidth: .infinity, minHeight: 48)
                 .background(PhoneStyle.pill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(PhoneStyle.background)
+                .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
+            .background(PhoneStyle.background)
+            .overlay(alignment: .top) {
+                Rectangle()
+                    .fill(PanelStyle.separator)
+                    .frame(height: 1)
+            }
+        }
+        .sheet(isPresented: $showsNewTask) {
+            NewTaskSheet(projectID: projectID(of: list))
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(24)
+                .presentationBackground(PhoneStyle.sheet)
         }
     }
 
@@ -70,7 +89,7 @@ struct RootView: View {
                 .foregroundStyle(PanelStyle.heading)
             Spacer(minLength: 8)
             Button {
-                isDraftFocused = true
+                showsNewTask = true
             } label: {
                 Glyph(kind: .newTask, size: 20)
                     .foregroundStyle(PanelStyle.secondary)
@@ -91,6 +110,13 @@ struct RootView: View {
         case .all: Text("All")
         case .project(let id): Text(projects.first { $0.id == id }?.name ?? "")
         }
+    }
+
+    private func projectID(of list: TaskList) -> UUID? {
+        if case .project(let id) = list {
+            return id
+        }
+        return nil
     }
 
     private var selectedList: TaskList {
