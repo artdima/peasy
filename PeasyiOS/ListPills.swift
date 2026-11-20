@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct ListPills: View {
     let projects: [Project]
@@ -7,10 +6,7 @@ struct ListPills: View {
     let store: TaskStore
     @Binding var selection: TaskList
 
-    @State private var isNaming = false
-    @State private var renaming: Project?
-    @State private var pendingDeletion: Project?
-    @State private var name = ""
+    @State private var edit: ProjectEdit?
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -33,7 +29,7 @@ struct ListPills: View {
                             ColorDot(hex: project.colorHex)
                         }
                         .contextMenu {
-                            projectMenu(project)
+                            ProjectMenu(project: project, projects: projects, store: store, edit: $edit, selection: $selection)
                         }
                         .id(list)
                     }
@@ -52,39 +48,12 @@ struct ListPills: View {
                 }
             }
         }
-        .alert("New project", isPresented: $isNaming) {
-            TextField("Project name", text: $name)
-            Button("Cancel", role: .cancel) {}
-            Button("Create") {
-                if let project = store.createProject(named: name) {
-                    selection = .project(project.id)
-                }
-            }
-        }
-        .alert("Rename", isPresented: isRenaming, presenting: renaming) { project in
-            TextField("Project name", text: $name)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
-                store.rename(project, to: name)
-            }
-        }
-        .confirmationDialog(
-            Text("Delete “\(pendingDeletion?.name ?? "")” and all its tasks?"),
-            isPresented: isConfirmingDeletion,
-            titleVisibility: .visible,
-            presenting: pendingDeletion
-        ) { project in
-            Button("Delete", role: .destructive) {
-                delete(project)
-            }
-            Button("Cancel", role: .cancel) {}
-        }
+        .projectEditing($edit, store: store, selection: $selection)
     }
 
     private var newProjectButton: some View {
         Button {
-            name = ""
-            isNaming = true
+            edit = .naming
         } label: {
             HStack(spacing: 7) {
                 Glyph(kind: .plus, size: 12)
@@ -105,87 +74,7 @@ struct ListPills: View {
         .accessibilityLabel(Text("New project"))
     }
 
-    @ViewBuilder
-    private func projectMenu(_ project: Project) -> some View {
-        Button("Rename") {
-            name = project.name
-            renaming = project
-        }
-        Menu("Color") {
-            ForEach(ProjectPalette.colors, id: \.self) { hex in
-                Button {
-                    store.setColor(project, to: hex)
-                } label: {
-                    Label {
-                        Text(ProjectPalette.name(of: hex))
-                    } icon: {
-                        Image(uiImage: Self.swatch(hex: hex, isOn: project.colorHex == hex))
-                    }
-                }
-            }
-        }
-        if let index = projects.firstIndex(where: { $0.id == project.id }) {
-            if index > 0 {
-                Button("Move Left") {
-                    moveProject(from: index, to: index - 1)
-                }
-            }
-            if index < projects.count - 1 {
-                Button("Move Right") {
-                    moveProject(from: index, to: index + 2)
-                }
-            }
-        }
-        Button("Delete…", role: .destructive) {
-            if (project.tasks ?? []).isEmpty {
-                delete(project)
-            } else {
-                pendingDeletion = project
-            }
-        }
-    }
-
-    private var isRenaming: Binding<Bool> {
-        Binding {
-            renaming != nil
-        } set: { isOn in
-            if !isOn {
-                renaming = nil
-            }
-        }
-    }
-
-    private var isConfirmingDeletion: Binding<Bool> {
-        Binding {
-            pendingDeletion != nil
-        } set: { isOn in
-            if !isOn {
-                pendingDeletion = nil
-            }
-        }
-    }
-
     private func count(in list: TaskList) -> Int {
         TaskQueries.ownOpenTasks(in: list, from: tasks, now: DayClock.shared.today).count
-    }
-
-    private func moveProject(from index: Int, to destination: Int) {
-        withAnimation(.snappy) {
-            store.moveProjects(from: IndexSet(integer: index), to: destination)
-        }
-    }
-
-    private func delete(_ project: Project) {
-        if selection == .project(project.id) {
-            selection = .today
-        }
-        withAnimation(.snappy) {
-            store.delete(project)
-        }
-    }
-
-    private static func swatch(hex: String, isOn: Bool) -> UIImage {
-        let symbol = UIImage(systemName: isOn ? "checkmark.circle.fill" : "circle.fill") ?? UIImage()
-        return symbol.withTintColor(PlatformColor(hex: hex), renderingMode: .alwaysOriginal)
     }
 }

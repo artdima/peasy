@@ -14,6 +14,7 @@ struct PhoneTaskRow: View {
     let onSchedule: () -> Void
 
     @Environment(\.openURL) private var openURL
+    @Environment(TaskKeyboard.self) private var keyboard: TaskKeyboard?
     @State private var isChecking = false
     @State private var editing: EditingField?
     @State private var draft = ""
@@ -117,6 +118,30 @@ struct PhoneTaskRow: View {
         .onChange(of: isEditorFocused) { _, focused in
             if !focused {
                 commit()
+            }
+        }
+        .onChange(of: editing) { _, field in
+            if field != nil {
+                keyboard?.editingID = task.id
+            } else if keyboard?.editingID == task.id {
+                keyboard?.editingID = nil
+            }
+        }
+        .onChange(of: keyboard?.editRequest) { _, id in
+            guard id == task.id else { return }
+            keyboard?.editRequest = nil
+            if editing == nil {
+                startEditing(.title)
+            }
+        }
+        .onChange(of: keyboard?.toggleRequest) { _, id in
+            guard id == task.id else { return }
+            keyboard?.toggleRequest = nil
+            toggle()
+        }
+        .onDisappear {
+            if keyboard?.editingID == task.id {
+                keyboard?.editingID = nil
             }
         }
         .toolbar {

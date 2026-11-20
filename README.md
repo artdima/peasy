@@ -12,7 +12,7 @@
 - **Quick add.** ⌃⌥N in any app, or + next to Settings in the panel, opens a small window for a new task.
 - **Keyboard.** ↑/↓ to select, Space to complete, Return to edit, ⌘N for a new task.
 - **Sync.** iCloud across your Macs and iPhone, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
-- **iPhone.** The same lists, projects, dates and reminders, a badge with what's left for today, and tasks handed to Claude. Home Screen widgets show today and Claude's questions, and Siri, Shortcuts and a Control Center button add tasks.
+- **iPhone.** The same lists, projects, dates and reminders, a badge with what's left for today, and tasks handed to Claude. Home Screen widgets show today and Claude's questions, and Siri, Shortcuts and a Control Center button add tasks. On the iPad projects sit in a sidebar, and a keyboard works as on the Mac: ↑/↓, Space, Return and ⌘N.
 - **Tasks with Claude.** Claude adds the tasks only you can do and works on the ones you hand to it, see [below](#tasks-with-claude).
 - **Updates.** Peasy checks for new versions and installs them in a click.
 - **English and Russian**, dark and light themes.
@@ -62,11 +62,11 @@ Peasy has to be running while Claude uses it, and the Connection row shows which
 
 Download the latest disk image from [Releases](https://github.com/artdima/peasy/releases), open it and drag Peasy to Applications. Peasy needs macOS 14 or later.
 
-Peasy for iPhone isn't on the App Store yet; build it from source. It needs iOS 17 or later.
+Peasy for iPhone and iPad isn't on the App Store yet; build it from source. It needs iOS 17 or later.
 
 ## Build
 
-You need Xcode 26 or later. Open `Peasy.xcodeproj`, choose the `Peasy` scheme for the Mac or `PeasyiOS` for the iPhone, and run.
+You need Xcode 26 or later. Open `Peasy.xcodeproj`, choose the `Peasy` scheme for the Mac or `PeasyiOS` for the iPhone and iPad, and run.
 
 `Shared/` holds what both apps use: the models, sync, reminders and common views. `Peasy/` is the Mac app with the menu bar, Settings window and Claude's MCP server, `PeasyiOS/` the iPhone app and `PeasyWidgets/` its widgets.
 

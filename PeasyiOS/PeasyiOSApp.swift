@@ -30,5 +30,13 @@ struct PeasyiOSApp: App {
         .backgroundTask(.appRefresh(AppModel.folderRefreshID)) {
             await model.refreshFolder()
         }
+        .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("New task") {
+                    NewTaskPrompt.shared.isPresented = true
+                }
+                .keyboardShortcut("n")
+            }
+        }
     }
 }
