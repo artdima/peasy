@@ -2,7 +2,7 @@
   <img src="docs/banner.png" alt="Peasy, a to-do list in your Mac's menu bar">
 </p>
 
-**Peasy** is a small to-do list that lives in the macOS menu bar. Click the sprout, jot a task down, get back to work.
+**Peasy** is a small to-do list that lives in the macOS menu bar. Click the sprout, jot a task down, get back to work. An iPhone app keeps the same list in your pocket.
 
 ## Features
 
@@ -11,7 +11,8 @@
 - **Dates and reminders.** Pick a day and an optional time. Overdue tasks stay in Today, marked in red.
 - **Quick add.** ⌃⌥N in any app, or + next to Settings in the panel, opens a small window for a new task.
 - **Keyboard.** ↑/↓ to select, Space to complete, Return to edit, ⌘N for a new task.
-- **Sync.** iCloud across your Macs, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
+- **Sync.** iCloud across your Macs and iPhone, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
+- **iPhone.** The same lists, projects, dates and reminders, a badge with what's left for today, and tasks handed to Claude.
 - **Tasks with Claude.** Claude adds the tasks only you can do and works on the ones you hand to it, see [below](#tasks-with-claude).
 - **Updates.** Peasy checks for new versions and installs them in a click.
 - **English and Russian**, dark and light themes.
@@ -40,6 +41,8 @@ What you see in the list:
 - **A dashed ring.** The task waits for Claude.
 - **A spinning arc and “working 12 min”.** Claude is on it.
 
+On the iPhone you hand tasks to Claude and answer its questions the same way; Claude picks them up through Peasy on your Mac once iCloud brings them over.
+
 Claude Code works in the project named like its folder, so in a repository called `peasy` it adds and takes tasks in the Peasy project. In Claude Desktop, name the project when you ask. Only you hand tasks to Claude: a task Claude adds is always yours, even with `@claude` in its title. Claude's tasks don't count in the sprout's number, and Peasy notifies you when Claude needs help and, if you turn it on, when it finishes a task.
 
 ### Connect Claude
@@ -59,11 +62,15 @@ Peasy has to be running while Claude uses it, and the Connection row shows which
 
 Download the latest disk image from [Releases](https://github.com/artdima/peasy/releases), open it and drag Peasy to Applications. Peasy needs macOS 14 or later.
 
+Peasy for iPhone isn't on the App Store yet; build it from source. It needs iOS 17 or later.
+
 ## Build
 
-You need Xcode 26 or later. Open `Peasy.xcodeproj` and run.
+You need Xcode 26 or later. Open `Peasy.xcodeproj`, choose the `Peasy` scheme for the Mac or `PeasyiOS` for the iPhone, and run.
 
-iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements` and in `CloudSync.containerIdentifier`. Without the container, Peasy keeps tasks on the Mac.
+`Shared/` holds what both apps use: the models, sync, reminders and common views. `Peasy/` is the Mac app with the menu bar, Settings window and Claude's MCP server, `PeasyiOS/` the iPhone app.
+
+iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements`, `PeasyiOS/PeasyiOS.entitlements` and `CloudSync.containerIdentifier`, and the app group `group.com.artdima.Peasy` in `PeasyiOS/PeasyiOS.entitlements`. Without the container, the Mac app keeps tasks on the Mac; the iPhone app expects it.
 
 Updates come through Sparkle, see [docs/releasing.md](docs/releasing.md).
 

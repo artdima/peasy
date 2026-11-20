@@ -24,10 +24,20 @@ SPARKLE=$(echo ~/Library/Developer/Xcode/DerivedData/Peasy-*/SourcePackages/arti
 ## Every release
 
 1. Raise `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`. Sparkle compares the build number, so it has to grow every time. Write the notes in `docs/releases/<version>.md`, commit and push.
-2. If the release adds fields to `TaskItem` or `Project`, run a debug build signed with the iCloud container once, so the fields reach the CloudKit Development schema. Then in [CloudKit Console](https://icloud.developer.apple.com) open `iCloud.com.artdima.Peasy`, choose Deploy Schema Changes and compare the fields of `CD_TaskItem` and `CD_Project` in Development and Production: the dialog can show no changes when there are some. Production only accepts additions, so a field can't be renamed or removed afterwards.
+2. If the release adds fields to `TaskItem` or `Project` in `Shared/`, run a debug build signed with the iCloud container once, so the fields reach the CloudKit Development schema. Then in [CloudKit Console](https://icloud.developer.apple.com) open `iCloud.com.artdima.Peasy`, choose Deploy Schema Changes and compare the fields of `CD_TaskItem` and `CD_Project` in Development and Production: the dialog can show no changes when there are some. Production only accepts additions, so a field can't be renamed or removed afterwards. The iPhone app reads the same records, so deploy before either app ships.
 3. Run `scripts/release.sh`. It archives Peasy, exports it with Developer ID, notarizes and staples it, zips it into `release/<version>/` and adds it to `appcast.xml`. Next to the zip it puts a signed and notarized disk image for people who download Peasy by hand.
 4. Publish the GitHub release `v<version>` with the disk image and the zip, then push `appcast.xml` to `main`. The script prints both commands.
 
 The disk image window shows `scripts/dmg/background.png` and `background@2x.png`, 660×400 and 1320×800. The script joins them into one TIFF, so a new background needs both sizes. Peasy sits at (170, 194), Applications at (490, 194).
 
 Peasy 0.1.0 has no Sparkle inside, so its users have to install the first version with updates by hand.
+
+## iPhone
+
+The iPhone app ships through App Store Connect and has its own version, set on the `PeasyiOS` target.
+
+1. Raise `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` of `PeasyiOS`. App Store Connect refuses a build number it has seen.
+2. Deploy CloudKit schema changes first, as in step 2 above.
+3. Choose the `PeasyiOS` scheme and Any iOS Device, then Product → Archive. In the Organizer, Distribute App → App Store Connect uploads it.
+4. Try the build in TestFlight. It uses the Production CloudKit environment like the released Mac app, while debug builds of both use Development, so check sync against a release of the Mac app.
+5. Submit it for review. The privacy manifest is `PeasyiOS/PrivacyInfo.xcprivacy`; in App Privacy the answer is Data Not Collected.
