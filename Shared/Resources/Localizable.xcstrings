@@ -1935,6 +1935,248 @@
           }
         }
       }
+    },
+    "Progress" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прогресс"
+          }
+        }
+      }
+    },
+    "Add Task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить задачу"
+          }
+        }
+      }
+    },
+    "Toggle Task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметить задачу"
+          }
+        }
+      }
+    },
+    "Adds a task to Today. Mention @claude to hand it to Claude." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавляет задачу в «Сегодня». Упомяните @claude, чтобы передать её Claude."
+          }
+        }
+      }
+    },
+    "What do you need to do?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что нужно сделать?"
+          }
+        }
+      }
+    },
+    "Added to Today: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавлено в «Сегодня»: %@"
+          }
+        }
+      }
+    },
+    "Opens Peasy with a new task." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает Peasy с новой задачей."
+          }
+        }
+      }
+    },
+    "Type what needs to be done." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Напишите, что нужно сделать."
+          }
+        }
+      }
+    },
+    "Peasy couldn’t open its tasks." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy не удалось открыть задачи."
+          }
+        }
+      }
+    },
+    "Today’s tasks, ticked off right from the Home Screen." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задачи на сегодня — отмечайте прямо с экрана «Домой»."
+          }
+        }
+      }
+    },
+    "How much of today is already done." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сколько из запланированного на сегодня уже сделано."
+          }
+        }
+      }
+    },
+    "Claude asks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude спрашивает"
+          }
+        }
+      }
+    },
+    "What Claude needs from you." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что Claude нужно от вас."
+          }
+        }
+      }
+    },
+    "%lld more" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ещё %lld"
+          }
+        }
+      }
+    },
+    "%lld tasks for today" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "task for today"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "tasks for today"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "задача на сегодня"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "задачи на сегодня"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "задач на сегодня"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "задачи на сегодня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld выполнено"
+          }
+        }
+      }
+    },
+    "No questions" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросов нет"
+          }
+        }
+      }
+    },
+    "%lld in progress" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В работе: %lld"
+          }
+        }
+      }
+    },
+    "Also %lld in progress" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ещё %lld в работе"
+          }
+        }
+      }
+    },
+    "Type @claude in a task" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Напишите @claude в задаче"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

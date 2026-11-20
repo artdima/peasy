@@ -18,6 +18,7 @@ struct PeasyiOSApp: App {
             .environment(model.sync)
             .environment(model.folderSync)
             .preferredColorScheme(theme.colorScheme)
+            .onOpenURL { model.open($0) }
             .onChange(of: scenePhase) { _, phase in
                 switch phase {
                 case .active: model.becameActive()

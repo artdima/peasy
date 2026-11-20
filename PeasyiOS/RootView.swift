@@ -7,7 +7,7 @@ struct RootView: View {
     private var projects: [Project]
     @Query private var tasks: [TaskItem]
     @AppStorage(TaskList.storageKey) private var selectedListValue = TaskList.today.storageValue
-    @State private var showsNewTask = false
+    @Bindable private var newTask = NewTaskPrompt.shared
     @State private var showsSettings = false
 
     var body: some View {
@@ -48,7 +48,7 @@ struct RootView: View {
         .background(PhoneStyle.background)
         .safeAreaInset(edge: .bottom) {
             Button {
-                showsNewTask = true
+                newTask.isPresented = true
             } label: {
                 HStack(spacing: 10) {
                     Glyph(kind: .plus, size: 18)
@@ -75,7 +75,7 @@ struct RootView: View {
                     .frame(height: 1)
             }
         }
-        .sheet(isPresented: $showsNewTask) {
+        .sheet(isPresented: $newTask.isPresented) {
             NewTaskSheet(projectID: projectID(of: list))
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
@@ -94,7 +94,7 @@ struct RootView: View {
                 .foregroundStyle(PanelStyle.heading)
             Spacer(minLength: 8)
             Button {
-                showsNewTask = true
+                newTask.isPresented = true
             } label: {
                 Glyph(kind: .newTask, size: 20)
                     .foregroundStyle(PanelStyle.secondary)

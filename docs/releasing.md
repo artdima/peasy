@@ -36,8 +36,8 @@ Peasy 0.1.0 has no Sparkle inside, so its users have to install the first versio
 
 The iPhone app ships through App Store Connect and has its own version, set on the `PeasyiOS` target.
 
-1. Raise `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` of `PeasyiOS`. App Store Connect refuses a build number it has seen.
+1. Raise `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` of `PeasyiOS` and `PeasyWidgets`; the widgets must carry the app's version. App Store Connect refuses a build number it has seen.
 2. Deploy CloudKit schema changes first, as in step 2 above.
 3. Choose the `PeasyiOS` scheme and Any iOS Device, then Product → Archive. In the Organizer, Distribute App → App Store Connect uploads it.
 4. Try the build in TestFlight. It uses the Production CloudKit environment like the released Mac app, while debug builds of both use Development, so check sync against a release of the Mac app.
-5. Submit it for review. The privacy manifest is `PeasyiOS/PrivacyInfo.xcprivacy`; in App Privacy the answer is Data Not Collected.
+5. Submit it for review. The privacy manifests are `PeasyiOS/PrivacyInfo.xcprivacy` and `PeasyWidgets/PrivacyInfo.xcprivacy`; in App Privacy the answer is Data Not Collected.

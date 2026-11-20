@@ -12,7 +12,7 @@
 - **Quick add.** ⌃⌥N in any app, or + next to Settings in the panel, opens a small window for a new task.
 - **Keyboard.** ↑/↓ to select, Space to complete, Return to edit, ⌘N for a new task.
 - **Sync.** iCloud across your Macs and iPhone, or any synced folder (Dropbox, Google Drive, Syncthing) where iCloud isn't an option.
-- **iPhone.** The same lists, projects, dates and reminders, a badge with what's left for today, and tasks handed to Claude.
+- **iPhone.** The same lists, projects, dates and reminders, a badge with what's left for today, and tasks handed to Claude. Home Screen widgets show today and Claude's questions, and Siri, Shortcuts and a Control Center button add tasks.
 - **Tasks with Claude.** Claude adds the tasks only you can do and works on the ones you hand to it, see [below](#tasks-with-claude).
 - **Updates.** Peasy checks for new versions and installs them in a click.
 - **English and Russian**, dark and light themes.
@@ -68,9 +68,9 @@ Peasy for iPhone isn't on the App Store yet; build it from source. It needs iOS 
 
 You need Xcode 26 or later. Open `Peasy.xcodeproj`, choose the `Peasy` scheme for the Mac or `PeasyiOS` for the iPhone, and run.
 
-`Shared/` holds what both apps use: the models, sync, reminders and common views. `Peasy/` is the Mac app with the menu bar, Settings window and Claude's MCP server, `PeasyiOS/` the iPhone app.
+`Shared/` holds what both apps use: the models, sync, reminders and common views. `Peasy/` is the Mac app with the menu bar, Settings window and Claude's MCP server, `PeasyiOS/` the iPhone app and `PeasyWidgets/` its widgets.
 
-iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements`, `PeasyiOS/PeasyiOS.entitlements` and `CloudSync.containerIdentifier`, and the app group `group.com.artdima.Peasy` in `PeasyiOS/PeasyiOS.entitlements`. Without the container, the Mac app keeps tasks on the Mac; the iPhone app expects it.
+iCloud sync works in builds signed with the iCloud container. To use your own team, change `iCloud.com.artdima.Peasy` in `Peasy/Peasy.entitlements`, `PeasyiOS/PeasyiOS.entitlements` and `CloudSync.containerIdentifier`, and the app group `group.com.artdima.Peasy` in `PeasyiOS/PeasyiOS.entitlements`, `PeasyWidgets/PeasyWidgets.entitlements` and `SharedStore`. Without the container, the Mac app keeps tasks on the Mac; the iPhone app expects it.
 
 Updates come through Sparkle, see [docs/releasing.md](docs/releasing.md).
 

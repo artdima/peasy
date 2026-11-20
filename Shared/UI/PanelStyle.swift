@@ -126,34 +126,47 @@ struct SproutIcon: View {
     var color: Color = PanelStyle.green
 
     var body: some View {
-        Canvas { context, size in
-            let unit = size.width / 24
-            let scale = CGAffineTransform(scaleX: unit, y: size.height / 24)
-            var stem = Path()
-            stem.move(to: CGPoint(x: 12, y: 22))
-            stem.addLine(to: CGPoint(x: 12, y: 10))
-            context.stroke(
-                stem.applying(scale),
-                with: .color(color),
-                style: StrokeStyle(lineWidth: 2 * unit, lineCap: .round)
-            )
-            var leaves = Path()
-            leaves.move(to: CGPoint(x: 12, y: 13))
-            leaves.addCurve(to: CGPoint(x: 20, y: 5.5), control1: CGPoint(x: 12, y: 8.6), control2: CGPoint(x: 15.1, y: 5.5))
-            leaves.addCurve(to: CGPoint(x: 12, y: 13), control1: CGPoint(x: 19.7, y: 10.1), control2: CGPoint(x: 16.7, y: 13))
-            leaves.closeSubpath()
-            leaves.move(to: CGPoint(x: 12, y: 10))
-            leaves.addCurve(to: CGPoint(x: 4, y: 2.5), control1: CGPoint(x: 12, y: 5.6), control2: CGPoint(x: 8.9, y: 2.5))
-            leaves.addCurve(to: CGPoint(x: 12, y: 10), control1: CGPoint(x: 4.3, y: 7.1), control2: CGPoint(x: 7.3, y: 10))
-            leaves.closeSubpath()
-            let scaled = leaves.applying(scale)
-            context.fill(scaled, with: .color(color))
-            context.stroke(
-                scaled,
-                with: .color(color),
-                style: StrokeStyle(lineWidth: 1.5 * unit, lineCap: .round, lineJoin: .round)
-            )
+        // Shapes rather than a Canvas, so the icon also draws in widgets.
+        GeometryReader { proxy in
+            let unit = proxy.size.width / 24
+            ZStack {
+                SproutShape(part: .stem)
+                    .stroke(color, style: StrokeStyle(lineWidth: 2 * unit, lineCap: .round))
+                SproutShape(part: .leaves)
+                    .fill(color)
+                SproutShape(part: .leaves)
+                    .stroke(color, style: StrokeStyle(lineWidth: 1.5 * unit, lineCap: .round, lineJoin: .round))
+            }
         }
         .accessibilityHidden(true)
+    }
+}
+
+private struct SproutShape: Shape {
+    enum Part {
+        case stem
+        case leaves
+    }
+
+    let part: Part
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        switch part {
+        case .stem:
+            path.move(to: CGPoint(x: 12, y: 22))
+            path.addLine(to: CGPoint(x: 12, y: 10))
+        case .leaves:
+            path.move(to: CGPoint(x: 12, y: 13))
+            path.addCurve(to: CGPoint(x: 20, y: 5.5), control1: CGPoint(x: 12, y: 8.6), control2: CGPoint(x: 15.1, y: 5.5))
+            path.addCurve(to: CGPoint(x: 12, y: 13), control1: CGPoint(x: 19.7, y: 10.1), control2: CGPoint(x: 16.7, y: 13))
+            path.closeSubpath()
+            path.move(to: CGPoint(x: 12, y: 10))
+            path.addCurve(to: CGPoint(x: 4, y: 2.5), control1: CGPoint(x: 12, y: 5.6), control2: CGPoint(x: 8.9, y: 2.5))
+            path.addCurve(to: CGPoint(x: 12, y: 10), control1: CGPoint(x: 4.3, y: 7.1), control2: CGPoint(x: 7.3, y: 10))
+            path.closeSubpath()
+        }
+        let scale = CGAffineTransform(scaleX: rect.width / 24, y: rect.height / 24)
+        return path.applying(scale.translatedBy(x: rect.minX, y: rect.minY))
     }
 }

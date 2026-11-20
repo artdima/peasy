@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8F3A1C3C2EA9000100D4E001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 8F3A1C3E2EA9000100D4E001 /* Sparkle */; };
+		8F3A1C552EA9000100D4E001 /* PeasyWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8F3A1C4C2EA9000100D4E001 /* PeasyWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -18,12 +19,34 @@
 			remoteGlobalIDString = 8F3A1C172EA9000100D4E001;
 			remoteInfo = Peasy;
 		};
+		8F3A1C572EA9000100D4E001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8F3A1C102EA9000100D4E001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F3A1C4B2EA9000100D4E001;
+			remoteInfo = PeasyWidgets;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8F3A1C562EA9000100D4E001 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8F3A1C552EA9000100D4E001 /* PeasyWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8F3A1C182EA9000100D4E001 /* Peasy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Peasy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F3A1C302EA9000100D4E001 /* PeasyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PeasyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F3A1C412EA9000100D4E001 /* Peasy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Peasy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F3A1C4C2EA9000100D4E001 /* PeasyWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PeasyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -40,6 +63,13 @@
 				Info.plist,
 			);
 			target = 8F3A1C402EA9000100D4E001 /* PeasyiOS */;
+		};
+		8F3A1C542EA9000100D4E001 /* Exceptions for "PeasyWidgets" folder in "PeasyWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8F3A1C4B2EA9000100D4E001 /* PeasyWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -70,6 +100,14 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		8F3A1C4D2EA9000100D4E001 /* PeasyWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8F3A1C542EA9000100D4E001 /* Exceptions for "PeasyWidgets" folder in "PeasyWidgets" target */,
+			);
+			path = PeasyWidgets;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +133,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8F3A1C4F2EA9000100D4E001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -104,6 +149,7 @@
 				8F3A1C1A2EA9000100D4E001 /* Peasy */,
 				8F3A1C312EA9000100D4E001 /* PeasyTests */,
 				8F3A1C422EA9000100D4E001 /* PeasyiOS */,
+				8F3A1C4D2EA9000100D4E001 /* PeasyWidgets */,
 				8F3A1C492EA9000100D4E001 /* Shared */,
 				8F3A1C192EA9000100D4E001 /* Products */,
 			);
@@ -115,6 +161,7 @@
 				8F3A1C182EA9000100D4E001 /* Peasy.app */,
 				8F3A1C302EA9000100D4E001 /* PeasyTests.xctest */,
 				8F3A1C412EA9000100D4E001 /* Peasy.app */,
+				8F3A1C4C2EA9000100D4E001 /* PeasyWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -176,10 +223,12 @@
 				8F3A1C432EA9000100D4E001 /* Sources */,
 				8F3A1C442EA9000100D4E001 /* Frameworks */,
 				8F3A1C452EA9000100D4E001 /* Resources */,
+				8F3A1C562EA9000100D4E001 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8F3A1C582EA9000100D4E001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				8F3A1C422EA9000100D4E001 /* PeasyiOS */,
@@ -191,6 +240,29 @@
 			productName = PeasyiOS;
 			productReference = 8F3A1C412EA9000100D4E001 /* Peasy.app */;
 			productType = "com.apple.product-type.application";
+		};
+		8F3A1C4B2EA9000100D4E001 /* PeasyWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F3A1C512EA9000100D4E001 /* Build configuration list for PBXNativeTarget "PeasyWidgets" */;
+			buildPhases = (
+				8F3A1C4E2EA9000100D4E001 /* Sources */,
+				8F3A1C4F2EA9000100D4E001 /* Frameworks */,
+				8F3A1C502EA9000100D4E001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				8F3A1C4D2EA9000100D4E001 /* PeasyWidgets */,
+				8F3A1C492EA9000100D4E001 /* Shared */,
+			);
+			name = PeasyWidgets;
+			packageProductDependencies = (
+			);
+			productName = PeasyWidgets;
+			productReference = 8F3A1C4C2EA9000100D4E001 /* PeasyWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -210,6 +282,9 @@
 						TestTargetID = 8F3A1C172EA9000100D4E001;
 					};
 					8F3A1C402EA9000100D4E001 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					8F3A1C4B2EA9000100D4E001 = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
@@ -235,6 +310,7 @@
 				8F3A1C172EA9000100D4E001 /* Peasy */,
 				8F3A1C322EA9000100D4E001 /* PeasyTests */,
 				8F3A1C402EA9000100D4E001 /* PeasyiOS */,
+				8F3A1C4B2EA9000100D4E001 /* PeasyWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -255,6 +331,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		8F3A1C452EA9000100D4E001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8F3A1C502EA9000100D4E001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -285,6 +368,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8F3A1C4E2EA9000100D4E001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -292,6 +382,11 @@
 			isa = PBXTargetDependency;
 			target = 8F3A1C172EA9000100D4E001 /* Peasy */;
 			targetProxy = 8F3A1C362EA9000100D4E001 /* PBXContainerItemProxy */;
+		};
+		8F3A1C582EA9000100D4E001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F3A1C4B2EA9000100D4E001 /* PeasyWidgets */;
+			targetProxy = 8F3A1C572EA9000100D4E001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -603,6 +698,73 @@
 			};
 			name = Release;
 		};
+		8F3A1C522EA9000100D4E001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PeasyWidgets/PeasyWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8Q6S7RTHBY;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PeasyWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Peasy;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.artdima.Peasy.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		8F3A1C532EA9000100D4E001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PeasyWidgets/PeasyWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8Q6S7RTHBY;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PeasyWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Peasy;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.artdima.Peasy.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -638,6 +800,15 @@
 			buildConfigurations = (
 				8F3A1C472EA9000100D4E001 /* Debug */,
 				8F3A1C482EA9000100D4E001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8F3A1C512EA9000100D4E001 /* Build configuration list for PBXNativeTarget "PeasyWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F3A1C522EA9000100D4E001 /* Debug */,
+				8F3A1C532EA9000100D4E001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

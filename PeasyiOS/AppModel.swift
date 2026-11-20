@@ -5,6 +5,7 @@ import Foundation
 import Observation
 import SwiftData
 import UserNotifications
+import WidgetKit
 
 @Observable
 final class AppModel {
@@ -14,6 +15,7 @@ final class AppModel {
     let folderSync = FolderSync()
     private(set) var container: ModelContainer?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
+    @ObservationIgnored private var pendingLink: AppLink?
 
     init() {
         sync.onStoreReloadNeeded = { [weak self] in self?.reloadStore() }
@@ -25,6 +27,9 @@ final class AppModel {
     }
 
     func becameActive() {
+        if SharedStore.takeOutsideChange() {
+            reloadStore()
+        }
         DayClock.shared.refresh()
         Reminders.shared.refresh()
         updateBadge()
@@ -33,6 +38,16 @@ final class AppModel {
 
     func enteredBackground() {
         scheduleFolderRefresh()
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    func open(_ url: URL) {
+        guard let link = AppLink(url: url) else { return }
+        if container == nil {
+            pendingLink = link
+        } else {
+            show(link)
+        }
     }
 
     func refreshFolder() async {
@@ -57,15 +72,22 @@ final class AppModel {
         store.assignDistinctColors()
         store.moveTodayFlagsToDates()
         self.container = container
+        SharedStore.appContainer = container
+        _ = SharedStore.takeOutsideChange()
         folderSync.attach(container)
         Reminders.shared.refresh()
         updateBadge()
+        if let pendingLink {
+            self.pendingLink = nil
+            show(pendingLink)
+        }
     }
 
     private func reloadStore() {
         folderSync.detach()
         // A second CloudKit container on the same store fails to register its export activity.
         container = nil
+        SharedStore.appContainer = nil
         Task { [weak self] in
             await Task.yield()
             guard let self else { return }
@@ -98,6 +120,7 @@ final class AppModel {
                     Reminders.shared.refresh()
                     self?.updateBadge()
                     self?.folderSync.scheduleSync()
+                    WidgetCenter.shared.reloadAllTimelines()
                 }
             })
         }
@@ -112,6 +135,15 @@ final class AppModel {
                 self?.updateBadge()
             }
         })
+    }
+
+    private func show(_ link: AppLink) {
+        switch link {
+        case .today:
+            UserDefaults.standard.set(TaskList.today.storageValue, forKey: TaskList.storageKey)
+        case .task(let id):
+            reveal(id)
+        }
     }
 
     private func reveal(_ id: UUID) {

@@ -6,6 +6,17 @@
 	<array>
 		<string>com.artdima.Peasy.folderSync</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.artdima.Peasy</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>peasy</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
