@@ -190,7 +190,7 @@ struct NewTaskSheet: View {
 
     private func submit() {
         let typed = ClaudeMention.parse(title)
-        let attachment = Self.split(noteOrLink)
+        let attachment = NoteOrLink.split(noteOrLink)
         let store = TaskStore(context: modelContext)
         guard let task = store.addTask(
             typed.title,
@@ -205,15 +205,6 @@ struct NewTaskSheet: View {
             store.assignToClaude(task)
         }
         dismiss()
-    }
-
-    static func split(_ text: String) -> (note: String, link: String) {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.contains(where: \.isWhitespace),
-              let scheme = URL(string: trimmed)?.scheme?.lowercased(),
-              scheme == "https" || scheme == "http"
-        else { return (trimmed, "") }
-        return ("", trimmed)
     }
 }
 
