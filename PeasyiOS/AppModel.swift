@@ -136,7 +136,7 @@ final class AppModel {
         observers.append(NotificationCenter.default.addObserver(forName: .CKAccountChanged, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                folderSync.refreshCloudAccount(isActive: sync.isActive)
+                self.folderSync.refreshCloudAccount(isActive: self.sync.isActive)
             }
         })
         observers.append(NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
