@@ -140,7 +140,7 @@ struct PhoneTaskRow: View {
             toggle()
         }
         .onDisappear {
-            if keyboard?.editingID == task.id {
+            if editing != nil {
                 keyboard?.editingID = nil
             }
         }

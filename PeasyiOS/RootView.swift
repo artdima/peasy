@@ -4,12 +4,12 @@ import SwiftUI
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(AppModel.self) private var model
     @Query(sort: [SortDescriptor(\Project.order), SortDescriptor(\Project.createdAt)])
     private var projects: [Project]
     @Query private var tasks: [TaskItem]
     @AppStorage(TaskList.storageKey) private var selectedListValue = TaskList.today.storageValue
     @Bindable private var newTask = NewTaskPrompt.shared
-    @State private var showsSettings = false
 
     var body: some View {
         let store = TaskStore(context: modelContext)
@@ -39,9 +39,6 @@ struct RootView: View {
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(24)
                 .presentationBackground(PhoneStyle.sheet)
-        }
-        .sheet(isPresented: $showsSettings) {
-            SettingsSheet()
         }
     }
 
@@ -143,7 +140,7 @@ struct RootView: View {
 
     private var settingsButton: some View {
         Button {
-            showsSettings = true
+            model.showsSettings = true
         } label: {
             Glyph(kind: .gear, size: 21)
                 .foregroundStyle(PanelStyle.secondary)

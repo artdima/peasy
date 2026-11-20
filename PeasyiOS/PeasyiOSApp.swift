@@ -9,12 +9,19 @@ struct PeasyiOSApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
+            ZStack {
+                PhoneStyle.background
+                    .ignoresSafeArea()
                 if let container = model.container {
                     RootView()
                         .modelContainer(container)
                 }
             }
+            // Outside the store's views, so Sync now and the iCloud switch don't close it.
+            .sheet(isPresented: $model.showsSettings) {
+                SettingsSheet()
+            }
+            .environment(model)
             .environment(model.sync)
             .environment(model.folderSync)
             .preferredColorScheme(theme.colorScheme)

@@ -16,6 +16,8 @@ final class AppModel {
     let folderSync = FolderSync()
     @ObservationIgnored private let claudeWatch = ClaudeWatch()
     private(set) var container: ModelContainer?
+    var showsSettings = false
+    @ObservationIgnored private var retiredContainer: ModelContainer?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var pendingLink: AppLink?
     @ObservationIgnored private var isReloading = false
@@ -91,13 +93,17 @@ final class AppModel {
         guard !isReloading else { return }
         isReloading = true
         folderSync.detach()
-        // A second CloudKit container on the same store fails to register its export activity,
-        // so wait until SwiftUI has dropped the views that hold the old one.
+        // Views still read their tasks while SwiftUI takes them down, so the old store stays
+        // open until then. It must close before the new one opens: a second CloudKit
+        // container on the same store fails to register its export activity.
+        retiredContainer = container
         container = nil
         SharedStore.appContainer = nil
         Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(250))
             guard let self else { return }
+            retiredContainer = nil
+            await Task.yield()
             isReloading = false
             openStore()
             folderSync.refreshCloudAccount(isActive: sync.isActive)
