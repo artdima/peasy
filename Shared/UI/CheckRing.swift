@@ -10,6 +10,8 @@ struct CheckRing: View {
     let color: Color
     let isOn: Bool
     var mark: Mark = .own
+    var size: CGFloat = 22
+    var hitSize: CGFloat = 30
     let action: () -> Void
 
     @State private var isHovered = false
@@ -32,16 +34,16 @@ struct CheckRing: View {
                     WorkingArc()
                 }
                 if mark != .own, !isOn {
-                    Glyph(kind: .sparkle, size: 9, filled: true)
+                    Glyph(kind: .sparkle, size: size * 9 / 22, filled: true)
                         .foregroundStyle(PanelStyle.claude)
                 }
-                Glyph(kind: .check, size: 12)
+                Glyph(kind: .check, size: size * 12 / 22)
                     .foregroundStyle(.black)
                     .opacity(isOn ? 1 : 0)
                     .scaleEffect(isOn ? 1 : 0.6)
             }
-            .frame(width: 22, height: 22)
-            .frame(width: 30, height: 30)
+            .frame(width: size, height: size)
+            .frame(width: hitSize, height: hitSize)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

@@ -15,7 +15,6 @@ struct RootView: View {
         let list = selectedList
         let now = DayClock.shared.today
         let openTasks = TaskQueries.openTasks(in: list, from: tasks, now: now)
-        let shown = TaskQueries.tasks(in: list, from: tasks, now: now)
         let placeholder: LocalizedStringKey = list == .today ? "New task for today" : "New task"
         VStack(alignment: .leading, spacing: 0) {
             header(now: now)
@@ -37,25 +36,12 @@ struct RootView: View {
             ListPills(projects: projects, tasks: tasks, selection: selection)
                 .padding(.top, 14)
 
-            List {
-                ForEach(shown) { task in
-                    Button {
-                        store.toggle(task)
-                    } label: {
-                        Label {
-                            Text(task.title)
-                        } icon: {
-                            Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                }
-                .onDelete { offsets in
-                    offsets.map { shown[$0] }.forEach { store.delete($0) }
-                }
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
+            PhoneTaskList(
+                list: list,
+                openTasks: openTasks,
+                completedTasks: TaskQueries.completedTasks(in: list, from: tasks, now: now),
+                store: store
+            )
             .padding(.top, 14)
         }
         .foregroundStyle(PanelStyle.primary)
