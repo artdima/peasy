@@ -157,6 +157,12 @@ struct TaskStore {
         save()
     }
 
+    func move(_ task: TaskItem, to project: Project?) {
+        guard task.project?.id != project?.id else { return }
+        task.project = project
+        save()
+    }
+
     @discardableResult
     func addTask(
         _ title: String,

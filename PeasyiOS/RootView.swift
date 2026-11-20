@@ -38,6 +38,7 @@ struct RootView: View {
                 list: list,
                 openTasks: openTasks,
                 completedTasks: TaskQueries.completedTasks(in: list, from: tasks, now: now),
+                projects: projects,
                 store: store
             )
             .padding(.top, 14)

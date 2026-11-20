@@ -4,6 +4,7 @@ struct PhoneTaskList: View {
     let list: TaskList
     let openTasks: [TaskItem]
     let completedTasks: [TaskItem]
+    let projects: [Project]
     let store: TaskStore
 
     @State private var showsCompleted = false
@@ -11,16 +12,13 @@ struct PhoneTaskList: View {
     var body: some View {
         List {
             ForEach(openTasks) { task in
-                PhoneTaskRow(task: task, list: list, store: store)
+                PhoneTaskRow(task: task, list: list, projects: projects, store: store)
                     .taskRow()
             }
             .onMove { source, destination in
                 withAnimation(.snappy) {
                     store.moveOpenTasks(in: list, from: source, to: destination)
                 }
-            }
-            .onDelete { offsets in
-                delete(offsets.map { openTasks[$0] })
             }
 
             if openTasks.isEmpty {
@@ -55,25 +53,17 @@ struct PhoneTaskList: View {
 
                 if showsCompleted {
                     ForEach(completedTasks) { task in
-                        PhoneTaskRow(task: task, list: list, store: store)
+                        PhoneTaskRow(task: task, list: list, projects: projects, store: store)
                             .taskRow()
-                    }
-                    .onDelete { offsets in
-                        delete(offsets.map { completedTasks[$0] })
                     }
                 }
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
         .onChange(of: list) {
             showsCompleted = false
-        }
-    }
-
-    private func delete(_ tasks: [TaskItem]) {
-        withAnimation(.snappy) {
-            tasks.forEach { store.delete($0) }
         }
     }
 }

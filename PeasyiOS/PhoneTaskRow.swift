@@ -1,12 +1,22 @@
 import SwiftUI
+import UIKit
 
 struct PhoneTaskRow: View {
+    enum EditingField {
+        case title
+        case note
+    }
+
     let task: TaskItem
     let list: TaskList
+    let projects: [Project]
     let store: TaskStore
 
     @Environment(\.openURL) private var openURL
     @State private var isChecking = false
+    @State private var editing: EditingField?
+    @State private var draft = ""
+    @FocusState private var isEditorFocused: Bool
 
     var body: some View {
         let place = task.isDone ? nil : placeAndDate()
@@ -19,11 +29,32 @@ struct PhoneTaskRow: View {
                 .sensoryFeedback(.impact(weight: .light), trigger: isChecking) { _, checking in checking }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(task.title)
-                    .font(.body)
-                    .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
+                if editing == .title {
+                    TextField("Task", text: $draft)
+                        .font(.body)
+                        .foregroundStyle(PanelStyle.primary)
+                        .focused($isEditorFocused)
+                        .submitLabel(.done)
+                        .onSubmit(commit)
+                        .onAppear {
+                            isEditorFocused = true
+                        }
+                } else {
+                    Text(task.title)
+                        .font(.body)
+                        .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
+                }
 
-                if let note = task.noteLabel {
+                if editing == .note {
+                    TextField("Note", text: $draft, axis: .vertical)
+                        .font(.subheadline)
+                        .foregroundStyle(PanelStyle.primary)
+                        .lineLimit(1...6)
+                        .focused($isEditorFocused)
+                        .onAppear {
+                            isEditorFocused = true
+                        }
+                } else if let note = task.noteLabel {
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
                         if task.showsNoteMark {
                             Glyph(kind: .sparkle, size: 10, filled: true)
@@ -49,8 +80,14 @@ struct PhoneTaskRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if editing == nil {
+                    startEditing(.title)
+                }
+            }
 
-            if let url = webLink {
+            if let url = webLink, editing == nil {
                 Button {
                     openURL(url)
                 } label: {
@@ -68,6 +105,67 @@ struct PhoneTaskRow: View {
             }
         }
         .padding(.vertical, 11)
+        .onChange(of: isEditorFocused) { _, focused in
+            if !focused {
+                commit()
+            }
+        }
+        .toolbar {
+            if editing == .note {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        isEditorFocused = false
+                    }
+                }
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive, action: delete) {
+                Label("Delete", systemImage: "trash")
+            }
+            .tint(Color(hex: "#D70015"))
+            if !task.isDone {
+                Button(action: toggleClaude) {
+                    Label(task.isForClaude ? LocalizedStringKey("Take Back from Claude") : "Hand to Claude", systemImage: "sparkle")
+                }
+                .tint(Color(hex: "#B44A25"))
+            }
+        }
+        .contextMenu {
+            Button(task.isDone ? LocalizedStringKey("Mark as Not Done") : "Mark as Done", action: toggle)
+            Button(task.isDue(on: .now) ? LocalizedStringKey("Remove from Today") : "Add to Today") {
+                withAnimation(.snappy) {
+                    store.setToday(task, !task.isDue(on: .now))
+                }
+            }
+            Button("Edit") {
+                startEditing(.title)
+            }
+            Button("Note…") {
+                startEditing(.note)
+            }
+            Divider()
+            if !task.isDone {
+                Button(task.isForClaude ? LocalizedStringKey("Take Back from Claude") : "Hand to Claude", action: toggleClaude)
+            }
+            Menu("Move to Project") {
+                projectButton(nil, title: Text("No Project"))
+                ForEach(projects) { project in
+                    projectButton(project, title: Text(project.name))
+                }
+            }
+            if let url = webLink {
+                Button("Open Link") {
+                    openURL(url)
+                }
+            }
+            Button("Copy Text") {
+                UIPasteboard.general.string = task.title
+            }
+            Divider()
+            Button("Delete", role: .destructive, action: delete)
+        }
     }
 
     private var accent: Color {
@@ -82,6 +180,24 @@ struct PhoneTaskRow: View {
         return url
     }
 
+    private func projectButton(_ project: Project?, title: Text) -> some View {
+        Button {
+            withAnimation(.snappy) {
+                store.move(task, to: project)
+            }
+        } label: {
+            if task.project?.id == project?.id {
+                Label {
+                    title
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            } else {
+                title
+            }
+        }
+    }
+
     private func placeAndDate() -> Text? {
         let now = DayClock.shared.today
         let when = TaskScheduleLabel.text(date: task.date, hasTime: task.hasTime, isDone: task.isDone, inToday: list == .today, now: now)
@@ -92,6 +208,38 @@ struct PhoneTaskRow: View {
             return when.map { place + Text(verbatim: " · ") + $0 } ?? place
         case .project:
             return when
+        }
+    }
+
+    private func startEditing(_ field: EditingField) {
+        draft = field == .title ? task.title : task.note
+        editing = field
+    }
+
+    private func commit() {
+        guard let field = editing else { return }
+        editing = nil
+        switch field {
+        case .title:
+            store.renameTypedTask(task, to: draft)
+        case .note:
+            store.setNote(draft, for: task)
+        }
+    }
+
+    private func toggleClaude() {
+        withAnimation(.snappy) {
+            if task.isForClaude {
+                store.takeBack(task)
+            } else {
+                store.assignToClaude(task)
+            }
+        }
+    }
+
+    private func delete() {
+        withAnimation(.snappy) {
+            store.delete(task)
         }
     }
 
