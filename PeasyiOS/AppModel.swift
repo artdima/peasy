@@ -12,6 +12,10 @@ final class AppModel {
         openStore()
     }
 
+    func becameActive() {
+        DayClock.shared.refresh()
+    }
+
     private func openStore() {
         let container = Persistence.openStore(cloudKit: sync.isActive) { [sync] error in
             sync.storeFailed(error)

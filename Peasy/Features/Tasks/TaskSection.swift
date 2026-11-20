@@ -30,7 +30,7 @@ struct TaskSection: View {
                     .lineLimit(1)
                 Spacer(minLength: 0)
                 if !openTasks.isEmpty {
-                    taskCount
+                    TaskCount.label(for: openTasks)
                         .font(.system(size: 15))
                         .foregroundStyle(PanelStyle.tertiary)
                 }
@@ -53,12 +53,5 @@ struct TaskSection: View {
             }
             .padding(.top, 6)
         }
-    }
-
-    private var taskCount: Text {
-        let claude = openTasks.filter(\.isForClaude).count
-        let own = openTasks.count - claude
-        let count = Text("\(own) tasks")
-        return claude > 0 ? count + Text(verbatim: " · ") + Text("\(claude) with Claude") : count
     }
 }

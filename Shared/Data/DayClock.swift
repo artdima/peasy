@@ -13,8 +13,15 @@ final class DayClock {
     private init() {
         observer = NotificationCenter.default.addObserver(forName: .NSCalendarDayChanged, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.today = Calendar.current.startOfDay(for: .now)
+                self?.refresh()
             }
+        }
+    }
+
+    func refresh() {
+        let today = Calendar.current.startOfDay(for: .now)
+        if today != self.today {
+            self.today = today
         }
     }
 }

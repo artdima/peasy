@@ -32,3 +32,12 @@ extension TaskItem {
         agentStatus == .returned || isFromAgent || (isForClaude && isDone)
     }
 }
+
+enum TaskCount {
+    static func label(for openTasks: [TaskItem]) -> Text {
+        let claude = openTasks.filter(\.isForClaude).count
+        let own = openTasks.count - claude
+        let count = Text("\(own) tasks")
+        return claude > 0 ? count + Text(verbatim: " · ") + Text("\(claude) with Claude") : count
+    }
+}
