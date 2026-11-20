@@ -1745,6 +1745,126 @@
           }
         }
       }
+    },
+    "Peasy follows the language chosen for it in Settings." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык Peasy выбирается на его странице в Настройках."
+          }
+        }
+      }
+    },
+    "Notifications" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомления"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть Настройки"
+          }
+        }
+      }
+    },
+    "Reminders for tasks with a time." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Напоминания для задач со временем."
+          }
+        }
+      }
+    },
+    "Claude works with your tasks through Peasy on your Mac. Tasks you hand to Claude here reach it through iCloud." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude работает с задачами через Peasy на Mac. Задачи, которые вы отдаёте Claude здесь, доходят до него через iCloud."
+          }
+        }
+      }
+    },
+    "This build of Peasy is signed without iCloud, so tasks are stored only on this iPhone." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта сборка Peasy подписана без iCloud, поэтому задачи хранятся только на этом iPhone."
+          }
+        }
+      }
+    },
+    "Sync is off — tasks are stored only on this iPhone." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация выключена — задачи хранятся только на этом iPhone."
+          }
+        }
+      }
+    },
+    "Sign in to iCloud in Settings to sync your tasks." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войдите в iCloud в Настройках, чтобы синхронизировать задачи."
+          }
+        }
+      }
+    },
+    "Peasy uses the iCloud account you’re signed in to on this iPhone. Tasks are kept in your private iCloud storage." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy использует аккаунт iCloud, в который вы вошли на этом iPhone. Задачи хранятся в вашем личном хранилище iCloud."
+          }
+        }
+      }
+    },
+    "Not set" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не настроены"
+          }
+        }
+      }
+    },
+    "Allowed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешены"
+          }
+        }
+      }
+    },
+    "Not allowed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрещены"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

@@ -5,6 +5,7 @@ import SwiftUI
 struct PeasyiOSApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var model = AppModel()
+    @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +15,8 @@ struct PeasyiOSApp: App {
                         .modelContainer(container)
                 }
             }
+            .environment(model.sync)
+            .preferredColorScheme(theme.colorScheme)
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
                     model.becameActive()

@@ -18,6 +18,7 @@ struct PhoneTaskRow: View {
     @State private var editing: EditingField?
     @State private var draft = ""
     @FocusState private var isEditorFocused: Bool
+    @AppStorage(PhoneSettings.multilineTasksKey) private var multilineTasks = true
 
     var body: some View {
         let place = task.isDone ? nil : placeAndDate()
@@ -45,6 +46,7 @@ struct PhoneTaskRow: View {
                     Text(task.title)
                         .font(.body)
                         .foregroundStyle(task.isDone ? PanelStyle.tertiary : PanelStyle.primary)
+                        .lineLimit(multilineTasks ? nil : 1)
                 }
 
                 if editing == .note {

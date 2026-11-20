@@ -8,6 +8,7 @@ struct RootView: View {
     @Query private var tasks: [TaskItem]
     @AppStorage(TaskList.storageKey) private var selectedListValue = TaskList.today.storageValue
     @State private var showsNewTask = false
+    @State private var showsSettings = false
 
     var body: some View {
         let store = TaskStore(context: modelContext)
@@ -81,6 +82,9 @@ struct RootView: View {
                 .presentationCornerRadius(24)
                 .presentationBackground(PhoneStyle.sheet)
         }
+        .sheet(isPresented: $showsSettings) {
+            SettingsSheet()
+        }
     }
 
     private func header(now: Date) -> some View {
@@ -99,6 +103,16 @@ struct RootView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text("New task"))
+            Button {
+                showsSettings = true
+            } label: {
+                Glyph(kind: .gear, size: 21)
+                    .foregroundStyle(PanelStyle.secondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Settings"))
         }
         .frame(height: 44)
         .padding(.leading, 20)
