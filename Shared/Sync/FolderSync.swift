@@ -43,6 +43,7 @@ struct SyncPeer: Equatable, Identifiable {
 @Observable
 final class FolderSync {
     static let bookmarkKey = "folderSyncBookmark"
+    static let deviceNameKey = "folderSyncDeviceName"
     static let pollInterval: TimeInterval = 15
     static let compactionThreshold = 500
     static let heartbeat: TimeInterval = 6 * 3600
@@ -123,6 +124,18 @@ final class FolderSync {
         panel.message = String(localized: "Choose a folder that Dropbox, Yandex Disk, Google Drive or another service keeps in sync. On your other Macs, choose the same folder.")
         NSApp.activate()
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        useFolder(url)
+    }
+    #endif
+
+    /// Remembers a folder the user picked and starts syncing through it.
+    func useFolder(_ url: URL) {
+        let isAccessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if isAccessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
         do {
             let bookmark = try url.bookmarkData(options: Self.bookmarkCreation, includingResourceValuesForKeys: nil, relativeTo: nil)
             defaults.set(bookmark, forKey: Self.bookmarkKey)
@@ -132,7 +145,6 @@ final class FolderSync {
         }
         activate(url)
     }
-    #endif
 
     /// Starts syncing through `url`, or through its `Peasy` subfolder when it isn't one already.
     func activate(_ url: URL) {
@@ -375,7 +387,11 @@ final class FolderSync {
     private static let bookmarkCreation: URL.BookmarkCreationOptions = .withSecurityScope
     private static let bookmarkResolution: URL.BookmarkResolutionOptions = .withSecurityScope
     #else
-    private static let deviceName = UIDevice.current.name
+    /// iOS names every iPhone just "iPhone", so the user can give this one a name.
+    private static var deviceName: String {
+        let name = UserDefaults.standard.string(forKey: deviceNameKey)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return name.isEmpty ? UIDevice.current.name : name
+    }
     private static let bookmarkCreation: URL.BookmarkCreationOptions = []
     private static let bookmarkResolution: URL.BookmarkResolutionOptions = []
     #endif

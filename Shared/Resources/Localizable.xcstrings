@@ -1875,6 +1875,66 @@
           }
         }
       }
+    },
+    "Choose Folder…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать папку…"
+          }
+        }
+      }
+    },
+    "Turn Off" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключить"
+          }
+        }
+      }
+    },
+    "Device name" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имя устройства"
+          }
+        }
+      }
+    },
+    "For devices with another Apple ID or without iCloud. Choose the same folder of Dropbox, Yandex Disk or another app in Files on each of them." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для устройств с другим Apple ID или без iCloud. На каждом выберите одну и ту же папку Dropbox, Яндекс Диска или другого приложения в «Файлах»."
+          }
+        }
+      }
+    },
+    "%@ already syncs this iCloud account through the folder, so this iPhone gets its tasks through iCloud." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ уже синхронизирует этот аккаунт iCloud через папку, поэтому этот iPhone получает задачи через iCloud."
+          }
+        }
+      }
+    },
+    "Choose this folder on your other devices too." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите эту папку и на других устройствах."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

@@ -1,3 +1,5 @@
+import BackgroundTasks
+import CloudKit
 import CoreData
 import Foundation
 import Observation
@@ -6,7 +8,10 @@ import UserNotifications
 
 @Observable
 final class AppModel {
+    static let folderRefreshID = "com.artdima.Peasy.folderSync"
+
     let sync = SyncMonitor()
+    let folderSync = FolderSync()
     private(set) var container: ModelContainer?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
 
@@ -14,6 +19,8 @@ final class AppModel {
         sync.onStoreReloadNeeded = { [weak self] in self?.reloadStore() }
         sync.start()
         openStore()
+        folderSync.refreshCloudAccount(isActive: sync.isActive)
+        folderSync.start()
         startReminders()
     }
 
@@ -21,6 +28,16 @@ final class AppModel {
         DayClock.shared.refresh()
         Reminders.shared.refresh()
         updateBadge()
+        folderSync.scheduleSync(after: .zero)
+    }
+
+    func enteredBackground() {
+        scheduleFolderRefresh()
+    }
+
+    func refreshFolder() async {
+        await folderSync.syncNow()
+        scheduleFolderRefresh()
     }
 
     func updateBadge() {
@@ -40,17 +57,28 @@ final class AppModel {
         store.assignDistinctColors()
         store.moveTodayFlagsToDates()
         self.container = container
+        folderSync.attach(container)
         Reminders.shared.refresh()
         updateBadge()
     }
 
     private func reloadStore() {
+        folderSync.detach()
         // A second CloudKit container on the same store fails to register its export activity.
         container = nil
         Task { [weak self] in
             await Task.yield()
-            self?.openStore()
+            guard let self else { return }
+            openStore()
+            folderSync.refreshCloudAccount(isActive: sync.isActive)
         }
+    }
+
+    private func scheduleFolderRefresh() {
+        guard folderSync.isOn else { return }
+        let request = BGAppRefreshTaskRequest(identifier: Self.folderRefreshID)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
+        try? BGTaskScheduler.shared.submit(request)
     }
 
     private func startReminders() {
@@ -69,9 +97,16 @@ final class AppModel {
                 MainActor.assumeIsolated {
                     Reminders.shared.refresh()
                     self?.updateBadge()
+                    self?.folderSync.scheduleSync()
                 }
             })
         }
+        observers.append(NotificationCenter.default.addObserver(forName: .CKAccountChanged, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                folderSync.refreshCloudAccount(isActive: sync.isActive)
+            }
+        })
         observers.append(NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 self?.updateBadge()

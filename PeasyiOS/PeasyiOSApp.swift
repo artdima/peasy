@@ -16,12 +16,18 @@ struct PeasyiOSApp: App {
                 }
             }
             .environment(model.sync)
+            .environment(model.folderSync)
             .preferredColorScheme(theme.colorScheme)
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active {
-                    model.becameActive()
+                switch phase {
+                case .active: model.becameActive()
+                case .background: model.enteredBackground()
+                default: break
                 }
             }
+        }
+        .backgroundTask(.appRefresh(AppModel.folderRefreshID)) {
+            await model.refreshFolder()
         }
     }
 }
