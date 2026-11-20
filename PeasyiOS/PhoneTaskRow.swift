@@ -27,6 +27,7 @@ struct PhoneTaskRow: View {
                 .padding(.leading, -10)
                 .padding(.trailing, -6)
                 .accessibilityLabel(task.isDone ? LocalizedStringKey("Mark as not done") : "Mark as done")
+                .accessibilityValue(agentState)
                 .sensoryFeedback(.impact(weight: .light), trigger: isChecking) { _, checking in checking }
 
             VStack(alignment: .leading, spacing: 3) {
@@ -66,6 +67,11 @@ struct PhoneTaskRow: View {
                     }
                     .font(.subheadline)
                     .foregroundStyle(PanelStyle.secondary)
+                    .onTapGesture {
+                        if editing == nil {
+                            startEditing(.note)
+                        }
+                    }
                 }
 
                 if !task.isDone, task.isForClaude || place != nil {
@@ -173,6 +179,14 @@ struct PhoneTaskRow: View {
             }
             Divider()
             Button("Delete", role: .destructive, action: delete)
+        }
+    }
+
+    private var agentState: Text {
+        switch task.ringMark {
+        case .own: Text(verbatim: "")
+        case .waiting: Text("Waiting for Claude")
+        case .working: Text("Claude is working")
         }
     }
 

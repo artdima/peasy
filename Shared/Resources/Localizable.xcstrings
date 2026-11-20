@@ -1725,6 +1725,26 @@
           }
         }
       }
+    },
+    "Waiting for Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждёт Claude"
+          }
+        }
+      }
+    },
+    "Claude is working" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude работает над задачей"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
