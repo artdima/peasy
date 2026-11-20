@@ -12,6 +12,7 @@ final class Reminders: NSObject {
     var onOpen: () -> Void = {}
     var onOpenTask: (UUID) -> Void = { _ in }
     var onOpenUpdate: () -> Void = {}
+    var permissionOptions: UNAuthorizationOptions = [.alert, .sound]
 
     private static let prefix = "task."
     private var refreshTask: Task<Void, Never>?
@@ -23,7 +24,7 @@ final class Reminders: NSObject {
 
     func requestPermission() async -> Bool {
         let center = UNUserNotificationCenter.current()
-        let granted = (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+        let granted = (try? await center.requestAuthorization(options: permissionOptions)) ?? false
         refresh()
         return granted
     }

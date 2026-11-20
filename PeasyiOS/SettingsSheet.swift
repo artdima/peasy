@@ -4,6 +4,7 @@ import UserNotifications
 
 enum PhoneSettings {
     static let multilineTasksKey = "multilineTasks"
+    static let showsBadgeKey = "showsBadge"
 }
 
 extension AppTheme {
@@ -23,6 +24,7 @@ struct SettingsSheet: View {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.dark
     @AppStorage(PhoneSettings.multilineTasksKey) private var multilineTasks = true
+    @AppStorage(PhoneSettings.showsBadgeKey) private var showsBadge = true
     @State private var notificationStatus: UNAuthorizationStatus?
 
     var body: some View {
@@ -67,6 +69,7 @@ struct SettingsSheet: View {
                     LabeledContent("Notifications") {
                         notificationText
                     }
+                    Toggle("Badge with today’s tasks", isOn: $showsBadge)
                     Button("Open Settings") {
                         open(UIApplication.openNotificationSettingsURLString)
                     }
@@ -102,6 +105,13 @@ struct SettingsSheet: View {
             }
             .task {
                 await refreshNotificationStatus()
+            }
+            .onChange(of: showsBadge) { _, isOn in
+                guard isOn else { return }
+                Task {
+                    _ = await Reminders.shared.requestPermission()
+                    await refreshNotificationStatus()
+                }
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {

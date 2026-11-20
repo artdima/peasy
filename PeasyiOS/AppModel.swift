@@ -2,6 +2,7 @@ import CoreData
 import Foundation
 import Observation
 import SwiftData
+import UserNotifications
 
 @Observable
 final class AppModel {
@@ -19,6 +20,16 @@ final class AppModel {
     func becameActive() {
         DayClock.shared.refresh()
         Reminders.shared.refresh()
+        updateBadge()
+    }
+
+    func updateBadge() {
+        var count = 0
+        if UserDefaults.standard.object(forKey: PhoneSettings.showsBadgeKey) as? Bool ?? true, let container {
+            let tasks = TaskStore(context: container.mainContext).allTasks()
+            count = TaskQueries.ownOpenTasks(in: .today, from: tasks).count
+        }
+        UNUserNotificationCenter.current().setBadgeCount(count) { _ in }
     }
 
     private func openStore() {
@@ -30,6 +41,7 @@ final class AppModel {
         store.moveTodayFlagsToDates()
         self.container = container
         Reminders.shared.refresh()
+        updateBadge()
     }
 
     private func reloadStore() {
@@ -43,6 +55,7 @@ final class AppModel {
 
     private func startReminders() {
         let reminders = Reminders.shared
+        reminders.permissionOptions = [.alert, .sound, .badge]
         reminders.tasks = { [weak self] in
             guard let container = self?.container else { return [] }
             return TaskStore(context: container.mainContext).allTasks()
@@ -52,12 +65,18 @@ final class AppModel {
         }
         reminders.start()
         for name in [ModelContext.didSave, NSPersistentCloudKitContainer.eventChangedNotification] {
-            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {
                     Reminders.shared.refresh()
+                    self?.updateBadge()
                 }
             })
         }
+        observers.append(NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.updateBadge()
+            }
+        })
     }
 
     private func reveal(_ id: UUID) {

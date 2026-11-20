@@ -1865,6 +1865,16 @@
           }
         }
       }
+    },
+    "Badge with today’s tasks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Число задач на сегодня на иконке"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
