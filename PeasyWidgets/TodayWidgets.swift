@@ -179,7 +179,7 @@ private struct TodayProgressView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .padding(.top, 10)
-            Text("\(entry.openCount) tasks for today")
+            Text("left for today")
                 .font(.footnote)
                 .foregroundStyle(PanelStyle.secondary)
                 .lineLimit(1)

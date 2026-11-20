@@ -2076,58 +2076,6 @@
         }
       }
     },
-    "%lld tasks for today" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "task for today"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "tasks for today"
-                }
-              }
-            }
-          }
-        },
-        "ru" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "задача на сегодня"
-                }
-              },
-              "few" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "задачи на сегодня"
-                }
-              },
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "задач на сегодня"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "задачи на сегодня"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "%lld done" : {
       "localizations" : {
         "ru" : {
@@ -2214,6 +2162,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Переместить ниже"
+          }
+        }
+      }
+    },
+    "left for today" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "осталось на сегодня"
           }
         }
       }
