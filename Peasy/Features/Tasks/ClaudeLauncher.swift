@@ -15,6 +15,8 @@ enum ClaudeLauncher {
         if let project = task.project {
             let folders = ProjectFolders.shared
             guard let url = folders.url(for: project) ?? folders.choose(for: project, store: store) else { return }
+            // A renamed folder keeps its bookmark; its new name is what Claude Code's session will report.
+            store.setFolder(url.lastPathComponent, for: project)
             folder = path(of: url)
         }
         let prompt = ClaudeLaunch.prompt(title: task.title, id: task.id, project: task.project?.name, note: task.note, link: task.link)

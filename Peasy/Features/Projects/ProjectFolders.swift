@@ -17,6 +17,10 @@ final class ProjectFolders {
         bookmarks = defaults.dictionary(forKey: Self.storageKey) as? [String: Data] ?? [:]
     }
 
+    func hasFolder(for project: Project) -> Bool {
+        bookmarks[project.id.uuidString] != nil
+    }
+
     func url(for project: Project) -> URL? {
         guard let data = bookmarks[project.id.uuidString] else { return nil }
         var isStale = false

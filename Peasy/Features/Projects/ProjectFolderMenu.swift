@@ -6,13 +6,19 @@ struct ProjectFolderMenu: View {
 
     var body: some View {
         let folders = ProjectFolders.shared
-        if let folder = folders.url(for: project) {
-            Menu("Folder: \(folder.lastPathComponent)") {
+        if folders.hasFolder(for: project) {
+            Menu {
                 Button("Choose Another Folder…") {
                     folders.choose(for: project, store: store)
                 }
                 Button("Remove Folder") {
                     folders.remove(for: project, store: store)
+                }
+            } label: {
+                if project.folder.isEmpty {
+                    Text("Folder")
+                } else {
+                    Text("Folder: \(project.folder)")
                 }
             }
         } else {

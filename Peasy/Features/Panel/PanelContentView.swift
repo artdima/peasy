@@ -204,7 +204,10 @@ struct PanelContentView: View {
             }
         case .startSelectedInClaude:
             if let task = tasks.first(where: { $0.id == model.selectedTaskID }) {
-                ClaudeLauncher.start(task, store: store)
+                // Out of the change handler: starting may run the folder panel or an alert modally.
+                Task {
+                    ClaudeLauncher.start(task, store: store)
+                }
             }
         }
     }
