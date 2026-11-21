@@ -43,7 +43,13 @@ What you see in the list:
 
 On the iPhone you hand tasks to Claude and answer its questions the same way; Claude picks them up through Peasy on your Mac once iCloud brings them over. The iPhone lets you know when Claude needs help and, if you turn it on in Settings, when it finishes a task.
 
-Claude Code works in the project named like its folder, so in a repository called `peasy` it adds and takes tasks in the Peasy project. In Claude Desktop, name the project when you ask. Only you hand tasks to Claude: a task Claude adds is always yours, even with `@claude` in its title. Claude's tasks don't count in the sprout's number, and Peasy notifies you when Claude needs help and, if you turn it on, when it finishes a task.
+Claude Code works in the project named like its folder, or whose folder you picked with **Project Folder…** in the project's menu, so in a repository called `peasy` it adds and takes tasks in the Peasy project. In Claude Desktop, name the project when you ask. Only you hand tasks to Claude: a task Claude adds is always yours, even with `@claude` in its title. Claude's tasks don't count in the sprout's number, and Peasy notifies you when Claude needs help and, if you turn it on, when it finishes a task.
+
+### Start a task in Claude
+
+Choose **Start in Claude** in a task's menu, or press ⌘↩ on the selected task. Peasy hands the task to Claude and opens Claude Code in Claude Desktop, in the project's folder, with a prompt that names the task. Confirm the folder and press Return: Claude marks the task as in progress, does it and closes it with a report.
+
+The first time, Peasy asks where the project's folder is. Each Mac remembers its own; change it with **Project Folder…** in the project's menu. Claude Code there needs Peasy connected, as below.
 
 ### Connect Claude
 
