@@ -2165,6 +2165,56 @@
           }
         }
       }
+    },
+    "Take the Peasy task “%@” (id %@) in the %@ project." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возьми в Peasy задачу «%@» (id %@) из проекта «%@»."
+          }
+        }
+      }
+    },
+    "Take the Peasy task “%@” (id %@)." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возьми в Peasy задачу «%@» (id %@)."
+          }
+        }
+      }
+    },
+    "Mark it working in Peasy before you start, then finish it with a short report. If you need something from me, hand it back with a question." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перед началом отметь её в Peasy как «в работе», а когда закончишь, закрой с коротким отчётом. Если тебе что-то от меня нужно, верни задачу с вопросом."
+          }
+        }
+      }
+    },
+    "Link: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ссылка: %@"
+          }
+        }
+      }
+    },
+    "Note: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заметка: %@"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
