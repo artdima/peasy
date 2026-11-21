@@ -1626,16 +1626,6 @@
         }
       }
     },
-    "@claude — hand to Claude" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "@claude — отдать Claude"
-          }
-        }
-      }
-    },
     "Move to Project" : {
       "localizations" : {
         "ru" : {

@@ -78,35 +78,6 @@ struct RootView: View {
         }
         .foregroundStyle(PanelStyle.primary)
         .background(PhoneStyle.background)
-        .safeAreaInset(edge: .bottom) {
-            Button {
-                newTask.isPresented = true
-            } label: {
-                HStack(spacing: 10) {
-                    Glyph(kind: .plus, size: 18)
-                    Text("New task")
-                        .font(.body)
-                    Spacer(minLength: 8)
-                    Text("@claude — hand to Claude")
-                        .font(.footnote)
-                        .lineLimit(1)
-                }
-                .foregroundStyle(PanelStyle.secondary)
-                .padding(.horizontal, 14)
-                .frame(maxWidth: .infinity, minHeight: 48)
-                .background(PhoneStyle.pill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .background(PhoneStyle.background)
-            .overlay(alignment: .top) {
-                Rectangle()
-                    .fill(PanelStyle.separator)
-                    .frame(height: 1)
-            }
-        }
     }
 
     private func header(now: Date, showsButtons: Bool) -> some View {
