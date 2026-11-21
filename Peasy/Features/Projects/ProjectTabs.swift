@@ -94,6 +94,7 @@ struct ProjectTabs: View {
                     model.projectEditor = .renaming(project.id)
                 }
                 ProjectColorMenu(project: project, store: store)
+                ProjectFolderMenu(project: project, store: store)
                 Button("Delete…", role: .destructive) {
                     if (project.tasks ?? []).isEmpty {
                         onDelete(project)

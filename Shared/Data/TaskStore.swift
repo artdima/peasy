@@ -60,6 +60,12 @@ struct TaskStore {
         save()
     }
 
+    func setFolder(_ folder: String, for project: Project) {
+        guard project.folder != folder else { return }
+        project.folder = folder
+        save()
+    }
+
     /// Projects created before colors were assigned all carry the default
     /// color; give every duplicate the next free one.
     func assignDistinctColors() {

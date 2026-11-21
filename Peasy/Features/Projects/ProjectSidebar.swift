@@ -101,6 +101,7 @@ struct ProjectSidebar: View {
                     model.projectEditor = .renaming(project.id)
                 }
                 ProjectColorMenu(project: project, store: store)
+                ProjectFolderMenu(project: project, store: store)
                 Button("Delete…", role: .destructive) {
                     requestDeletion(of: project)
                 }

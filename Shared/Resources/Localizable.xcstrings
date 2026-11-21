@@ -2215,6 +2215,66 @@
           }
         }
       }
+    },
+    "Folder: %@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка: %@"
+          }
+        }
+      }
+    },
+    "Choose Another Folder…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать другую папку…"
+          }
+        }
+      }
+    },
+    "Remove Folder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать папку"
+          }
+        }
+      }
+    },
+    "Project Folder…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка проекта…"
+          }
+        }
+      }
+    },
+    "Choose" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать"
+          }
+        }
+      }
+    },
+    "Choose the folder of “%@”. Claude Code opens there when you start one of its tasks in Claude." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите папку проекта «%@». В ней откроется Claude Code, когда вы запустите задачу этого проекта в Claude."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
