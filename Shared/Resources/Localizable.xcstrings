@@ -2275,6 +2275,16 @@
           }
         }
       }
+    },
+    "Start in Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запустить в Claude"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

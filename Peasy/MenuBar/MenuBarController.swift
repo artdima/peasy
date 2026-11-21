@@ -458,9 +458,14 @@ final class MenuBarController: NSObject {
         }
         guard model.acceptsNavigationKeys else { return false }
 
+        let canActOnSelection = model.draft.isEmpty && model.selectedTaskID != nil
         if modifiers == .command {
             if characters == "n" {
                 model.send(.focusNewTask)
+                return true
+            }
+            if canActOnSelection, event.keyCode == KeyCode.returnKey || event.keyCode == KeyCode.enter {
+                model.send(.startSelectedInClaude)
                 return true
             }
             if let digit = Int(characters), (1...9).contains(digit) {
@@ -475,7 +480,6 @@ final class MenuBarController: NSObject {
             collapse()
             return true
         }
-        let canActOnSelection = model.draft.isEmpty && model.selectedTaskID != nil
         switch event.keyCode {
         case KeyCode.down:
             model.send(.moveSelection(1))

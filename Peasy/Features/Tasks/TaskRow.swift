@@ -146,6 +146,9 @@ struct TaskRow: View {
                         }
                     }
                 }
+                Button("Start in Claude") {
+                    ClaudeLauncher.start(task, store: store)
+                }
             }
             if !task.link.isEmpty {
                 Button("Open Link", action: openLink)

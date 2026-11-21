@@ -14,6 +14,7 @@ final class PanelViewModel {
         case moveSelection(Int)
         case toggleSelected
         case editSelected
+        case startSelectedInClaude
         case selectList(Int)
         case focusNewTask
     }

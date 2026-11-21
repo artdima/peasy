@@ -202,6 +202,10 @@ struct PanelContentView: View {
             if let task = tasks.first(where: { $0.id == model.selectedTaskID }) {
                 model.startEditing(task)
             }
+        case .startSelectedInClaude:
+            if let task = tasks.first(where: { $0.id == model.selectedTaskID }) {
+                ClaudeLauncher.start(task, store: store)
+            }
         }
     }
 
