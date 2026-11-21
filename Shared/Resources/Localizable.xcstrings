@@ -2285,6 +2285,36 @@
           }
         }
       }
+    },
+    "Claude Desktop isn’t installed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Desktop не установлен"
+          }
+        }
+      }
+    },
+    "Peasy starts tasks in Claude Code inside Claude Desktop. Install it, sign in, and start the task again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peasy запускает задачи в Claude Code внутри Claude Desktop. Установите его, войдите в аккаунт и запустите задачу ещё раз."
+          }
+        }
+      }
+    },
+    "Download Claude" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скачать Claude"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

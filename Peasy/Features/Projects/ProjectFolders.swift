@@ -20,7 +20,9 @@ final class ProjectFolders {
     func url(for project: Project) -> URL? {
         guard let data = bookmarks[project.id.uuidString] else { return nil }
         var isStale = false
-        guard let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, bookmarkDataIsStale: &isStale) else {
+        guard let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, bookmarkDataIsStale: &isStale),
+              Self.isUsable(url)
+        else {
             return nil
         }
         if isStale {
@@ -52,6 +54,17 @@ final class ProjectFolders {
         bookmarks[project.id.uuidString] = nil
         defaults.set(bookmarks, forKey: Self.storageKey)
         store.setFolder("", for: project)
+    }
+
+    /// A deleted folder can still resolve, to its place in the Trash.
+    private static func isUsable(_ url: URL) -> Bool {
+        let isAccessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if isAccessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        return (try? url.checkResourceIsReachable()) == true && !url.pathComponents.contains(".Trash")
     }
 
     private func renew(_ url: URL, for project: Project) {
